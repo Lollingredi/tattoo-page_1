@@ -232,41 +232,49 @@ const TomoeLanding: React.FC = () => {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            {/* Anteprima sinistra (immagine precedente) - striscia sottile dal bordo sinistro */}
+            {/* Anteprima sinistra (immagine precedente) */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 overflow-hidden rounded-l-2xl pointer-events-none z-0"
+              className="absolute top-1/2 -translate-y-1/2 overflow-hidden pointer-events-none z-0"
               style={{
-                right: `calc(100% + ${hoverOffset * 30}px)`,
-                width: `${(isHovering || isTransitioning) && hoverOffset < 0 ? Math.abs(hoverOffset) * 30 : 0}px`,
-                height: '90%',
+                right: isTransitioning && transitionDirection === 'left'
+                  ? '0%'
+                  : `calc(100% + ${hoverOffset * 30}px)`,
+                width: isTransitioning && transitionDirection === 'left'
+                  ? '100%'
+                  : `${(isHovering || isTransitioning) && hoverOffset < 0 ? Math.abs(hoverOffset) * 30 : 0}px`,
+                height: isTransitioning && transitionDirection === 'left' ? '100%' : '90%',
                 opacity: (isHovering || transitionDirection === 'left') && hoverOffset < 0 ? 1 : 0,
                 transition: isTransitioning ? 'all 0.4s ease-out' : 'none',
+                borderRadius: isTransitioning && transitionDirection === 'left' ? '1rem' : '1rem 0 0 1rem',
               }}
             >
               <img
                 src={STUDIO_IMAGES[getPrevImageIndex()]}
                 alt="Immagine precedente"
-                className="h-full object-cover object-right"
-                style={{ width: '500px', maxWidth: 'none' }}
+                className="w-full h-full object-cover"
               />
             </div>
 
-            {/* Anteprima destra (immagine successiva) - striscia sottile dal bordo destro */}
+            {/* Anteprima destra (immagine successiva) */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 overflow-hidden rounded-r-2xl pointer-events-none z-0"
+              className="absolute top-1/2 -translate-y-1/2 overflow-hidden pointer-events-none z-0"
               style={{
-                left: `calc(100% - ${hoverOffset * 30}px)`,
-                width: `${(isHovering || isTransitioning) && hoverOffset > 0 ? hoverOffset * 30 : 0}px`,
-                height: '90%',
+                left: isTransitioning && transitionDirection === 'right'
+                  ? '0%'
+                  : `calc(100% - ${hoverOffset * 30}px)`,
+                width: isTransitioning && transitionDirection === 'right'
+                  ? '100%'
+                  : `${(isHovering || isTransitioning) && hoverOffset > 0 ? hoverOffset * 30 : 0}px`,
+                height: isTransitioning && transitionDirection === 'right' ? '100%' : '90%',
                 opacity: (isHovering || transitionDirection === 'right') && hoverOffset > 0 ? 1 : 0,
                 transition: isTransitioning ? 'all 0.4s ease-out' : 'none',
+                borderRadius: isTransitioning && transitionDirection === 'right' ? '1rem' : '0 1rem 1rem 0',
               }}
             >
               <img
                 src={STUDIO_IMAGES[getNextImageIndex()]}
                 alt="Immagine successiva"
-                className="h-full object-cover object-left"
-                style={{ width: '500px', maxWidth: 'none' }}
+                className="w-full h-full object-cover"
               />
             </div>
 
