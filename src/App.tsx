@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { Instagram, MapPin, Calendar, ArrowRight, Menu, X } from 'lucide-react';
 
+// Importazione Immagini
+import studioImg from './elements/studio1.PNG';
+import tat1 from './elements/tat1.PNG';
+import tat2 from './elements/tat2.PNG';
+import tat3 from './elements/tat3.PNG';
+
 // --- Types & Interfaces ---
 
 interface ColorPalette {
@@ -9,7 +15,6 @@ interface ColorPalette {
   charcoal: string;
   crimson: string;
   leather: string;
-  strlu: string;
 }
 
 interface PortfolioItem {
@@ -21,19 +26,17 @@ interface PortfolioItem {
 // --- Data & Config ---
 
 const COLORS: ColorPalette = {
-  sage: '#AEB59F',      // Il tuo Verde (Base Hero)
-  sand: '#D5CAC0',      // Il tuo Grigio/Beige (Sfondo Pagina)
-  leather: '#BBA18B',   // Il tuo Marrone (Dettagli)
-  strlu: '#90A898',    // NUOVO: Verde salvia più scuro per dettagli
-  charcoal: '#1F1C18',  // NUOVO: Nero caldo per i testi
-  crimson: '#8A1C1C',   // NUOVO: Rosso sangue scuro per i bottoni
+  sage: '#FDFBF7',      // MODIFICATO: Bianco Panna (Cream/Off-White)
+  sand: '#D5CAC0',      // Sabbia/Grigio (Sfondo Pagina)
+  leather: '#BBA18B',   // Marrone (Dettagli)
+  charcoal: '#1F1C18',  // Nero caldo (Testi)
+  crimson: '#8A1C1C',   // Rosso scuro (Accenti)
 };
 
-// NOTA: Sostituisci questi link con le foto reali dei tatuaggi
 const PORTFOLIO_ITEMS: PortfolioItem[] = [
-  { id: 1, alt: 'Tattoo Work 1', src: 'https://placehold.co/500x500/png?text=Tattoo+1' },
-  { id: 2, alt: 'Tattoo Work 2', src: 'https://placehold.co/500x500/png?text=Tattoo+2' },
-  { id: 3, alt: 'Tattoo Work 3', src: 'https://placehold.co/500x500/png?text=Tattoo+3' },
+  { id: 1, alt: 'Tattoo Work 1', src: tat1 },
+  { id: 2, alt: 'Tattoo Work 2', src: tat2 },
+  { id: 3, alt: 'Tattoo Work 3', src: tat3 },
 ];
 
 const TomoeLanding: React.FC = () => {
@@ -56,9 +59,9 @@ const TomoeLanding: React.FC = () => {
           
           {/* Desktop Menu */}
           <div className="hidden md:flex gap-8 items-center font-medium text-sm tracking-wide">
-            <a href="#studio" className="hover:text-red-600 transition-colors">Studio</a>
-            <a href="#works" className="hover:text-red-600 transition-colors">Portfolio</a>
-            <a href="#contact" className="hover:text-red-600 transition-colors">Contatti</a>
+            <a href="#studio" className="hover:text-red-800 transition-colors">Studio</a>
+            <a href="#works" className="hover:text-red-800 transition-colors">Opere</a>
+            <a href="#contact" className="hover:text-red-800 transition-colors">Contatti</a>
             <button 
               className="px-5 py-2 text-white rounded-full transition-transform hover:scale-105 shadow-md"
               style={{ backgroundColor: COLORS.crimson }}
@@ -81,7 +84,7 @@ const TomoeLanding: React.FC = () => {
         {isMenuOpen && (
           <div className="md:hidden absolute w-full bg-white border-b py-6 px-6 flex flex-col gap-4 shadow-xl">
             <a href="#studio" onClick={toggleMenu} className="text-lg font-medium">Studio</a>
-            <a href="#works" onClick={toggleMenu} className="text-lg font-medium">Portfolio</a>
+            <a href="#works" onClick={toggleMenu} className="text-lg font-medium">Opere</a>
             <a href="#contact" onClick={toggleMenu} className="text-lg font-medium">Contatti</a>
             <button 
               className="w-full py-3 text-white rounded-lg font-bold mt-2"
@@ -95,22 +98,22 @@ const TomoeLanding: React.FC = () => {
 
       {/* --- HERO SECTION --- */}
       <header id="studio" className="pt-32 pb-20 px-6 md:pt-48 md:pb-32 relative overflow-hidden">
-        {/* Decorative Sage Background */}
+        {/* Decorative Background (Ora Bianco Panna) */}
         <div 
-          className="absolute top-0 right-0 w-2/3 h-full -z-10 opacity-40 blur-3xl rounded-bl-full pointer-events-none"
+          className="absolute top-0 right-0 w-2/3 h-full -z-10 opacity-60 blur-3xl rounded-bl-full pointer-events-none"
           style={{ backgroundColor: COLORS.sage }}
         />
 
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-            <p className="text-sm font-bold tracking-widest uppercase text-stone-500">
+            <p className="text-sm font-bold tracking-widest uppercase opacity-60 text-stone-600">
               Castelferretti, Marche
             </p>
-            <h1 className="text-5xl md:text-7xl font-light leading-tight">
+            <h1 className="text-5xl md:text-7xl font-light leading-tight text-stone-900">
               Arte su pelle, <br />
               <span className="font-bold italic">anima zen.</span>
             </h1>
-            <p className="text-lg text-stone-600 max-w-md leading-relaxed">
+            <p className="text-lg text-stone-700 max-w-md leading-relaxed">
               Uno spazio dove il tatuaggio tradizionale incontra la calma moderna. 
               Linee pulite, ambiente rilassato, inchiostro indelebile.
             </p>
@@ -127,9 +130,8 @@ const TomoeLanding: React.FC = () => {
           {/* Image Area */}
           <div className="relative">
             <div className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative">
-              {/* Placeholder Studio Image */}
               <img 
-                src="https://placehold.co/600x800/EEE/31343C?text=Foto+Studio" 
+                src={studioImg} 
                 alt="Tomoe Studio Interior" 
                 className="object-cover w-full h-full opacity-90 hover:scale-105 transition-transform duration-700"
               />
@@ -141,28 +143,36 @@ const TomoeLanding: React.FC = () => {
               className="absolute -bottom-6 -left-6 p-6 rounded-xl shadow-lg backdrop-blur-sm bg-white/80 border border-stone-100 max-w-xs hidden md:block"
             >
               <p className="text-xs font-bold uppercase tracking-wider mb-1 text-stone-400">Atmosphere</p>
-              <p className="font-medium">Un ambiente curato per farti sentire a casa mentre creiamo arte.</p>
+              <p className="font-medium text-stone-800">Un ambiente curato per farti sentire a casa mentre creiamo arte.</p>
             </div>
           </div>
         </div>
       </header>
 
-      {/* --- GALLERY SECTION --- */}
-      <section id="works" className="py-24 px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
+      {/* --- GALLERY SECTION (Le nostre opere) --- */}
+      <section 
+        id="works" 
+        className="py-24 px-6"
+        style={{ backgroundColor: COLORS.sage }} // Sfondo sezione Bianco Panna
+      >
+        {/* WRAPPER BIANCO PER CONTRASTO */}
+        <div 
+          className="max-w-6xl mx-auto bg-white p-8 md:p-12 rounded-3xl shadow-sm"
+          style={{ color: COLORS.charcoal }}
+        > 
           <div className="flex justify-between items-end mb-12">
             <div>
-              <h2 className="text-4xl font-bold mb-2">Selected Works</h2>
+              <h2 className="text-4xl font-bold mb-2">Le nostre opere</h2>
               <div className="h-1 w-24" style={{ backgroundColor: COLORS.crimson }}></div>
             </div>
-            <a href="#" className="hidden md:flex items-center gap-2 font-medium hover:underline hover:text-red-600 transition-colors">
+            <a href="#" className="hidden md:flex items-center gap-2 font-medium hover:text-stone-600 transition-colors">
               Vedi tutto su Instagram <Instagram size={18} />
             </a>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
             {PORTFOLIO_ITEMS.map((item) => (
-              <div key={item.id} className="aspect-square bg-stone-100 relative group overflow-hidden cursor-pointer">
+              <div key={item.id} className="aspect-square bg-stone-800 relative group overflow-hidden cursor-pointer">
                 <img 
                   src={item.src}
                   alt={item.alt}
@@ -178,7 +188,7 @@ const TomoeLanding: React.FC = () => {
           </div>
           
           <div className="mt-8 flex justify-center md:hidden">
-            <a href="#" className="flex items-center gap-2 font-medium hover:text-red-600 transition-colors">
+            <a href="#" className="flex items-center gap-2 font-medium hover:text-stone-600 transition-colors">
               Instagram <Instagram size={18} />
             </a>
           </div>
@@ -188,13 +198,13 @@ const TomoeLanding: React.FC = () => {
       {/* --- FOOTER / CONTACT --- */}
       <section id="contact" className="py-24 px-6">
         <div 
-          className="max-w-5xl mx-auto rounded-3xl p-8 md:p-16 flex flex-col md:flex-row gap-12 text-white shadow-2xl relative"
-          style={{ backgroundColor: '#2C2C2C' }}
+          className="max-w-5xl mx-auto rounded-3xl p-8 md:p-16 flex flex-col md:flex-row gap-12 shadow-2xl relative"
+          style={{ backgroundColor: COLORS.sage, color: COLORS.charcoal }} // Sfondo Bianco Panna
         >
           <div className="flex-1 space-y-6 z-10">
             <Calendar className="w-12 h-12" style={{ color: COLORS.crimson }} />
             <h2 className="text-3xl md:text-4xl font-bold">Prenota il tuo appuntamento</h2>
-            <p className="text-gray-400 leading-relaxed">
+            <p className="text-stone-700 leading-relaxed font-medium">
               Raccontaci la tua idea, scegli l'artista e blocca la data.
             </p>
             <button 
@@ -205,19 +215,19 @@ const TomoeLanding: React.FC = () => {
             </button>
           </div>
 
-          <div className="flex-1 space-y-8 md:border-l md:border-gray-700 md:pl-12 flex flex-col justify-center z-10">
+          <div className="flex-1 space-y-8 md:border-l md:border-stone-200 md:pl-12 flex flex-col justify-center z-10">
              <div className="flex items-start gap-4 group">
-               <MapPin className="mt-1 shrink-0 text-stone-400 group-hover:text-white transition-colors" />
+               <MapPin className="mt-1 shrink-0 text-stone-700 group-hover:text-red-800 transition-colors" />
                <div>
                  <h3 className="font-bold text-lg">Tomoe Tattoo Studio</h3>
-                 <p className="text-gray-400">Via Esempio 12<br/>Castelferretti, Marche</p>
+                 <p className="text-stone-700">Via Esempio 12<br/>Castelferretti, Marche</p>
                </div>
              </div>
              <div className="flex items-start gap-4 group">
-               <Instagram className="mt-1 shrink-0 text-stone-400 group-hover:text-white transition-colors" />
+               <Instagram className="mt-1 shrink-0 text-stone-700 group-hover:text-red-800 transition-colors" />
                <div>
                  <h3 className="font-bold text-lg">Seguici</h3>
-                 <p className="text-gray-400">@tomoe_tattoo_studio</p>
+                 <p className="text-stone-700">@tomoe_tattoo_studio</p>
                </div>
              </div>
           </div>
