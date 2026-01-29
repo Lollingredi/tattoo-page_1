@@ -275,17 +275,14 @@ const TomoeLanding: React.FC = () => {
               className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative z-10"
               style={{
                 transform: `translateX(${-hoverOffset * 30}px) scale(${isHovering && !isTransitioning ? 1.02 : 1})`,
-                transition: isTransitioning ? 'transform 0.4s ease-out' : 'transform 0.2s ease-out',
+                transition: isTransitioning ? 'transform 0.4s ease-out, opacity 0.4s ease-out' : 'transform 0.2s ease-out',
+                opacity: mainImageOpacity,
               }}
             >
               <img
                 src={STUDIO_IMAGES[currentStudioImage]}
                 alt={`Tomoe Studio Interior ${currentStudioImage + 1}`}
-                className="object-cover w-full h-full"
-                style={{
-                  opacity: mainImageOpacity * 0.9,
-                  transition: 'opacity 0.4s ease-out',
-                }}
+                className="object-cover w-full h-full opacity-90"
               />
               <div className="absolute inset-0 bg-black/10 pointer-events-none transition-colors duration-500 group-hover:bg-black/5"></div>
 
