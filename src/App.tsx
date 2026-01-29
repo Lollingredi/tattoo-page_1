@@ -63,21 +63,29 @@ const TomoeLanding: React.FC = () => {
     setHoverEnabled(false);
     setHoverOffset(-1); // Forza anteprima sinistra a comparire completamente
 
-    // Fase 1: Fade out immagine centrale (400ms)
+    // Fase 1: Fade out immagine centrale
     setTimeout(() => {
       setMainImageOpacity(0);
     }, 50);
 
-    // Fase 2: Cambia immagine (dopo 500ms)
+    // Fase 2: Cambia immagine quando l'anteprima è completamente espansa
     setTimeout(() => {
       setCurrentStudioImage((prev) => (prev === 0 ? STUDIO_IMAGES.length - 1 : prev - 1));
+    }, 450);
+
+    // Fase 3: Mostra nuova immagine centrale e nascondi anteprima
+    setTimeout(() => {
       setMainImageOpacity(1);
+    }, 500);
+
+    // Fase 4: Reset stati transizione (dopo che l'immagine centrale è visibile)
+    setTimeout(() => {
       setHoverOffset(0);
       setTransitionDirection(null);
       setIsTransitioning(false);
-    }, 500);
+    }, 550);
 
-    // Fase 3: Riattiva hover (dopo 1.5s totali)
+    // Fase 5: Riattiva hover
     setTimeout(() => {
       setHoverEnabled(true);
     }, 1500);
@@ -91,21 +99,29 @@ const TomoeLanding: React.FC = () => {
     setHoverEnabled(false);
     setHoverOffset(1); // Forza anteprima destra a comparire completamente
 
-    // Fase 1: Fade out immagine centrale (400ms)
+    // Fase 1: Fade out immagine centrale
     setTimeout(() => {
       setMainImageOpacity(0);
     }, 50);
 
-    // Fase 2: Cambia immagine (dopo 500ms)
+    // Fase 2: Cambia immagine quando l'anteprima è completamente espansa
     setTimeout(() => {
       setCurrentStudioImage((prev) => (prev === STUDIO_IMAGES.length - 1 ? 0 : prev + 1));
+    }, 450);
+
+    // Fase 3: Mostra nuova immagine centrale e nascondi anteprima
+    setTimeout(() => {
       setMainImageOpacity(1);
+    }, 500);
+
+    // Fase 4: Reset stati transizione (dopo che l'immagine centrale è visibile)
+    setTimeout(() => {
       setHoverOffset(0);
       setTransitionDirection(null);
       setIsTransitioning(false);
-    }, 500);
+    }, 550);
 
-    // Fase 3: Riattiva hover (dopo 1.5s totali)
+    // Fase 5: Riattiva hover
     setTimeout(() => {
       setHoverEnabled(true);
     }, 1500);
