@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Instagram, MapPin, Calendar, ArrowRight, Menu, X } from 'lucide-react';
+import { Instagram, MapPin, Calendar, ArrowRight, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Importazione Immagini
-import studioImg from './elements/studio1.PNG';
+import studioImg1 from './elements/studio1.PNG';
+import studioImg2 from './elements/studio2.PNG';
+import studioImg3 from './elements/studio3.PNG';
 import tat1 from './elements/tat1.PNG';
 import tat2 from './elements/tat2.PNG';
 import tat3 from './elements/tat3.PNG';
@@ -39,10 +41,21 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
   { id: 3, alt: 'Tattoo Work 3', src: tat3 },
 ];
 
+const STUDIO_IMAGES = [studioImg1, studioImg2, studioImg3];
+
 const TomoeLanding: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const [currentStudioImage, setCurrentStudioImage] = useState<number>(0);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const prevStudioImage = () => {
+    setCurrentStudioImage((prev) => (prev === 0 ? STUDIO_IMAGES.length - 1 : prev - 1));
+  };
+
+  const nextStudioImage = () => {
+    setCurrentStudioImage((prev) => (prev === STUDIO_IMAGES.length - 1 ? 0 : prev + 1));
+  };
 
   return (
     <div 
@@ -133,15 +146,47 @@ const TomoeLanding: React.FC = () => {
             </div>
           </div>
           
-          {/* Image Area */}
+          {/* Image Area - Studio Slider */}
           <div className="relative group">
             <div className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative transition-transform duration-700 md:group-hover:scale-105">
               <img
-                src={studioImg}
-                alt="Tomoe Studio Interior"
-                className="object-cover w-full h-full opacity-90 transition-transform duration-700 md:group-hover:scale-105"
+                src={STUDIO_IMAGES[currentStudioImage]}
+                alt={`Tomoe Studio Interior ${currentStudioImage + 1}`}
+                className="object-cover w-full h-full opacity-90 transition-all duration-500"
               />
               <div className="absolute inset-0 bg-black/10 pointer-events-none transition-colors duration-500 md:group-hover:bg-black/5"></div>
+
+              {/* Frecce di navigazione - solo desktop */}
+              <button
+                onClick={prevStudioImage}
+                className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 w-12 h-24 items-center justify-center bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-full group-hover:translate-x-0 rounded-r-lg"
+                aria-label="Immagine precedente"
+              >
+                <ChevronLeft size={32} />
+              </button>
+              <button
+                onClick={nextStudioImage}
+                className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 w-12 h-24 items-center justify-center bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-full group-hover:translate-x-0 rounded-l-lg"
+                aria-label="Immagine successiva"
+              >
+                <ChevronRight size={32} />
+              </button>
+
+              {/* Indicatori */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                {STUDIO_IMAGES.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentStudioImage(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      index === currentStudioImage
+                        ? 'bg-white w-6'
+                        : 'bg-white/50 hover:bg-white/80'
+                    }`}
+                    aria-label={`Vai all'immagine ${index + 1}`}
+                  />
+                ))}
+              </div>
             </div>
             
             {/* Badge */}
@@ -227,7 +272,7 @@ const TomoeLanding: React.FC = () => {
                <MapPin className="mt-1 shrink-0 text-stone-700 group-hover:text-red-800 transition-colors" />
                <div>
                  <h3 className="font-bold text-lg">Tomoe Tattoo Studio</h3>
-                 <p className="text-stone-700">Via Esempio 12<br/>Castelferretti, Marche</p>
+                 <p className="text-stone-700">Piazza della libertà 4<br/>Castelferretti, Marche</p>
                </div>
              </div>
              <div className="flex items-start gap-4 group">
