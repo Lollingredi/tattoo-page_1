@@ -128,7 +128,7 @@ const TomoeLanding: React.FC = () => {
                 className="px-8 py-4 text-white rounded-lg font-semibold flex items-center gap-2 transition-all hover:gap-4 shadow-lg hover:shadow-xl"
                 style={{ backgroundColor: COLORS.crimson }}
               >
-                Inizia il progetto <ArrowRight size={20} />
+                Prenota una consultazione <ArrowRight size={20} />
               </button>
             </div>
           </div>
