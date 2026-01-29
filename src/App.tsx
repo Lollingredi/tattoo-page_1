@@ -52,16 +52,20 @@ const TomoeLanding: React.FC = () => {
   const [transitionDirection, setTransitionDirection] = useState<'left' | 'right' | null>(null);
   const [mainImageOpacity, setMainImageOpacity] = useState<number>(1);
   const [hoverEnabled, setHoverEnabled] = useState<boolean>(true);
+  const [transitionTargetImage, setTransitionTargetImage] = useState<number | null>(null);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   const prevStudioImage = () => {
     if (isTransitioning) return;
 
+    const targetIndex = currentStudioImage === 0 ? STUDIO_IMAGES.length - 1 : currentStudioImage - 1;
+
     setIsTransitioning(true);
     setTransitionDirection('left');
+    setTransitionTargetImage(targetIndex);
     setHoverEnabled(false);
-    setHoverOffset(-1); // Forza anteprima sinistra a comparire completamente
+    setHoverOffset(-1);
 
     // Fase 1: Fade out immagine centrale
     setTimeout(() => {
@@ -70,18 +74,19 @@ const TomoeLanding: React.FC = () => {
 
     // Fase 2: Cambia immagine quando l'anteprima è completamente espansa
     setTimeout(() => {
-      setCurrentStudioImage((prev) => (prev === 0 ? STUDIO_IMAGES.length - 1 : prev - 1));
+      setCurrentStudioImage(targetIndex);
     }, 450);
 
-    // Fase 3: Mostra nuova immagine centrale e nascondi anteprima
+    // Fase 3: Mostra nuova immagine centrale
     setTimeout(() => {
       setMainImageOpacity(1);
     }, 500);
 
-    // Fase 4: Reset stati transizione (dopo che l'immagine centrale è visibile)
+    // Fase 4: Reset stati transizione
     setTimeout(() => {
       setHoverOffset(0);
       setTransitionDirection(null);
+      setTransitionTargetImage(null);
       setIsTransitioning(false);
     }, 550);
 
@@ -94,10 +99,13 @@ const TomoeLanding: React.FC = () => {
   const nextStudioImage = () => {
     if (isTransitioning) return;
 
+    const targetIndex = currentStudioImage === STUDIO_IMAGES.length - 1 ? 0 : currentStudioImage + 1;
+
     setIsTransitioning(true);
     setTransitionDirection('right');
+    setTransitionTargetImage(targetIndex);
     setHoverEnabled(false);
-    setHoverOffset(1); // Forza anteprima destra a comparire completamente
+    setHoverOffset(1);
 
     // Fase 1: Fade out immagine centrale
     setTimeout(() => {
@@ -106,18 +114,19 @@ const TomoeLanding: React.FC = () => {
 
     // Fase 2: Cambia immagine quando l'anteprima è completamente espansa
     setTimeout(() => {
-      setCurrentStudioImage((prev) => (prev === STUDIO_IMAGES.length - 1 ? 0 : prev + 1));
+      setCurrentStudioImage(targetIndex);
     }, 450);
 
-    // Fase 3: Mostra nuova immagine centrale e nascondi anteprima
+    // Fase 3: Mostra nuova immagine centrale
     setTimeout(() => {
       setMainImageOpacity(1);
     }, 500);
 
-    // Fase 4: Reset stati transizione (dopo che l'immagine centrale è visibile)
+    // Fase 4: Reset stati transizione
     setTimeout(() => {
       setHoverOffset(0);
       setTransitionDirection(null);
+      setTransitionTargetImage(null);
       setIsTransitioning(false);
     }, 550);
 
@@ -129,6 +138,14 @@ const TomoeLanding: React.FC = () => {
 
   const getPrevImageIndex = () => (currentStudioImage === 0 ? STUDIO_IMAGES.length - 1 : currentStudioImage - 1);
   const getNextImageIndex = () => (currentStudioImage === STUDIO_IMAGES.length - 1 ? 0 : currentStudioImage + 1);
+
+  // Durante la transizione usa l'indice salvato, altrimenti calcola dinamicamente
+  const getPreviewImageIndex = (direction: 'left' | 'right') => {
+    if (isTransitioning && transitionTargetImage !== null) {
+      return transitionTargetImage;
+    }
+    return direction === 'left' ? getPrevImageIndex() : getNextImageIndex();
+  };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!hoverEnabled || isTransitioning) return;
@@ -265,7 +282,7 @@ const TomoeLanding: React.FC = () => {
               }}
             >
               <img
-                src={STUDIO_IMAGES[getPrevImageIndex()]}
+                src={STUDIO_IMAGES[getPreviewImageIndex('left')]}
                 alt="Immagine precedente"
                 className="w-full h-full object-cover"
               />
@@ -288,7 +305,7 @@ const TomoeLanding: React.FC = () => {
               }}
             >
               <img
-                src={STUDIO_IMAGES[getNextImageIndex()]}
+                src={STUDIO_IMAGES[getPreviewImageIndex('right')]}
                 alt="Immagine successiva"
                 className="w-full h-full object-cover"
               />
