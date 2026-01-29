@@ -8,6 +8,7 @@ interface ColorPalette {
   sand: string;
   charcoal: string;
   crimson: string;
+  leather: string;
 }
 
 interface PortfolioItem {
@@ -19,10 +20,11 @@ interface PortfolioItem {
 // --- Data & Config ---
 
 const COLORS: ColorPalette = {
-  sage: '#B2C9B6',      
-  sand: '#FDFBF7',      
-  charcoal: '#1A1A1A',  
-  crimson: '#D93025',   
+  sage: '#AEB59F',      // Il tuo Verde (Base Hero)
+  sand: '#D5CAC0',      // Il tuo Grigio/Beige (Sfondo Pagina)
+  leather: '#BBA18B',   // Il tuo Marrone (Dettagli)
+  charcoal: '#1F1C18',  // NUOVO: Nero caldo per i testi
+  crimson: '#8A1C1C',   // NUOVO: Rosso sangue scuro per i bottoni
 };
 
 // NOTA: Sostituisci questi link con le foto reali dei tatuaggi
@@ -122,7 +124,7 @@ const TomoeLanding: React.FC = () => {
           
           {/* Image Area */}
           <div className="relative">
-            <div className="aspect-[4/5] bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative">
+            <div className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative">
               {/* Placeholder Studio Image */}
               <img 
                 src="https://placehold.co/600x800/EEE/31343C?text=Foto+Studio" 
