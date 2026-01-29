@@ -176,11 +176,10 @@ const TomoeLanding: React.FC = () => {
             <div
               className="absolute top-1/2 -translate-y-1/2 overflow-hidden rounded-l-2xl pointer-events-none z-0"
               style={{
-                right: `calc(100% + ${-hoverOffset * 15}px)`,
+                right: `calc(100% + ${hoverOffset * 15}px)`,
                 width: `${isHovering && hoverOffset < 0 ? Math.abs(hoverOffset) * 15 : 0}px`,
                 height: '90%',
                 opacity: isHovering && hoverOffset < 0 ? 1 : 0,
-                transition: 'opacity 0.2s ease-out',
               }}
             >
               <img
@@ -195,11 +194,10 @@ const TomoeLanding: React.FC = () => {
             <div
               className="absolute top-1/2 -translate-y-1/2 overflow-hidden rounded-r-2xl pointer-events-none z-0"
               style={{
-                left: `calc(100% + ${hoverOffset * 15}px)`,
+                left: `calc(100% - ${hoverOffset * 15}px)`,
                 width: `${isHovering && hoverOffset > 0 ? hoverOffset * 15 : 0}px`,
                 height: '90%',
                 opacity: isHovering && hoverOffset > 0 ? 1 : 0,
-                transition: 'opacity 0.2s ease-out',
               }}
             >
               <img
