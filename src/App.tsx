@@ -51,7 +51,10 @@ const TomoeLanding: React.FC = () => {
     >
       
       {/* --- NAVIGATION --- */}
-      <nav className="fixed w-full z-50 backdrop-blur-md bg-white/70 border-b border-stone-100">
+      <nav
+        className="fixed w-full z-50 backdrop-blur-md border-b border-stone-200/50"
+        style={{ backgroundColor: 'rgba(253, 251, 247, 0.85)' }}
+      >
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="text-2xl font-bold tracking-tighter uppercase cursor-pointer">
             Tomoe<span style={{ color: COLORS.crimson }}>.</span>
@@ -82,7 +85,10 @@ const TomoeLanding: React.FC = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden absolute w-full bg-white border-b py-6 px-6 flex flex-col gap-4 shadow-xl">
+          <div
+            className="md:hidden absolute w-full border-b border-stone-200/50 py-6 px-6 flex flex-col gap-4 shadow-xl"
+            style={{ backgroundColor: COLORS.sage }}
+          >
             <a href="#studio" onClick={toggleMenu} className="text-lg font-medium">Studio</a>
             <a href="#works" onClick={toggleMenu} className="text-lg font-medium">Opere</a>
             <a href="#contact" onClick={toggleMenu} className="text-lg font-medium">Contatti</a>
@@ -139,8 +145,9 @@ const TomoeLanding: React.FC = () => {
             </div>
             
             {/* Badge */}
-            <div 
-              className="absolute -bottom-6 -left-6 p-6 rounded-xl shadow-lg backdrop-blur-sm bg-white/80 border border-stone-100 max-w-xs hidden md:block"
+            <div
+              className="absolute -bottom-6 -left-6 p-6 rounded-xl shadow-lg backdrop-blur-sm border border-stone-200/50 max-w-xs hidden md:block"
+              style={{ backgroundColor: 'rgba(253, 251, 247, 0.9)' }}
             >
               <p className="text-xs font-bold uppercase tracking-wider mb-1 text-stone-400">Atmosphere</p>
               <p className="font-medium text-stone-800">Un ambiente curato per farti sentire a casa mentre creiamo arte.</p>
@@ -155,10 +162,10 @@ const TomoeLanding: React.FC = () => {
         className="py-24 px-6"
         style={{ backgroundColor: COLORS.sage }} // Sfondo sezione Bianco Panna
       >
-        {/* WRAPPER BIANCO PER CONTRASTO */}
-        <div 
-          className="max-w-6xl mx-auto bg-white p-8 md:p-12 rounded-3xl shadow-sm"
-          style={{ color: COLORS.charcoal }}
+        {/* WRAPPER BIANCO CALDO PER CONTRASTO */}
+        <div
+          className="max-w-6xl mx-auto p-8 md:p-12 rounded-3xl shadow-sm"
+          style={{ backgroundColor: 'rgba(253, 251, 247, 0.95)', color: COLORS.charcoal }}
         > 
           <div className="flex justify-between items-end mb-12">
             <div>
