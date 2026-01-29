@@ -298,8 +298,8 @@ const TomoeLanding: React.FC = () => {
             <div
               className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative z-10"
               style={{
-                transform: `translateX(${-hoverOffset * 30}px) scale(${isHovering && !isTransitioning ? 1.02 : 1})`,
-                transition: isTransitioning ? 'transform 0.4s ease-out, opacity 0.4s ease-out' : 'transform 0.2s ease-out',
+                transform: `translateX(${isTransitioning ? 0 : -hoverOffset * 30}px) scale(${isHovering && !isTransitioning ? 1.02 : 1})`,
+                transition: isTransitioning ? 'opacity 0.4s ease-out' : 'transform 0.2s ease-out',
                 opacity: mainImageOpacity,
               }}
             >
