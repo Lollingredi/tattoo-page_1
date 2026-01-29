@@ -46,6 +46,8 @@ const STUDIO_IMAGES = [studioImg1, studioImg2, studioImg3];
 const TomoeLanding: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [currentStudioImage, setCurrentStudioImage] = useState<number>(0);
+  const [hoverOffset, setHoverOffset] = useState<number>(0);
+  const [isHovering, setIsHovering] = useState<boolean>(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -55,6 +57,23 @@ const TomoeLanding: React.FC = () => {
 
   const nextStudioImage = () => {
     setCurrentStudioImage((prev) => (prev === STUDIO_IMAGES.length - 1 ? 0 : prev + 1));
+  };
+
+  const getPrevImageIndex = () => (currentStudioImage === 0 ? STUDIO_IMAGES.length - 1 : currentStudioImage - 1);
+  const getNextImageIndex = () => (currentStudioImage === STUDIO_IMAGES.length - 1 ? 0 : currentStudioImage + 1);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const width = rect.width;
+    const normalizedX = (x / width - 0.5) * 2; // da -1 (sinistra) a 1 (destra)
+    setHoverOffset(normalizedX);
+  };
+
+  const handleMouseEnter = () => setIsHovering(true);
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+    setHoverOffset(0);
   };
 
   return (
@@ -147,26 +166,67 @@ const TomoeLanding: React.FC = () => {
           </div>
           
           {/* Image Area - Studio Slider */}
-          <div className="relative group">
-            <div className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative transition-transform duration-700 md:group-hover:scale-105">
+          <div
+            className="relative group hidden md:block"
+            onMouseMove={handleMouseMove}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            {/* Anteprima sinistra (immagine precedente) */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 -left-4 w-[90%] aspect-4/5 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 pointer-events-none z-0"
+              style={{
+                opacity: isHovering && hoverOffset < -0.3 ? Math.min(Math.abs(hoverOffset) - 0.3, 0.7) : 0,
+                transform: `translateX(${isHovering && hoverOffset < -0.3 ? Math.min((Math.abs(hoverOffset) - 0.3) * 30, 20) : 0}px)`,
+              }}
+            >
+              <img
+                src={STUDIO_IMAGES[getPrevImageIndex()]}
+                alt="Immagine precedente"
+                className="object-cover w-full h-full opacity-80"
+              />
+            </div>
+
+            {/* Anteprima destra (immagine successiva) */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 -right-4 w-[90%] aspect-4/5 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 pointer-events-none z-0"
+              style={{
+                opacity: isHovering && hoverOffset > 0.3 ? Math.min(hoverOffset - 0.3, 0.7) : 0,
+                transform: `translateX(${isHovering && hoverOffset > 0.3 ? Math.max(-(hoverOffset - 0.3) * 30, -20) : 0}px)`,
+              }}
+            >
+              <img
+                src={STUDIO_IMAGES[getNextImageIndex()]}
+                alt="Immagine successiva"
+                className="object-cover w-full h-full opacity-80"
+              />
+            </div>
+
+            {/* Immagine principale */}
+            <div
+              className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative transition-all duration-150 z-10"
+              style={{
+                transform: `translateX(${hoverOffset * 15}px) scale(${isHovering ? 1.05 : 1})`,
+              }}
+            >
               <img
                 src={STUDIO_IMAGES[currentStudioImage]}
                 alt={`Tomoe Studio Interior ${currentStudioImage + 1}`}
                 className="object-cover w-full h-full opacity-90 transition-all duration-500"
               />
-              <div className="absolute inset-0 bg-black/10 pointer-events-none transition-colors duration-500 md:group-hover:bg-black/5"></div>
+              <div className="absolute inset-0 bg-black/10 pointer-events-none transition-colors duration-500 group-hover:bg-black/5"></div>
 
               {/* Frecce di navigazione - solo desktop */}
               <button
                 onClick={prevStudioImage}
-                className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 w-12 h-24 items-center justify-center bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-full group-hover:translate-x-0 rounded-r-lg"
+                className="flex absolute left-0 top-1/2 -translate-y-1/2 w-12 h-24 items-center justify-center bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-full group-hover:translate-x-0 rounded-r-lg"
                 aria-label="Immagine precedente"
               >
                 <ChevronLeft size={32} />
               </button>
               <button
                 onClick={nextStudioImage}
-                className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 w-12 h-24 items-center justify-center bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-full group-hover:translate-x-0 rounded-l-lg"
+                className="flex absolute right-0 top-1/2 -translate-y-1/2 w-12 h-24 items-center justify-center bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-full group-hover:translate-x-0 rounded-l-lg"
                 aria-label="Immagine successiva"
               >
                 <ChevronRight size={32} />
@@ -188,14 +248,42 @@ const TomoeLanding: React.FC = () => {
                 ))}
               </div>
             </div>
-            
-            {/* Badge */}
+
+            {/* Badge - Desktop */}
             <div
-              className="absolute -bottom-6 -left-6 p-6 rounded-xl shadow-lg backdrop-blur-sm border border-stone-200/50 max-w-xs hidden md:block"
+              className="absolute -bottom-6 -left-6 p-6 rounded-xl shadow-lg backdrop-blur-sm border border-stone-200/50 max-w-xs z-20"
               style={{ backgroundColor: 'rgba(253, 251, 247, 0.9)' }}
             >
               <p className="text-xs font-bold uppercase tracking-wider mb-1 text-stone-400">Atmosphere</p>
               <p className="font-medium text-stone-800">Un ambiente curato per farti sentire a casa mentre creiamo arte.</p>
+            </div>
+          </div>
+
+          {/* Image Area - Mobile (senza effetti hover avanzati) */}
+          <div className="relative md:hidden">
+            <div className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative">
+              <img
+                src={STUDIO_IMAGES[currentStudioImage]}
+                alt={`Tomoe Studio Interior ${currentStudioImage + 1}`}
+                className="object-cover w-full h-full opacity-90"
+              />
+              <div className="absolute inset-0 bg-black/10 pointer-events-none"></div>
+
+              {/* Indicatori mobile */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                {STUDIO_IMAGES.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentStudioImage(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      index === currentStudioImage
+                        ? 'bg-white w-6'
+                        : 'bg-white/50 hover:bg-white/80'
+                    }`}
+                    aria-label={`Vai all'immagine ${index + 1}`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
