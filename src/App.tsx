@@ -172,37 +172,41 @@ const TomoeLanding: React.FC = () => {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            {/* Anteprima sinistra (immagine precedente) - parte dal bordo sinistro del wrapper */}
+            {/* Anteprima sinistra (immagine precedente) - striscia sottile dal bordo sinistro */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 w-[90%] aspect-4/5 rounded-2xl overflow-hidden shadow-xl transition-all duration-200 pointer-events-none z-0"
+              className="absolute top-1/2 -translate-y-1/2 overflow-hidden rounded-l-2xl pointer-events-none z-0"
               style={{
-                right: '100%',
-                marginRight: `${-hoverOffset * 15}px`,
-                opacity: isHovering && hoverOffset < 0 ? Math.min(Math.abs(hoverOffset) * 1.2, 0.9) : 0,
-                transform: `translateX(${isHovering && hoverOffset < 0 ? Math.abs(hoverOffset) * 25 : 0}px)`,
+                right: `calc(100% + ${-hoverOffset * 15}px)`,
+                width: `${isHovering && hoverOffset < 0 ? Math.abs(hoverOffset) * 15 : 0}px`,
+                height: '90%',
+                opacity: isHovering && hoverOffset < 0 ? 1 : 0,
+                transition: 'opacity 0.2s ease-out',
               }}
             >
               <img
                 src={STUDIO_IMAGES[getPrevImageIndex()]}
                 alt="Immagine precedente"
-                className="object-cover w-full h-full"
+                className="h-full object-cover object-right"
+                style={{ width: '500px', maxWidth: 'none' }}
               />
             </div>
 
-            {/* Anteprima destra (immagine successiva) - parte dal bordo destro del wrapper */}
+            {/* Anteprima destra (immagine successiva) - striscia sottile dal bordo destro */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 w-[90%] aspect-4/5 rounded-2xl overflow-hidden shadow-xl transition-all duration-200 pointer-events-none z-0"
+              className="absolute top-1/2 -translate-y-1/2 overflow-hidden rounded-r-2xl pointer-events-none z-0"
               style={{
-                left: '100%',
-                marginLeft: `${hoverOffset * 15}px`,
-                opacity: isHovering && hoverOffset > 0 ? Math.min(hoverOffset * 1.2, 0.9) : 0,
-                transform: `translateX(${isHovering && hoverOffset > 0 ? -hoverOffset * 25 : 0}px)`,
+                left: `calc(100% + ${hoverOffset * 15}px)`,
+                width: `${isHovering && hoverOffset > 0 ? hoverOffset * 15 : 0}px`,
+                height: '90%',
+                opacity: isHovering && hoverOffset > 0 ? 1 : 0,
+                transition: 'opacity 0.2s ease-out',
               }}
             >
               <img
                 src={STUDIO_IMAGES[getNextImageIndex()]}
                 alt="Immagine successiva"
-                className="object-cover w-full h-full"
+                className="h-full object-cover object-left"
+                style={{ width: '500px', maxWidth: 'none' }}
               />
             </div>
 
