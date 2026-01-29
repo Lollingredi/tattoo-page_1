@@ -48,21 +48,74 @@ const TomoeLanding: React.FC = () => {
   const [currentStudioImage, setCurrentStudioImage] = useState<number>(0);
   const [hoverOffset, setHoverOffset] = useState<number>(0);
   const [isHovering, setIsHovering] = useState<boolean>(false);
+  const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
+  const [transitionDirection, setTransitionDirection] = useState<'left' | 'right' | null>(null);
+  const [mainImageOpacity, setMainImageOpacity] = useState<number>(1);
+  const [hoverEnabled, setHoverEnabled] = useState<boolean>(true);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   const prevStudioImage = () => {
-    setCurrentStudioImage((prev) => (prev === 0 ? STUDIO_IMAGES.length - 1 : prev - 1));
+    if (isTransitioning) return;
+
+    setIsTransitioning(true);
+    setTransitionDirection('left');
+    setHoverEnabled(false);
+    setHoverOffset(-1); // Forza anteprima sinistra a comparire completamente
+
+    // Fase 1: Fade out immagine centrale (400ms)
+    setTimeout(() => {
+      setMainImageOpacity(0);
+    }, 50);
+
+    // Fase 2: Cambia immagine (dopo 500ms)
+    setTimeout(() => {
+      setCurrentStudioImage((prev) => (prev === 0 ? STUDIO_IMAGES.length - 1 : prev - 1));
+      setMainImageOpacity(1);
+      setHoverOffset(0);
+      setTransitionDirection(null);
+      setIsTransitioning(false);
+    }, 500);
+
+    // Fase 3: Riattiva hover (dopo 1.5s totali)
+    setTimeout(() => {
+      setHoverEnabled(true);
+    }, 1500);
   };
 
   const nextStudioImage = () => {
-    setCurrentStudioImage((prev) => (prev === STUDIO_IMAGES.length - 1 ? 0 : prev + 1));
+    if (isTransitioning) return;
+
+    setIsTransitioning(true);
+    setTransitionDirection('right');
+    setHoverEnabled(false);
+    setHoverOffset(1); // Forza anteprima destra a comparire completamente
+
+    // Fase 1: Fade out immagine centrale (400ms)
+    setTimeout(() => {
+      setMainImageOpacity(0);
+    }, 50);
+
+    // Fase 2: Cambia immagine (dopo 500ms)
+    setTimeout(() => {
+      setCurrentStudioImage((prev) => (prev === STUDIO_IMAGES.length - 1 ? 0 : prev + 1));
+      setMainImageOpacity(1);
+      setHoverOffset(0);
+      setTransitionDirection(null);
+      setIsTransitioning(false);
+    }, 500);
+
+    // Fase 3: Riattiva hover (dopo 1.5s totali)
+    setTimeout(() => {
+      setHoverEnabled(true);
+    }, 1500);
   };
 
   const getPrevImageIndex = () => (currentStudioImage === 0 ? STUDIO_IMAGES.length - 1 : currentStudioImage - 1);
   const getNextImageIndex = () => (currentStudioImage === STUDIO_IMAGES.length - 1 ? 0 : currentStudioImage + 1);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!hoverEnabled || isTransitioning) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const width = rect.width;
@@ -70,10 +123,17 @@ const TomoeLanding: React.FC = () => {
     setHoverOffset(normalizedX);
   };
 
-  const handleMouseEnter = () => setIsHovering(true);
+  const handleMouseEnter = () => {
+    if (hoverEnabled && !isTransitioning) {
+      setIsHovering(true);
+    }
+  };
+
   const handleMouseLeave = () => {
-    setIsHovering(false);
-    setHoverOffset(0);
+    if (!isTransitioning) {
+      setIsHovering(false);
+      setHoverOffset(0);
+    }
   };
 
   return (
@@ -176,10 +236,11 @@ const TomoeLanding: React.FC = () => {
             <div
               className="absolute top-1/2 -translate-y-1/2 overflow-hidden rounded-l-2xl pointer-events-none z-0"
               style={{
-                right: `calc(100% + ${hoverOffset * 15}px)`,
-                width: `${isHovering && hoverOffset < 0 ? Math.abs(hoverOffset) * 15 : 0}px`,
+                right: `calc(100% + ${hoverOffset * 30}px)`,
+                width: `${(isHovering || isTransitioning) && hoverOffset < 0 ? Math.abs(hoverOffset) * 30 : 0}px`,
                 height: '90%',
-                opacity: isHovering && hoverOffset < 0 ? 1 : 0,
+                opacity: (isHovering || transitionDirection === 'left') && hoverOffset < 0 ? 1 : 0,
+                transition: isTransitioning ? 'all 0.4s ease-out' : 'none',
               }}
             >
               <img
@@ -194,10 +255,11 @@ const TomoeLanding: React.FC = () => {
             <div
               className="absolute top-1/2 -translate-y-1/2 overflow-hidden rounded-r-2xl pointer-events-none z-0"
               style={{
-                left: `calc(100% - ${hoverOffset * 15}px)`,
-                width: `${isHovering && hoverOffset > 0 ? hoverOffset * 15 : 0}px`,
+                left: `calc(100% - ${hoverOffset * 30}px)`,
+                width: `${(isHovering || isTransitioning) && hoverOffset > 0 ? hoverOffset * 30 : 0}px`,
                 height: '90%',
-                opacity: isHovering && hoverOffset > 0 ? 1 : 0,
+                opacity: (isHovering || transitionDirection === 'right') && hoverOffset > 0 ? 1 : 0,
+                transition: isTransitioning ? 'all 0.4s ease-out' : 'none',
               }}
             >
               <img
@@ -210,15 +272,20 @@ const TomoeLanding: React.FC = () => {
 
             {/* Immagine principale */}
             <div
-              className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative transition-all duration-200 z-10"
+              className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative z-10"
               style={{
-                transform: `translateX(${-hoverOffset * 15}px) scale(${isHovering ? 1.02 : 1})`,
+                transform: `translateX(${-hoverOffset * 30}px) scale(${isHovering && !isTransitioning ? 1.02 : 1})`,
+                transition: isTransitioning ? 'transform 0.4s ease-out' : 'transform 0.2s ease-out',
               }}
             >
               <img
                 src={STUDIO_IMAGES[currentStudioImage]}
                 alt={`Tomoe Studio Interior ${currentStudioImage + 1}`}
-                className="object-cover w-full h-full opacity-90 transition-all duration-500"
+                className="object-cover w-full h-full"
+                style={{
+                  opacity: mainImageOpacity * 0.9,
+                  transition: 'opacity 0.4s ease-out',
+                }}
               />
               <div className="absolute inset-0 bg-black/10 pointer-events-none transition-colors duration-500 group-hover:bg-black/5"></div>
 
