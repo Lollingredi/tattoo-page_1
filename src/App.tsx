@@ -134,14 +134,14 @@ const TomoeLanding: React.FC = () => {
           </div>
           
           {/* Image Area */}
-          <div className="relative">
-            <div className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative">
-              <img 
-                src={studioImg} 
-                alt="Tomoe Studio Interior" 
-                className="object-cover w-full h-full opacity-90 hover:scale-105 transition-transform duration-700"
+          <div className="relative group">
+            <div className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative transition-transform duration-700 md:group-hover:scale-[1.02]">
+              <img
+                src={studioImg}
+                alt="Tomoe Studio Interior"
+                className="object-cover w-full h-full opacity-90 transition-transform duration-700 md:group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-black/10 pointer-events-none"></div>
+              <div className="absolute inset-0 bg-black/10 pointer-events-none transition-colors duration-500 md:group-hover:bg-black/5"></div>
             </div>
             
             {/* Badge */}
@@ -157,15 +157,15 @@ const TomoeLanding: React.FC = () => {
       </header>
 
       {/* --- GALLERY SECTION (Le nostre opere) --- */}
-      <section 
-        id="works" 
+      <section
+        id="works"
         className="py-24 px-6"
-        style={{ backgroundColor: COLORS.sage }} // Sfondo sezione Bianco Panna
+        style={{ backgroundColor: '#E8E0D8' }} // Sfondo sezione più scuro per contrasto
       >
         {/* WRAPPER BIANCO CALDO PER CONTRASTO */}
         <div
-          className="max-w-6xl mx-auto p-8 md:p-12 rounded-3xl shadow-sm"
-          style={{ backgroundColor: 'rgba(253, 251, 247, 0.95)', color: COLORS.charcoal }}
+          className="max-w-6xl mx-auto p-8 md:p-12 rounded-3xl shadow-lg"
+          style={{ backgroundColor: '#FFFDF9', color: COLORS.charcoal }}
         > 
           <div className="flex justify-between items-end mb-12">
             <div>
