@@ -9,6 +9,7 @@ interface ColorPalette {
   charcoal: string;
   crimson: string;
   leather: string;
+  strlu: string;
 }
 
 interface PortfolioItem {
@@ -23,6 +24,7 @@ const COLORS: ColorPalette = {
   sage: '#AEB59F',      // Il tuo Verde (Base Hero)
   sand: '#D5CAC0',      // Il tuo Grigio/Beige (Sfondo Pagina)
   leather: '#BBA18B',   // Il tuo Marrone (Dettagli)
+  strlu: '#90A898',    // NUOVO: Verde salvia più scuro per dettagli
   charcoal: '#1F1C18',  // NUOVO: Nero caldo per i testi
   crimson: '#8A1C1C',   // NUOVO: Rosso sangue scuro per i bottoni
 };
