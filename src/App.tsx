@@ -135,7 +135,7 @@ const TomoeLanding: React.FC = () => {
           
           {/* Image Area */}
           <div className="relative group">
-            <div className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative transition-transform duration-700 md:group-hover:scale-[1.02]">
+            <div className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative transition-transform duration-700 md:group-hover:scale-105">
               <img
                 src={studioImg}
                 alt="Tomoe Studio Interior"
@@ -160,12 +160,12 @@ const TomoeLanding: React.FC = () => {
       <section
         id="works"
         className="py-24 px-6"
-        style={{ backgroundColor: '#E8E0D8' }} // Sfondo sezione più scuro per contrasto
+        style={{ backgroundColor: '#FFFDF9' }} // Sfondo sezione bianco caldo
       >
-        {/* WRAPPER BIANCO CALDO PER CONTRASTO */}
+        {/* WRAPPER PIÙ SCURO PER CONTRASTO */}
         <div
           className="max-w-6xl mx-auto p-8 md:p-12 rounded-3xl shadow-lg"
-          style={{ backgroundColor: '#FFFDF9', color: COLORS.charcoal }}
+          style={{ backgroundColor: '#E8E0D8', color: COLORS.charcoal }}
         > 
           <div className="flex justify-between items-end mb-12">
             <div>
