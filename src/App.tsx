@@ -54,7 +54,34 @@ const TomoeLanding: React.FC = () => {
   const [hoverEnabled, setHoverEnabled] = useState<boolean>(true);
   const [transitionTargetImage, setTransitionTargetImage] = useState<number | null>(null);
 
+  // Lightbox states
+  const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number>(0);
+
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  // Lightbox functions
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+    document.body.style.overflow = 'auto';
+  };
+
+  const prevLightboxImage = () => {
+    setLightboxIndex((prev) => (prev === 0 ? PORTFOLIO_ITEMS.length - 1 : prev - 1));
+  };
+
+  const nextLightboxImage = () => {
+    setLightboxIndex((prev) => (prev === PORTFOLIO_ITEMS.length - 1 ? 0 : prev + 1));
+  };
+
+  const getLightboxPrevIndex = () => (lightboxIndex === 0 ? PORTFOLIO_ITEMS.length - 1 : lightboxIndex - 1);
+  const getLightboxNextIndex = () => (lightboxIndex === PORTFOLIO_ITEMS.length - 1 ? 0 : lightboxIndex + 1);
 
   const prevStudioImage = () => {
     if (isTransitioning) return;
@@ -416,9 +443,13 @@ const TomoeLanding: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
-            {PORTFOLIO_ITEMS.map((item) => (
-              <div key={item.id} className="aspect-square bg-stone-800 relative group overflow-hidden cursor-pointer">
-                <img 
+            {PORTFOLIO_ITEMS.map((item, index) => (
+              <div
+                key={item.id}
+                className="aspect-square bg-stone-800 relative group overflow-hidden cursor-pointer"
+                onClick={() => openLightbox(index)}
+              >
+                <img
                   src={item.src}
                   alt={item.alt}
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
@@ -478,6 +509,93 @@ const TomoeLanding: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Lightbox Modal */}
+      {lightboxOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center"
+          onClick={closeLightbox}
+        >
+          {/* Sfondo nero opaco */}
+          <div className="absolute inset-0 bg-black/95" />
+
+          {/* Contenitore carosello */}
+          <div
+            className="relative z-10 flex items-center justify-center w-full h-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Immagine precedente (sfocata, 90%) */}
+            <div className="absolute left-4 md:left-12 w-[30%] md:w-[25%] aspect-square opacity-50 transition-all duration-300">
+              <img
+                src={PORTFOLIO_ITEMS[getLightboxPrevIndex()].src}
+                alt={PORTFOLIO_ITEMS[getLightboxPrevIndex()].alt}
+                className="w-full h-full object-cover rounded-xl blur-sm scale-90"
+              />
+            </div>
+
+            {/* Immagine centrale */}
+            <div className="relative w-[70%] md:w-[50%] max-w-3xl aspect-square group">
+              <img
+                src={PORTFOLIO_ITEMS[lightboxIndex].src}
+                alt={PORTFOLIO_ITEMS[lightboxIndex].alt}
+                className="w-full h-full object-cover rounded-2xl shadow-2xl"
+              />
+
+              {/* Freccia sinistra */}
+              <button
+                onClick={prevLightboxImage}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full md:-translate-x-1/2 w-12 h-24 flex items-center justify-center bg-black/50 hover:bg-black/70 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300"
+                aria-label="Immagine precedente"
+              >
+                <ChevronLeft size={32} />
+              </button>
+
+              {/* Freccia destra */}
+              <button
+                onClick={nextLightboxImage}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full md:translate-x-1/2 w-12 h-24 flex items-center justify-center bg-black/50 hover:bg-black/70 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300"
+                aria-label="Immagine successiva"
+              >
+                <ChevronRight size={32} />
+              </button>
+            </div>
+
+            {/* Immagine successiva (sfocata, 90%) */}
+            <div className="absolute right-4 md:right-12 w-[30%] md:w-[25%] aspect-square opacity-50 transition-all duration-300">
+              <img
+                src={PORTFOLIO_ITEMS[getLightboxNextIndex()].src}
+                alt={PORTFOLIO_ITEMS[getLightboxNextIndex()].alt}
+                className="w-full h-full object-cover rounded-xl blur-sm scale-90"
+              />
+            </div>
+
+            {/* Pulsante chiudi */}
+            <button
+              onClick={closeLightbox}
+              className="absolute top-4 right-4 md:top-8 md:right-8 w-12 h-12 flex items-center justify-center bg-black/50 hover:bg-black/70 text-white rounded-full transition-all duration-300"
+              aria-label="Chiudi"
+            >
+              <X size={24} />
+            </button>
+
+            {/* Indicatori */}
+            <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+              {PORTFOLIO_ITEMS.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setLightboxIndex(index)}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    index === lightboxIndex
+                      ? 'bg-white w-6'
+                      : 'bg-white/50 hover:bg-white/80'
+                  }`}
+                  aria-label={`Vai all'immagine ${index + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
