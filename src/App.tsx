@@ -258,13 +258,7 @@ const TomoeLanding: React.FC = () => {
             </div>
 
             {/* Badge - Desktop */}
-            <div
-              className="absolute -bottom-6 -left-6 p-6 rounded-xl shadow-lg backdrop-blur-sm border border-stone-200/50 max-w-xs z-20"
-              style={{ backgroundColor: 'rgba(253, 251, 247, 0.9)' }}
-            >
-              <p className="text-xs font-bold uppercase tracking-wider mb-1 text-stone-400">Atmosphere</p>
-              <p className="font-medium text-stone-800">Un ambiente curato per farti sentire a casa mentre creiamo arte.</p>
-            </div>
+            
           </div>
 
           {/* Image Area - Mobile (senza effetti hover avanzati) */}
