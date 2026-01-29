@@ -1,0 +1,226 @@
+import React, { useState } from 'react';
+import { Instagram, MapPin, Calendar, ArrowRight, Menu, X } from 'lucide-react';
+
+// --- Types & Interfaces ---
+
+interface ColorPalette {
+  sage: string;
+  sand: string;
+  charcoal: string;
+  crimson: string;
+}
+
+interface PortfolioItem {
+  id: number;
+  alt: string;
+  src: string;
+}
+
+// --- Data & Config ---
+
+const COLORS: ColorPalette = {
+  sage: '#B2C9B6',      
+  sand: '#FDFBF7',      
+  charcoal: '#1A1A1A',  
+  crimson: '#D93025',   
+};
+
+// NOTA: Sostituisci questi link con le foto reali dei tatuaggi
+const PORTFOLIO_ITEMS: PortfolioItem[] = [
+  { id: 1, alt: 'Tattoo Work 1', src: 'https://placehold.co/500x500/png?text=Tattoo+1' },
+  { id: 2, alt: 'Tattoo Work 2', src: 'https://placehold.co/500x500/png?text=Tattoo+2' },
+  { id: 3, alt: 'Tattoo Work 3', src: 'https://placehold.co/500x500/png?text=Tattoo+3' },
+];
+
+const TomoeLanding: React.FC = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  return (
+    <div 
+      style={{ backgroundColor: COLORS.sand, color: COLORS.charcoal }} 
+      className="min-h-screen font-sans selection:bg-red-200"
+    >
+      
+      {/* --- NAVIGATION --- */}
+      <nav className="fixed w-full z-50 backdrop-blur-md bg-white/70 border-b border-stone-100">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="text-2xl font-bold tracking-tighter uppercase cursor-pointer">
+            Tomoe<span style={{ color: COLORS.crimson }}>.</span>
+          </div>
+          
+          {/* Desktop Menu */}
+          <div className="hidden md:flex gap-8 items-center font-medium text-sm tracking-wide">
+            <a href="#studio" className="hover:text-red-600 transition-colors">Studio</a>
+            <a href="#works" className="hover:text-red-600 transition-colors">Portfolio</a>
+            <a href="#contact" className="hover:text-red-600 transition-colors">Contatti</a>
+            <button 
+              className="px-5 py-2 text-white rounded-full transition-transform hover:scale-105 shadow-md"
+              style={{ backgroundColor: COLORS.crimson }}
+            >
+              Prenota Ora
+            </button>
+          </div>
+
+          {/* Mobile Toggle */}
+          <button 
+            className="md:hidden p-2 hover:bg-stone-100 rounded-md transition-colors"
+            onClick={toggleMenu}
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden absolute w-full bg-white border-b py-6 px-6 flex flex-col gap-4 shadow-xl">
+            <a href="#studio" onClick={toggleMenu} className="text-lg font-medium">Studio</a>
+            <a href="#works" onClick={toggleMenu} className="text-lg font-medium">Portfolio</a>
+            <a href="#contact" onClick={toggleMenu} className="text-lg font-medium">Contatti</a>
+            <button 
+              className="w-full py-3 text-white rounded-lg font-bold mt-2"
+              style={{ backgroundColor: COLORS.crimson }}
+            >
+              Prenota Ora
+            </button>
+          </div>
+        )}
+      </nav>
+
+      {/* --- HERO SECTION --- */}
+      <header id="studio" className="pt-32 pb-20 px-6 md:pt-48 md:pb-32 relative overflow-hidden">
+        {/* Decorative Sage Background */}
+        <div 
+          className="absolute top-0 right-0 w-2/3 h-full -z-10 opacity-40 blur-3xl rounded-bl-full pointer-events-none"
+          style={{ backgroundColor: COLORS.sage }}
+        />
+
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <p className="text-sm font-bold tracking-widest uppercase text-stone-500">
+              Castelferretti, Marche
+            </p>
+            <h1 className="text-5xl md:text-7xl font-light leading-tight">
+              Arte su pelle, <br />
+              <span className="font-bold italic">anima zen.</span>
+            </h1>
+            <p className="text-lg text-stone-600 max-w-md leading-relaxed">
+              Uno spazio dove il tatuaggio tradizionale incontra la calma moderna. 
+              Linee pulite, ambiente rilassato, inchiostro indelebile.
+            </p>
+            <div className="pt-4 flex gap-4">
+              <button 
+                className="px-8 py-4 text-white rounded-lg font-semibold flex items-center gap-2 transition-all hover:gap-4 shadow-lg hover:shadow-xl"
+                style={{ backgroundColor: COLORS.crimson }}
+              >
+                Inizia il progetto <ArrowRight size={20} />
+              </button>
+            </div>
+          </div>
+          
+          {/* Image Area */}
+          <div className="relative">
+            <div className="aspect-[4/5] bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative">
+              {/* Placeholder Studio Image */}
+              <img 
+                src="https://placehold.co/600x800/EEE/31343C?text=Foto+Studio" 
+                alt="Tomoe Studio Interior" 
+                className="object-cover w-full h-full opacity-90 hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-black/10 pointer-events-none"></div>
+            </div>
+            
+            {/* Badge */}
+            <div 
+              className="absolute -bottom-6 -left-6 p-6 rounded-xl shadow-lg backdrop-blur-sm bg-white/80 border border-stone-100 max-w-xs hidden md:block"
+            >
+              <p className="text-xs font-bold uppercase tracking-wider mb-1 text-stone-400">Atmosphere</p>
+              <p className="font-medium">Un ambiente curato per farti sentire a casa mentre creiamo arte.</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* --- GALLERY SECTION --- */}
+      <section id="works" className="py-24 px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex justify-between items-end mb-12">
+            <div>
+              <h2 className="text-4xl font-bold mb-2">Selected Works</h2>
+              <div className="h-1 w-24" style={{ backgroundColor: COLORS.crimson }}></div>
+            </div>
+            <a href="#" className="hidden md:flex items-center gap-2 font-medium hover:underline hover:text-red-600 transition-colors">
+              Vedi tutto su Instagram <Instagram size={18} />
+            </a>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
+            {PORTFOLIO_ITEMS.map((item) => (
+              <div key={item.id} className="aspect-square bg-stone-100 relative group overflow-hidden cursor-pointer">
+                <img 
+                  src={item.src}
+                  alt={item.alt}
+                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <span className="text-white font-bold tracking-widest uppercase border border-white px-4 py-2 backdrop-blur-sm">
+                    View
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="mt-8 flex justify-center md:hidden">
+            <a href="#" className="flex items-center gap-2 font-medium hover:text-red-600 transition-colors">
+              Instagram <Instagram size={18} />
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* --- FOOTER / CONTACT --- */}
+      <section id="contact" className="py-24 px-6">
+        <div 
+          className="max-w-5xl mx-auto rounded-3xl p-8 md:p-16 flex flex-col md:flex-row gap-12 text-white shadow-2xl relative"
+          style={{ backgroundColor: '#2C2C2C' }}
+        >
+          <div className="flex-1 space-y-6 z-10">
+            <Calendar className="w-12 h-12" style={{ color: COLORS.crimson }} />
+            <h2 className="text-3xl md:text-4xl font-bold">Prenota il tuo appuntamento</h2>
+            <p className="text-gray-400 leading-relaxed">
+              Raccontaci la tua idea, scegli l'artista e blocca la data.
+            </p>
+            <button 
+              className="mt-4 px-8 py-4 text-white font-bold rounded-lg w-full md:w-auto hover:brightness-110 transition-all shadow-lg"
+              style={{ backgroundColor: COLORS.crimson }}
+            >
+              Apri Calendario
+            </button>
+          </div>
+
+          <div className="flex-1 space-y-8 md:border-l md:border-gray-700 md:pl-12 flex flex-col justify-center z-10">
+             <div className="flex items-start gap-4 group">
+               <MapPin className="mt-1 shrink-0 text-stone-400 group-hover:text-white transition-colors" />
+               <div>
+                 <h3 className="font-bold text-lg">Tomoe Tattoo Studio</h3>
+                 <p className="text-gray-400">Via Esempio 12<br/>Castelferretti, Marche</p>
+               </div>
+             </div>
+             <div className="flex items-start gap-4 group">
+               <Instagram className="mt-1 shrink-0 text-stone-400 group-hover:text-white transition-colors" />
+               <div>
+                 <h3 className="font-bold text-lg">Seguici</h3>
+                 <p className="text-gray-400">@tomoe_tattoo_studio</p>
+               </div>
+             </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default TomoeLanding;
