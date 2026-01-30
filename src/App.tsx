@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Instagram, MapPin, Calendar, ArrowRight, Menu, X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
 import CalendarPage from './CalendarPage';
 
@@ -45,8 +45,33 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
 const STUDIO_IMAGES = [studioImg1, studioImg2, studioImg3];
 
 const TomoeLanding: React.FC = () => {
-  const [showCalendar, setShowCalendar] = useState<boolean>(false);
+  // Initialize showCalendar based on current URL
+  const [showCalendar, setShowCalendar] = useState<boolean>(() => {
+    return window.location.pathname === '/prenota';
+  });
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+
+  // Navigate to calendar page with URL update
+  const navigateToCalendar = useCallback(() => {
+    window.history.pushState({}, '', '/prenota');
+    setShowCalendar(true);
+  }, []);
+
+  // Navigate to home page with URL update
+  const navigateToHome = useCallback(() => {
+    window.history.pushState({}, '', '/');
+    setShowCalendar(false);
+  }, []);
+
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      setShowCalendar(window.location.pathname === '/prenota');
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
   const [currentStudioImage, setCurrentStudioImage] = useState<number>(0);
   const [hoverOffset, setHoverOffset] = useState<number>(0);
   const [isHovering, setIsHovering] = useState<boolean>(false);
@@ -285,18 +310,18 @@ const TomoeLanding: React.FC = () => {
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div
             className="text-2xl font-bold tracking-tighter uppercase cursor-pointer"
-            onClick={() => setShowCalendar(false)}
+            onClick={() => navigateToHome()}
           >
             Studio<span style={{ color: COLORS.crimson }}>.</span>
           </div>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex gap-8 items-center font-medium text-sm tracking-wide">
-            <a href="#studio" onClick={() => setShowCalendar(false)} className="hover:text-red-800 transition-colors">Studio</a>
-            <a href="#works" onClick={() => setShowCalendar(false)} className="hover:text-red-800 transition-colors">Opere</a>
-            <a href="#contact" onClick={() => setShowCalendar(false)} className="hover:text-red-800 transition-colors">Contatti</a>
+            <a href="#studio" onClick={() => navigateToHome()} className="hover:text-red-800 transition-colors">Studio</a>
+            <a href="#works" onClick={() => navigateToHome()} className="hover:text-red-800 transition-colors">Opere</a>
+            <a href="#contact" onClick={() => navigateToHome()} className="hover:text-red-800 transition-colors">Contatti</a>
             <button
-              onClick={() => setShowCalendar(true)}
+              onClick={() => navigateToCalendar()}
               className="px-5 py-2 text-white rounded-full transition-transform hover:scale-105 shadow-md"
               style={{ backgroundColor: COLORS.crimson }}
             >
@@ -321,11 +346,11 @@ const TomoeLanding: React.FC = () => {
           }`}
           style={{ backgroundColor: COLORS.sage }}
         >
-          <a href="#studio" onClick={() => { toggleMenu(); setShowCalendar(false); }} className="text-lg font-medium">Studio</a>
-          <a href="#works" onClick={() => { toggleMenu(); setShowCalendar(false); }} className="text-lg font-medium">Opere</a>
-          <a href="#contact" onClick={() => { toggleMenu(); setShowCalendar(false); }} className="text-lg font-medium">Contatti</a>
+          <a href="#studio" onClick={() => { toggleMenu(); navigateToHome(); }} className="text-lg font-medium">Studio</a>
+          <a href="#works" onClick={() => { toggleMenu(); navigateToHome(); }} className="text-lg font-medium">Opere</a>
+          <a href="#contact" onClick={() => { toggleMenu(); navigateToHome(); }} className="text-lg font-medium">Contatti</a>
           <button
-            onClick={() => { toggleMenu(); setShowCalendar(true); }}
+            onClick={() => { toggleMenu(); navigateToCalendar(); }}
             className="w-full py-3 text-white rounded-lg font-bold mt-2"
             style={{ backgroundColor: COLORS.crimson }}
           >
@@ -362,7 +387,7 @@ const TomoeLanding: React.FC = () => {
             </p>
             <div className="pt-4 flex gap-4">
               <button
-                onClick={() => setShowCalendar(true)}
+                onClick={() => navigateToCalendar()}
                 className="px-8 py-4 text-white rounded-lg font-semibold flex items-center gap-2 transition-all hover:gap-4 shadow-lg hover:shadow-xl"
                 style={{ backgroundColor: COLORS.crimson }}
               >
@@ -647,7 +672,7 @@ const TomoeLanding: React.FC = () => {
               Raccontaci la tua idea, scegli l'artista e blocca la data.
             </p>
             <button
-              onClick={() => setShowCalendar(true)}
+              onClick={() => navigateToCalendar()}
               className="mt-4 px-8 py-4 text-white font-bold rounded-lg w-full md:w-auto hover:brightness-110 transition-all shadow-lg"
               style={{ backgroundColor: COLORS.crimson }}
             >

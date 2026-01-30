@@ -221,7 +221,7 @@ const CalendarPage: React.FC = () => {
 
   // Get wrapper styles based on state
   const getWrapperStyles = () => {
-    const baseStyles = 'rounded-2xl p-6 transition-all duration-300 ease-out overflow-hidden order-2 md:order-none md:row-span-3';
+    const baseStyles = 'rounded-2xl p-6 transition-all duration-300 ease-out overflow-hidden order-2 md:col-start-2 md:row-start-1 md:row-span-3';
 
     switch (wrapperState) {
       case 'calendar':
@@ -253,10 +253,10 @@ const CalendarPage: React.FC = () => {
           <p className="text-stone-600">Scegli l'artista, la data e l'orario per la tua consultazione</p>
         </div>
 
-        <div className="grid md:grid-cols-[300px_1fr] gap-6 md:gap-8">
-          {/* Artist Dropdown - Always first */}
+        <div className="flex flex-col md:grid md:grid-cols-[300px_1fr] gap-6 md:gap-8">
+          {/* Artist Dropdown - First on mobile, row 1 col 1 on desktop */}
           <div
-            className="rounded-2xl p-6 order-1 md:order-none"
+            className="rounded-2xl p-6 order-1 md:col-start-1 md:row-start-1"
             style={{ backgroundColor: COLORS.sage }}
           >
             <div className="flex items-center gap-3 mb-4">
@@ -334,9 +334,9 @@ const CalendarPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Opening Hours - Third on mobile, second on desktop (sidebar) */}
+          {/* Opening Hours - Third on mobile, row 2 col 1 on desktop */}
           <div
-            className="rounded-2xl p-6 order-3 md:order-none"
+            className="rounded-2xl p-6 order-3 md:col-start-1 md:row-start-2"
             style={{ backgroundColor: COLORS.sage }}
           >
             <div className="flex items-center gap-3 mb-4">
@@ -361,9 +361,9 @@ const CalendarPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Location - Fourth on mobile, third on desktop (sidebar) */}
+          {/* Location - Fourth on mobile, row 3 col 1 on desktop */}
           <div
-            className="rounded-2xl p-6 order-4 md:order-none"
+            className="rounded-2xl p-6 order-4 md:col-start-1 md:row-start-3"
             style={{ backgroundColor: COLORS.sage }}
           >
             <div className="flex items-center gap-3 mb-4">
