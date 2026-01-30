@@ -289,7 +289,7 @@ const TomoeLanding: React.FC = () => {
       >
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="text-2xl font-bold tracking-tighter uppercase cursor-pointer">
-            Tomoe<span style={{ color: COLORS.crimson }}>.</span>
+            Studio<span style={{ color: COLORS.crimson }}>.</span>
           </div>
           
           {/* Desktop Menu */}
@@ -347,7 +347,7 @@ const TomoeLanding: React.FC = () => {
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <p className="text-sm font-bold tracking-widest uppercase opacity-60 text-stone-600">
-              Castelferretti, Marche
+              Città, Regione
             </p>
             <h1 className="text-5xl md:text-7xl font-light leading-tight text-stone-900">
               Arte su pelle, <br />
@@ -432,7 +432,7 @@ const TomoeLanding: React.FC = () => {
             >
               <img
                 src={STUDIO_IMAGES[currentStudioImage]}
-                alt={`Tomoe Studio Interior ${currentStudioImage + 1}`}
+                alt={`Studio Interior ${currentStudioImage + 1}`}
                 className="object-cover w-full h-full opacity-90"
               />
               <div className="absolute inset-0 bg-black/10 pointer-events-none transition-colors duration-500 group-hover:bg-black/5"></div>
@@ -490,7 +490,7 @@ const TomoeLanding: React.FC = () => {
                   <div className="relative w-full h-full bg-stone-200">
                     <img
                       src={img}
-                      alt={`Tomoe Studio Interior ${index + 1}`}
+                      alt={`Studio Interior ${index + 1}`}
                       className="object-cover w-full h-full opacity-90"
                     />
                     <div className="absolute inset-0 bg-black/10 pointer-events-none"></div>
@@ -656,15 +656,15 @@ const TomoeLanding: React.FC = () => {
              <div className="flex items-start gap-4 group">
                <MapPin className="mt-1 shrink-0 text-stone-700 group-hover:text-red-800 transition-colors" />
                <div>
-                 <h3 className="font-bold text-lg">Tomoe Tattoo Studio</h3>
-                 <p className="text-stone-700">Piazza della libertà 4<br/>Castelferretti, Marche</p>
+                 <h3 className="font-bold text-lg">Tattoo Studio</h3>
+                 <p className="text-stone-700">Via Example 123<br/>Città, Regione</p>
                </div>
              </div>
              <div className="flex items-start gap-4 group">
                <Instagram className="mt-1 shrink-0 text-stone-700 group-hover:text-red-800 transition-colors" />
                <div>
                  <h3 className="font-bold text-lg">Seguici</h3>
-                 <p className="text-stone-700">@tomoe_tattoo_studio</p>
+                 <p className="text-stone-700">@studio_tattoo</p>
                </div>
              </div>
           </div>
@@ -681,10 +681,10 @@ const TomoeLanding: React.FC = () => {
             {/* Logo e Copyright */}
             <div className="text-center md:text-left">
               <div className="text-xl font-bold tracking-tighter uppercase text-white mb-2">
-                Tomoe<span style={{ color: COLORS.crimson }}>.</span>
+                Studio<span style={{ color: COLORS.crimson }}>.</span>
               </div>
               <p className="text-stone-400 text-sm">
-                © {new Date().getFullYear()} Tomoe Tattoo Studio. Tutti i diritti riservati.
+                © {new Date().getFullYear()} Tattoo Studio. Tutti i diritti riservati.
               </p>
             </div>
 

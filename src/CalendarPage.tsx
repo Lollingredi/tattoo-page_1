@@ -35,9 +35,9 @@ const COLORS = {
 };
 
 const ARTISTS: Artist[] = [
-  { id: 'pendra', name: 'Michele', nickname: 'Pendra', fullName: 'Michele "Pendra" Bini' },
-  { id: 'ryu', name: 'Alessandro', nickname: 'Ryu', fullName: 'Alessandro "Ryu" Nisi' },
-  { id: 'lillo', name: 'Lorenzo', nickname: 'Lillo', fullName: 'Lorenzo "Lillo" Latini' },
+  { id: 'artist1', name: 'Nome', nickname: 'Soprannome', fullName: 'Nome "Soprannome" Cognome' },
+  { id: 'artist2', name: 'Nome', nickname: 'Soprannome', fullName: 'Nome "Soprannome" Cognome' },
+  { id: 'artist3', name: 'Nome', nickname: 'Soprannome', fullName: 'Nome "Soprannome" Cognome' },
 ];
 
 // Days when studio is open (0 = Sunday, 1 = Monday, etc.)
@@ -197,7 +197,7 @@ const CalendarPage: React.FC<CalendarPageProps> = ({ onBack }) => {
           </button>
           <div>
             <h1 className="text-xl font-bold">Prenota Appuntamento</h1>
-            <p className="text-sm text-stone-500">Tomoe Tattoo Studio</p>
+            <p className="text-sm text-stone-500">Tattoo Studio</p>
           </div>
         </div>
       </header>
