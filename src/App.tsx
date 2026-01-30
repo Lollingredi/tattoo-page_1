@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Instagram, MapPin, Calendar, ArrowRight, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Instagram, MapPin, Calendar, ArrowRight, Menu, X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
 
 // Importazione Immagini
 import studioImg1 from './elements/studio1.PNG';
@@ -65,7 +65,49 @@ const TomoeLanding: React.FC = () => {
   // Galleria mobile index
   const [mobileGalleryIndex, setMobileGalleryIndex] = useState<number>(0);
 
+  // Mobile tap-to-zoom state
+  const [mobileGalleryTapped, setMobileGalleryTapped] = useState<boolean>(false);
+
+  // Refs for scroll snap
+  const studioScrollRef = React.useRef<HTMLDivElement>(null);
+  const galleryScrollRef = React.useRef<HTMLDivElement>(null);
+
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  // Scroll snap handlers
+  const handleStudioScroll = () => {
+    if (studioScrollRef.current) {
+      const scrollLeft = studioScrollRef.current.scrollLeft;
+      const width = studioScrollRef.current.clientWidth;
+      const newIndex = Math.round(scrollLeft / width);
+      if (newIndex !== currentStudioImage && newIndex >= 0 && newIndex < STUDIO_IMAGES.length) {
+        setCurrentStudioImage(newIndex);
+      }
+    }
+  };
+
+  const handleGalleryScroll = () => {
+    if (galleryScrollRef.current) {
+      const scrollLeft = galleryScrollRef.current.scrollLeft;
+      const width = galleryScrollRef.current.clientWidth;
+      const newIndex = Math.round(scrollLeft / width);
+      if (newIndex !== mobileGalleryIndex && newIndex >= 0 && newIndex < PORTFOLIO_ITEMS.length) {
+        setMobileGalleryIndex(newIndex);
+      }
+    }
+  };
+
+  // Handle mobile gallery tap
+  const handleMobileGalleryTap = () => {
+    if (mobileGalleryTapped) {
+      // Second tap - open lightbox
+      openLightbox(mobileGalleryIndex);
+      setMobileGalleryTapped(false);
+    } else {
+      // First tap - show overlay
+      setMobileGalleryTapped(true);
+    }
+  };
 
   // Swipe handlers
   const minSwipeDistance = 50;
@@ -77,30 +119,6 @@ const TomoeLanding: React.FC = () => {
 
   const onTouchMove = (e: React.TouchEvent) => {
     setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const onTouchEndStudio = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    if (isLeftSwipe) {
-      setCurrentStudioImage((prev) => (prev === STUDIO_IMAGES.length - 1 ? 0 : prev + 1));
-    } else if (isRightSwipe) {
-      setCurrentStudioImage((prev) => (prev === 0 ? STUDIO_IMAGES.length - 1 : prev - 1));
-    }
-  };
-
-  const onTouchEndGallery = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    if (isLeftSwipe) {
-      setMobileGalleryIndex((prev) => (prev === PORTFOLIO_ITEMS.length - 1 ? 0 : prev + 1));
-    } else if (isRightSwipe) {
-      setMobileGalleryIndex((prev) => (prev === 0 ? PORTFOLIO_ITEMS.length - 1 : prev - 1));
-    }
   };
 
   const onTouchEndLightbox = () => {
@@ -446,36 +464,48 @@ const TomoeLanding: React.FC = () => {
             
           </div>
 
-          {/* Image Area - Mobile (con swipe) */}
-          <div
-            className="relative md:hidden"
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            onTouchEnd={onTouchEndStudio}
-          >
-            <div className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative">
-              <img
-                src={STUDIO_IMAGES[currentStudioImage]}
-                alt={`Tomoe Studio Interior ${currentStudioImage + 1}`}
-                className="object-cover w-full h-full opacity-90 transition-opacity duration-300"
-              />
-              <div className="absolute inset-0 bg-black/10 pointer-events-none"></div>
+          {/* Image Area - Mobile (con scroll snap) */}
+          <div className="relative md:hidden">
+            <div
+              ref={studioScrollRef}
+              onScroll={handleStudioScroll}
+              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide rounded-2xl shadow-2xl"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {STUDIO_IMAGES.map((img, index) => (
+                <div
+                  key={index}
+                  className="flex-shrink-0 w-full aspect-4/5 snap-center"
+                >
+                  <div className="relative w-full h-full bg-stone-200">
+                    <img
+                      src={img}
+                      alt={`Tomoe Studio Interior ${index + 1}`}
+                      className="object-cover w-full h-full opacity-90"
+                    />
+                    <div className="absolute inset-0 bg-black/10 pointer-events-none"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-              {/* Indicatori mobile */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                {STUDIO_IMAGES.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentStudioImage(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      index === currentStudioImage
-                        ? 'bg-white w-6'
-                        : 'bg-white/50 hover:bg-white/80'
-                    }`}
-                    aria-label={`Vai all'immagine ${index + 1}`}
-                  />
-                ))}
-              </div>
+            {/* Indicatori mobile */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+              {STUDIO_IMAGES.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setCurrentStudioImage(index);
+                    studioScrollRef.current?.scrollTo({ left: index * (studioScrollRef.current?.clientWidth || 0), behavior: 'smooth' });
+                  }}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    index === currentStudioImage
+                      ? 'bg-white w-6'
+                      : 'bg-white/50 hover:bg-white/80'
+                  }`}
+                  aria-label={`Vai all'immagine ${index + 1}`}
+                />
+              ))}
             </div>
           </div>
         </div>
@@ -524,26 +554,54 @@ const TomoeLanding: React.FC = () => {
             ))}
           </div>
 
-          {/* Galleria Mobile - Singola foto con swipe */}
-          <div
-            className="md:hidden relative"
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            onTouchEnd={onTouchEndGallery}
-          >
-            <div className="aspect-square bg-stone-800 rounded-xl overflow-hidden relative">
-              <img
-                src={PORTFOLIO_ITEMS[mobileGalleryIndex].src}
-                alt={PORTFOLIO_ITEMS[mobileGalleryIndex].alt}
-                className="w-full h-full object-cover transition-opacity duration-300"
-              />
+          {/* Galleria Mobile - Scroll snap con tap-to-zoom */}
+          <div className="md:hidden relative">
+            <div
+              ref={galleryScrollRef}
+              onScroll={() => {
+                handleGalleryScroll();
+                setMobileGalleryTapped(false); // Reset tap state on scroll
+              }}
+              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide rounded-xl"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {PORTFOLIO_ITEMS.map((item, index) => (
+                <div
+                  key={item.id}
+                  className="flex-shrink-0 w-full aspect-square snap-center relative cursor-pointer"
+                  onClick={handleMobileGalleryTap}
+                >
+                  <div className="relative w-full h-full bg-stone-800">
+                    <img
+                      src={item.src}
+                      alt={item.alt}
+                      className="w-full h-full object-cover"
+                    />
+
+                    {/* Overlay tap-to-zoom */}
+                    {mobileGalleryTapped && index === mobileGalleryIndex && (
+                      <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center transition-opacity duration-300">
+                        <ZoomIn size={48} className="text-white mb-3" />
+                        <p className="text-white text-sm font-medium text-center px-4">
+                          Tocca per vedere la galleria completa
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
+
             {/* Indicatori mobile galleria */}
             <div className="flex justify-center gap-2 mt-4">
               {PORTFOLIO_ITEMS.map((_, index) => (
                 <button
                   key={index}
-                  onClick={() => setMobileGalleryIndex(index)}
+                  onClick={() => {
+                    setMobileGalleryIndex(index);
+                    setMobileGalleryTapped(false);
+                    galleryScrollRef.current?.scrollTo({ left: index * (galleryScrollRef.current?.clientWidth || 0), behavior: 'smooth' });
+                  }}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     index === mobileGalleryIndex
                       ? 'bg-stone-700 w-6'
