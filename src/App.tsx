@@ -677,15 +677,13 @@ const TomoeLanding: React.FC = () => {
               </p>
             </div>
 
-            {/* Link rapidi */}
-            <div className="flex gap-6 text-stone-400 text-sm">
+            {/* Link rapidi + Social */}
+            <div className="flex items-center gap-4 md:gap-6 text-stone-400 text-sm">
               <a href="#studio" className="hover:text-white transition-colors">Studio</a>
               <a href="#works" className="hover:text-white transition-colors">Opere</a>
               <a href="#contact" className="hover:text-white transition-colors">Contatti</a>
-            </div>
-
-            {/* Social */}
-            <div className="flex items-center gap-4">
+              {/* Separatore pallino - solo desktop */}
+              <span className="hidden md:block w-1 h-1 rounded-full bg-stone-500"></span>
               <a
                 href="#"
                 className="text-stone-400 hover:text-white transition-colors"
