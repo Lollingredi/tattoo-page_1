@@ -24,6 +24,8 @@ interface DaySchedule {
   date: Date;
 }
 
+type WrapperState = 'calendar' | 'timeSlots' | 'confirmation';
+
 // --- Data & Config ---
 
 const COLORS = {
@@ -73,37 +75,65 @@ const CalendarPage: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
-  const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
 
-  // Animation states
-  const [calendarCollapsed, setCalendarCollapsed] = useState<boolean>(false);
-  const [showTimeSlots, setShowTimeSlots] = useState<boolean>(false);
-  const [showSummary, setShowSummary] = useState<boolean>(false);
+  // Wrapper state management
+  const [wrapperState, setWrapperState] = useState<WrapperState>('calendar');
+  const [contentVisible, setContentVisible] = useState<boolean>(true);
+  const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
 
-  // Handle animations when artist and date are selected
+  // Handle transition to time slots when artist and date are selected
   useEffect(() => {
-    if (selectedArtist && selectedDate) {
-      // First collapse the calendar
-      setCalendarCollapsed(true);
-      // Then show time slots after a small delay
-      const timeSlotsTimer = setTimeout(() => {
-        setShowTimeSlots(true);
-      }, 100);
-      // Then show summary after calendar animation completes
-      const summaryTimer = setTimeout(() => {
-        setShowSummary(true);
-      }, 400);
+    if (selectedArtist && selectedDate && wrapperState === 'calendar') {
+      // Start transition
+      setIsTransitioning(true);
+      setContentVisible(false);
 
-      return () => {
-        clearTimeout(timeSlotsTimer);
-        clearTimeout(summaryTimer);
-      };
-    } else {
-      setCalendarCollapsed(false);
-      setShowTimeSlots(false);
-      setShowSummary(false);
+      // After content fades out, change wrapper state
+      const transitionTimer = setTimeout(() => {
+        setWrapperState('timeSlots');
+        // Show new content after wrapper resizes
+        setTimeout(() => {
+          setContentVisible(true);
+          setIsTransitioning(false);
+        }, 300);
+      }, 300);
+
+      return () => clearTimeout(transitionTimer);
     }
   }, [selectedArtist, selectedDate]);
+
+  const handleConfirmBooking = () => {
+    if (selectedArtist && selectedDate && selectedTime) {
+      // Start transition to confirmation
+      setIsTransitioning(true);
+      setContentVisible(false);
+
+      // After content fades out, change to confirmation
+      setTimeout(() => {
+        setWrapperState('confirmation');
+        // Show confirmation content
+        setTimeout(() => {
+          setContentVisible(true);
+          setIsTransitioning(false);
+        }, 300);
+      }, 300);
+    }
+  };
+
+  const handleBackToCalendar = () => {
+    setIsTransitioning(true);
+    setContentVisible(false);
+
+    setTimeout(() => {
+      setSelectedDate(null);
+      setSelectedTime(null);
+      setWrapperState('calendar');
+      setTimeout(() => {
+        setContentVisible(true);
+        setIsTransitioning(false);
+      }, 300);
+    }, 300);
+  };
 
   // Get all days in current month
   const getDaysInMonth = (): (DaySchedule | null)[] => {
@@ -170,19 +200,13 @@ const CalendarPage: React.FC = () => {
   };
 
   const handleDateSelect = (day: DaySchedule) => {
-    if (!day.isOpen || isDateInPast(day.date)) return;
+    if (!day.isOpen || isDateInPast(day.date) || isTransitioning) return;
     setSelectedDate(day.date);
     setSelectedTime(null);
   };
 
   const handleTimeSelect = (time: string) => {
     setSelectedTime(time);
-  };
-
-  const handleConfirmBooking = () => {
-    if (selectedArtist && selectedDate && selectedTime) {
-      setShowConfirmation(true);
-    }
   };
 
   const formatDate = (date: Date): string => {
@@ -195,90 +219,30 @@ const CalendarPage: React.FC = () => {
 
   const canBook = selectedArtist && selectedDate && selectedTime;
 
-  // Confirmation Page
-  if (showConfirmation && selectedArtist && selectedDate && selectedTime) {
-    return (
-      <div className="pt-24 pb-12 px-6 min-h-[calc(100vh-200px)]">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <div
-              className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
-              style={{ backgroundColor: COLORS.crimson }}
-            >
-              <Check size={40} className="text-white" />
-            </div>
-            <h2 className="text-3xl font-bold mb-2">Prenotazione completata!</h2>
-            <p className="text-stone-600">Ecco i dettagli del tuo appuntamento</p>
-          </div>
+  // Get wrapper styles based on state
+  const getWrapperStyles = () => {
+    const baseStyles = 'rounded-2xl p-6 transition-all duration-300 ease-out overflow-hidden';
 
-          <div
-            className="rounded-2xl p-6 md:p-8 space-y-6"
-            style={{ backgroundColor: COLORS.sage }}
-          >
-            {/* Artist */}
-            <div className="flex items-center gap-4">
-              <div
-                className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold text-white"
-                style={{ backgroundColor: COLORS.leather }}
-              >
-                {selectedArtist.nickname[0]}
-              </div>
-              <div>
-                <p className="text-sm text-stone-500">Artista</p>
-                <p className="font-bold text-lg">{selectedArtist.fullName}</p>
-              </div>
-            </div>
+    switch (wrapperState) {
+      case 'calendar':
+        return {
+          className: baseStyles,
+          style: { backgroundColor: COLORS.sage },
+        };
+      case 'timeSlots':
+        return {
+          className: baseStyles,
+          style: { backgroundColor: COLORS.sage },
+        };
+      case 'confirmation':
+        return {
+          className: baseStyles,
+          style: { backgroundColor: COLORS.charcoal },
+        };
+    }
+  };
 
-            <div className="h-px bg-stone-200" />
-
-            {/* Date */}
-            <div className="flex items-center gap-4">
-              <div
-                className="w-14 h-14 rounded-full flex items-center justify-center text-white"
-                style={{ backgroundColor: COLORS.crimson }}
-              >
-                <Calendar size={24} />
-              </div>
-              <div>
-                <p className="text-sm text-stone-500">Data</p>
-                <p className="font-bold text-lg">{formatDate(selectedDate)}</p>
-              </div>
-            </div>
-
-            <div className="h-px bg-stone-200" />
-
-            {/* Time */}
-            <div className="flex items-center gap-4">
-              <div
-                className="w-14 h-14 rounded-full flex items-center justify-center text-white"
-                style={{ backgroundColor: COLORS.crimson }}
-              >
-                <Clock size={24} />
-              </div>
-              <div>
-                <p className="text-sm text-stone-500">Orario</p>
-                <p className="font-bold text-lg">{selectedTime}</p>
-                <p className="text-sm text-stone-400">Durata: 30 minuti</p>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="rounded-xl p-4 border mt-6"
-            style={{ backgroundColor: '#FEF3C7', borderColor: '#F59E0B' }}
-          >
-            <p className="text-sm text-amber-800">
-              <strong>Nota:</strong> Questa è una consultazione iniziale. La durata effettiva della sessione di tatuaggio verrà discussa durante l'appuntamento.
-            </p>
-          </div>
-
-          <p className="text-center text-sm text-stone-500 mt-6">
-            Riceverai una conferma via email con tutti i dettagli
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const wrapperStyles = getWrapperStyles();
 
   return (
     <div className="pt-24 pb-12 px-6 min-h-[calc(100vh-200px)]">
@@ -305,7 +269,10 @@ const CalendarPage: React.FC = () => {
               <div className="relative">
                 <button
                   onClick={() => setArtistMenuOpen(!artistMenuOpen)}
-                  className="w-full p-4 rounded-xl border-2 flex items-center justify-between transition-all"
+                  disabled={wrapperState !== 'calendar'}
+                  className={`w-full p-4 rounded-xl border-2 flex items-center justify-between transition-all ${
+                    wrapperState !== 'calendar' ? 'opacity-60 cursor-not-allowed' : ''
+                  }`}
                   style={{
                     backgroundColor: 'white',
                     borderColor: selectedArtist ? COLORS.crimson : COLORS.leather,
@@ -334,7 +301,7 @@ const CalendarPage: React.FC = () => {
                 </button>
 
                 {/* Dropdown Menu */}
-                {artistMenuOpen && (
+                {artistMenuOpen && wrapperState === 'calendar' && (
                   <div
                     className="absolute top-full left-0 right-0 mt-2 rounded-xl shadow-xl border overflow-hidden z-20"
                     style={{ backgroundColor: 'white', borderColor: COLORS.sand }}
@@ -412,204 +379,255 @@ const CalendarPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Main Content - Calendar & Time Slots */}
-          <div className="space-y-6">
-            {/* Calendar */}
-            <div
-              className={`rounded-2xl p-6 transition-all duration-300 ease-out overflow-hidden ${
-                calendarCollapsed ? 'max-h-[280px]' : 'max-h-[600px]'
-              }`}
-              style={{ backgroundColor: COLORS.sage }}
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <Calendar size={20} style={{ color: COLORS.crimson }} />
-                <h3 className="font-bold">Seleziona Data</h3>
-                {selectedDate && calendarCollapsed && (
-                  <span className="ml-auto text-sm font-medium" style={{ color: COLORS.crimson }}>
-                    {formatShortDate(selectedDate)}
-                  </span>
+          {/* Main Content - Single Transforming Wrapper */}
+          <div
+            className={wrapperStyles.className}
+            style={wrapperStyles.style}
+          >
+            {/* Calendar Content */}
+            {wrapperState === 'calendar' && (
+              <div
+                className={`transition-opacity duration-300 ${
+                  contentVisible ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <Calendar size={20} style={{ color: COLORS.crimson }} />
+                  <h3 className="font-bold">Seleziona Data</h3>
+                </div>
+
+                {/* Month Navigation */}
+                <div className="flex items-center justify-between mb-6">
+                  <button
+                    onClick={goToPreviousMonth}
+                    className="p-2 hover:bg-stone-200 rounded-lg transition-colors"
+                    aria-label="Mese precedente"
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                  <h4 className="font-bold text-lg">
+                    {MONTHS_IT[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+                  </h4>
+                  <button
+                    onClick={goToNextMonth}
+                    className="p-2 hover:bg-stone-200 rounded-lg transition-colors"
+                    aria-label="Mese successivo"
+                  >
+                    <ChevronRight size={24} />
+                  </button>
+                </div>
+
+                {/* Days Header */}
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                  {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map((day) => (
+                    <div key={day} className="text-center text-sm font-medium text-stone-500 py-2">
+                      {day}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Calendar Grid */}
+                <div className="grid grid-cols-7 gap-1">
+                  {getDaysInMonth().map((day, index) => {
+                    if (!day) {
+                      return <div key={`empty-${index}`} className="aspect-square" />;
+                    }
+
+                    const isPast = isDateInPast(day.date);
+                    const isSelected = isDateSelected(day.date);
+                    const isDisabled = !day.isOpen || isPast;
+
+                    return (
+                      <button
+                        key={day.dayNumber}
+                        onClick={() => handleDateSelect(day)}
+                        disabled={isDisabled || !selectedArtist}
+                        className={`aspect-square rounded-xl flex items-center justify-center text-sm font-medium transition-all ${
+                          isDisabled || !selectedArtist
+                            ? 'text-stone-300 cursor-not-allowed'
+                            : isSelected
+                            ? 'text-white shadow-lg'
+                            : 'hover:bg-stone-200'
+                        }`}
+                        style={{
+                          backgroundColor: isSelected ? COLORS.crimson : undefined,
+                        }}
+                      >
+                        {day.dayNumber}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {!selectedArtist && (
+                  <p className="text-center text-sm text-stone-400 mt-6">
+                    Seleziona prima un artista per scegliere la data
+                  </p>
                 )}
               </div>
+            )}
 
-              {/* Month Navigation */}
-              <div className="flex items-center justify-between mb-6">
-                <button
-                  onClick={goToPreviousMonth}
-                  className="p-2 hover:bg-stone-200 rounded-lg transition-colors"
-                  aria-label="Mese precedente"
-                >
-                  <ChevronLeft size={24} />
-                </button>
-                <h4 className="font-bold text-lg">
-                  {MONTHS_IT[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-                </h4>
-                <button
-                  onClick={goToNextMonth}
-                  className="p-2 hover:bg-stone-200 rounded-lg transition-colors"
-                  aria-label="Mese successivo"
-                >
-                  <ChevronRight size={24} />
-                </button>
-              </div>
-
-              {/* Days Header */}
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map((day) => (
-                  <div key={day} className="text-center text-sm font-medium text-stone-500 py-2">
-                    {day}
-                  </div>
-                ))}
-              </div>
-
-              {/* Calendar Grid */}
-              <div className="grid grid-cols-7 gap-1">
-                {getDaysInMonth().map((day, index) => {
-                  if (!day) {
-                    return <div key={`empty-${index}`} className="aspect-square" />;
-                  }
-
-                  const isPast = isDateInPast(day.date);
-                  const isSelected = isDateSelected(day.date);
-                  const isDisabled = !day.isOpen || isPast;
-
-                  return (
-                    <button
-                      key={day.dayNumber}
-                      onClick={() => handleDateSelect(day)}
-                      disabled={isDisabled}
-                      className={`aspect-square rounded-xl flex items-center justify-center text-sm font-medium transition-all ${
-                        isDisabled
-                          ? 'text-stone-300 cursor-not-allowed'
-                          : isSelected
-                          ? 'text-white shadow-lg'
-                          : 'hover:bg-stone-200'
-                      }`}
-                      style={{
-                        backgroundColor: isSelected ? COLORS.crimson : undefined,
-                      }}
-                    >
-                      {day.dayNumber}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Time Slots - Show when date is selected with animation */}
-            <div
-              className={`rounded-2xl p-6 transition-all duration-300 ease-out ${
-                showTimeSlots ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none h-0 p-0 overflow-hidden'
-              }`}
-              style={{ backgroundColor: showTimeSlots ? COLORS.sage : 'transparent' }}
-            >
-              {selectedDate && (
-                <>
-                  <div className="flex items-center gap-3 mb-4">
+            {/* Time Slots Content */}
+            {wrapperState === 'timeSlots' && (
+              <div
+                className={`transition-opacity duration-300 ${
+                  contentVisible ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
                     <Clock size={20} style={{ color: COLORS.crimson }} />
                     <h3 className="font-bold">
-                      Orari disponibili - {formatDate(selectedDate)}
+                      Orari disponibili
                     </h3>
                   </div>
-
-                  {/* Morning Slots */}
-                  <div className="mb-6">
-                    <p className="text-sm text-stone-500 mb-3">Mattina (10:00 - 13:00)</p>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                      {TIME_SLOTS.filter((slot) => {
-                        const hour = parseInt(slot.time.split(':')[0]);
-                        return hour < 14;
-                      }).map((slot) => (
-                        <button
-                          key={slot.time}
-                          onClick={() => handleTimeSelect(slot.time)}
-                          className={`py-3 px-2 rounded-lg text-sm font-medium transition-all ${
-                            selectedTime === slot.time
-                              ? 'text-white'
-                              : 'bg-white hover:bg-stone-100'
-                          }`}
-                          style={{
-                            backgroundColor: selectedTime === slot.time ? COLORS.crimson : undefined,
-                          }}
-                        >
-                          {slot.time}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Afternoon Slots */}
-                  <div>
-                    <p className="text-sm text-stone-500 mb-3">Pomeriggio (14:00 - 19:00)</p>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                      {TIME_SLOTS.filter((slot) => {
-                        const hour = parseInt(slot.time.split(':')[0]);
-                        return hour >= 14;
-                      }).map((slot) => (
-                        <button
-                          key={slot.time}
-                          onClick={() => handleTimeSelect(slot.time)}
-                          className={`py-3 px-2 rounded-lg text-sm font-medium transition-all ${
-                            selectedTime === slot.time
-                              ? 'text-white'
-                              : 'bg-white hover:bg-stone-100'
-                          }`}
-                          style={{
-                            backgroundColor: selectedTime === slot.time ? COLORS.crimson : undefined,
-                          }}
-                        >
-                          {slot.time}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Booking Summary & Button - Animated appearance */}
-            <div
-              className={`rounded-2xl p-6 transition-all duration-300 ease-out ${
-                showSummary ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none h-0 p-0 overflow-hidden'
-              }`}
-              style={{ backgroundColor: showSummary ? COLORS.charcoal : 'transparent' }}
-            >
-              {showSummary && (
-                <>
-                  <h3 className="font-bold text-white mb-4">Riepilogo Prenotazione</h3>
-                  <div className="space-y-2 text-sm mb-6">
-                    <div className="flex justify-between">
-                      <span className="text-stone-400">Artista</span>
-                      <span className="text-white font-medium">
-                        {selectedArtist ? selectedArtist.fullName : '—'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-stone-400">Data</span>
-                      <span className="text-white font-medium">
-                        {selectedDate ? formatShortDate(selectedDate) : '—'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-stone-400">Orario</span>
-                      <span className="text-white font-medium">
-                        {selectedTime || '—'}
-                      </span>
-                    </div>
-                  </div>
-
                   <button
-                    onClick={handleConfirmBooking}
-                    disabled={!canBook}
-                    className={`w-full py-4 rounded-xl font-bold text-white transition-all ${
-                      canBook ? 'hover:brightness-110' : 'opacity-50 cursor-not-allowed'
-                    }`}
+                    onClick={handleBackToCalendar}
+                    className="text-sm text-stone-500 hover:text-stone-700 transition-colors flex items-center gap-1"
+                  >
+                    <ChevronLeft size={16} />
+                    Cambia data
+                  </button>
+                </div>
+
+                {selectedDate && (
+                  <p className="text-sm text-stone-600 mb-6">
+                    {formatDate(selectedDate)} • {selectedArtist?.fullName}
+                  </p>
+                )}
+
+                {/* Morning Slots */}
+                <div className="mb-6">
+                  <p className="text-sm text-stone-500 mb-3">Mattina (10:00 - 13:00)</p>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                    {TIME_SLOTS.filter((slot) => {
+                      const hour = parseInt(slot.time.split(':')[0]);
+                      return hour < 14;
+                    }).map((slot) => (
+                      <button
+                        key={slot.time}
+                        onClick={() => handleTimeSelect(slot.time)}
+                        className={`py-3 px-2 rounded-lg text-sm font-medium transition-all ${
+                          selectedTime === slot.time
+                            ? 'text-white'
+                            : 'bg-white hover:bg-stone-100'
+                        }`}
+                        style={{
+                          backgroundColor: selectedTime === slot.time ? COLORS.crimson : undefined,
+                        }}
+                      >
+                        {slot.time}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Afternoon Slots */}
+                <div className="mb-6">
+                  <p className="text-sm text-stone-500 mb-3">Pomeriggio (14:00 - 19:00)</p>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                    {TIME_SLOTS.filter((slot) => {
+                      const hour = parseInt(slot.time.split(':')[0]);
+                      return hour >= 14;
+                    }).map((slot) => (
+                      <button
+                        key={slot.time}
+                        onClick={() => handleTimeSelect(slot.time)}
+                        className={`py-3 px-2 rounded-lg text-sm font-medium transition-all ${
+                          selectedTime === slot.time
+                            ? 'text-white'
+                            : 'bg-white hover:bg-stone-100'
+                        }`}
+                        style={{
+                          backgroundColor: selectedTime === slot.time ? COLORS.crimson : undefined,
+                        }}
+                      >
+                        {slot.time}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Confirm Button */}
+                <button
+                  onClick={handleConfirmBooking}
+                  disabled={!canBook}
+                  className={`w-full py-4 rounded-xl font-bold text-white transition-all ${
+                    canBook ? 'hover:brightness-110' : 'opacity-50 cursor-not-allowed'
+                  }`}
+                  style={{ backgroundColor: COLORS.crimson }}
+                >
+                  Conferma Prenotazione
+                </button>
+              </div>
+            )}
+
+            {/* Confirmation Content */}
+            {wrapperState === 'confirmation' && selectedArtist && selectedDate && selectedTime && (
+              <div
+                className={`transition-opacity duration-300 ${
+                  contentVisible ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                <div className="text-center mb-6">
+                  <div
+                    className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
                     style={{ backgroundColor: COLORS.crimson }}
                   >
-                    Conferma Prenotazione
-                  </button>
-                </>
-              )}
-            </div>
+                    <Check size={32} className="text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-2">Prenotazione completata!</h3>
+                  <p className="text-stone-400">Ecco i dettagli del tuo appuntamento</p>
+                </div>
+
+                <div className="space-y-4 mb-6">
+                  {/* Artist */}
+                  <div className="flex items-center gap-4 p-4 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
+                    <div
+                      className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold text-white"
+                      style={{ backgroundColor: COLORS.leather }}
+                    >
+                      {selectedArtist.nickname[0]}
+                    </div>
+                    <div>
+                      <p className="text-xs text-stone-400">Artista</p>
+                      <p className="font-bold text-white">{selectedArtist.fullName}</p>
+                    </div>
+                  </div>
+
+                  {/* Date & Time */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Calendar size={16} className="text-stone-400" />
+                        <p className="text-xs text-stone-400">Data</p>
+                      </div>
+                      <p className="font-bold text-white">{formatShortDate(selectedDate)}</p>
+                    </div>
+                    <div className="p-4 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Clock size={16} className="text-stone-400" />
+                        <p className="text-xs text-stone-400">Orario</p>
+                      </div>
+                      <p className="font-bold text-white">{selectedTime}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  className="rounded-xl p-4 mb-6"
+                  style={{ backgroundColor: 'rgba(254, 243, 199, 0.2)', border: '1px solid rgba(245, 158, 11, 0.3)' }}
+                >
+                  <p className="text-sm text-amber-200">
+                    <strong>Nota:</strong> Questa è una consultazione iniziale di 30 minuti.
+                  </p>
+                </div>
+
+                <p className="text-center text-sm text-stone-400">
+                  Riceverai una conferma via email con tutti i dettagli
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
