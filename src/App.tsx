@@ -308,23 +308,23 @@ const TomoeLanding: React.FC = () => {
           </button>
         </div>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div
-            className="md:hidden absolute w-full border-b border-stone-200/50 py-6 px-6 flex flex-col gap-4 shadow-xl"
-            style={{ backgroundColor: COLORS.sage }}
+        {/* Mobile Menu - Slide down animation */}
+        <div
+          className={`md:hidden absolute w-full border-b border-stone-200/50 flex flex-col gap-4 shadow-xl overflow-hidden transition-all duration-300 ease-out ${
+            isMenuOpen ? 'max-h-80 py-6 px-6 opacity-100' : 'max-h-0 py-0 px-6 opacity-0'
+          }`}
+          style={{ backgroundColor: COLORS.sage }}
+        >
+          <a href="#studio" onClick={toggleMenu} className="text-lg font-medium">Studio</a>
+          <a href="#works" onClick={toggleMenu} className="text-lg font-medium">Opere</a>
+          <a href="#contact" onClick={toggleMenu} className="text-lg font-medium">Contatti</a>
+          <button
+            className="w-full py-3 text-white rounded-lg font-bold mt-2"
+            style={{ backgroundColor: COLORS.crimson }}
           >
-            <a href="#studio" onClick={toggleMenu} className="text-lg font-medium">Studio</a>
-            <a href="#works" onClick={toggleMenu} className="text-lg font-medium">Opere</a>
-            <a href="#contact" onClick={toggleMenu} className="text-lg font-medium">Contatti</a>
-            <button 
-              className="w-full py-3 text-white rounded-lg font-bold mt-2"
-              style={{ backgroundColor: COLORS.crimson }}
-            >
-              Prenota Ora
-            </button>
-          </div>
-        )}
+            Prenota Ora
+          </button>
+        </div>
       </nav>
 
       {/* --- HERO SECTION --- */}
@@ -659,6 +659,51 @@ const TomoeLanding: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* --- FOOTER --- */}
+      <footer
+        className="py-8 px-6 border-t"
+        style={{ backgroundColor: COLORS.charcoal, borderColor: 'rgba(255,255,255,0.1)' }}
+      >
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            {/* Logo e Copyright */}
+            <div className="text-center md:text-left">
+              <div className="text-xl font-bold tracking-tighter uppercase text-white mb-2">
+                Tomoe<span style={{ color: COLORS.crimson }}>.</span>
+              </div>
+              <p className="text-stone-400 text-sm">
+                © {new Date().getFullYear()} Tomoe Tattoo Studio. Tutti i diritti riservati.
+              </p>
+            </div>
+
+            {/* Link rapidi */}
+            <div className="flex gap-6 text-stone-400 text-sm">
+              <a href="#studio" className="hover:text-white transition-colors">Studio</a>
+              <a href="#works" className="hover:text-white transition-colors">Opere</a>
+              <a href="#contact" className="hover:text-white transition-colors">Contatti</a>
+            </div>
+
+            {/* Social */}
+            <div className="flex items-center gap-4">
+              <a
+                href="#"
+                className="text-stone-400 hover:text-white transition-colors"
+                aria-label="Instagram"
+              >
+                <Instagram size={20} />
+              </a>
+            </div>
+          </div>
+
+          {/* Credits */}
+          <div className="mt-8 pt-6 border-t border-stone-700 text-center">
+            <p className="text-stone-500 text-xs">
+              Sito web realizzato da <span className="text-stone-400 font-medium">Redi Bako</span>
+            </p>
+          </div>
+        </div>
+      </footer>
 
       {/* Lightbox Modal */}
       {lightboxOpen && (
