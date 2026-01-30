@@ -271,32 +271,30 @@ const TomoeLanding: React.FC = () => {
     }
   };
 
-  // Show Calendar Page
-  if (showCalendar) {
-    return <CalendarPage onBack={() => setShowCalendar(false)} />;
-  }
-
   return (
     <div
       style={{ backgroundColor: COLORS.sand, color: COLORS.charcoal }}
       className="min-h-screen font-sans selection:bg-red-200"
     >
 
-      {/* --- NAVIGATION --- */}
+      {/* --- NAVIGATION (Global) --- */}
       <nav
         className="fixed w-full z-50 backdrop-blur-md border-b border-stone-200/50"
         style={{ backgroundColor: 'rgba(253, 251, 247, 0.85)' }}
       >
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold tracking-tighter uppercase cursor-pointer">
+          <div
+            className="text-2xl font-bold tracking-tighter uppercase cursor-pointer"
+            onClick={() => setShowCalendar(false)}
+          >
             Studio<span style={{ color: COLORS.crimson }}>.</span>
           </div>
-          
+
           {/* Desktop Menu */}
           <div className="hidden md:flex gap-8 items-center font-medium text-sm tracking-wide">
-            <a href="#studio" className="hover:text-red-800 transition-colors">Studio</a>
-            <a href="#works" className="hover:text-red-800 transition-colors">Opere</a>
-            <a href="#contact" className="hover:text-red-800 transition-colors">Contatti</a>
+            <a href="#studio" onClick={() => setShowCalendar(false)} className="hover:text-red-800 transition-colors">Studio</a>
+            <a href="#works" onClick={() => setShowCalendar(false)} className="hover:text-red-800 transition-colors">Opere</a>
+            <a href="#contact" onClick={() => setShowCalendar(false)} className="hover:text-red-800 transition-colors">Contatti</a>
             <button
               onClick={() => setShowCalendar(true)}
               className="px-5 py-2 text-white rounded-full transition-transform hover:scale-105 shadow-md"
@@ -307,7 +305,7 @@ const TomoeLanding: React.FC = () => {
           </div>
 
           {/* Mobile Toggle */}
-          <button 
+          <button
             className="md:hidden p-2 hover:bg-stone-100 rounded-md transition-colors"
             onClick={toggleMenu}
             aria-label="Toggle menu"
@@ -323,9 +321,9 @@ const TomoeLanding: React.FC = () => {
           }`}
           style={{ backgroundColor: COLORS.sage }}
         >
-          <a href="#studio" onClick={toggleMenu} className="text-lg font-medium">Studio</a>
-          <a href="#works" onClick={toggleMenu} className="text-lg font-medium">Opere</a>
-          <a href="#contact" onClick={toggleMenu} className="text-lg font-medium">Contatti</a>
+          <a href="#studio" onClick={() => { toggleMenu(); setShowCalendar(false); }} className="text-lg font-medium">Studio</a>
+          <a href="#works" onClick={() => { toggleMenu(); setShowCalendar(false); }} className="text-lg font-medium">Opere</a>
+          <a href="#contact" onClick={() => { toggleMenu(); setShowCalendar(false); }} className="text-lg font-medium">Contatti</a>
           <button
             onClick={() => { toggleMenu(); setShowCalendar(true); }}
             className="w-full py-3 text-white rounded-lg font-bold mt-2"
@@ -336,6 +334,11 @@ const TomoeLanding: React.FC = () => {
         </div>
       </nav>
 
+      {/* --- CONTENT --- */}
+      {showCalendar ? (
+        <CalendarPage />
+      ) : (
+        <>
       {/* --- HERO SECTION --- */}
       <header id="studio" className="pt-32 pb-20 px-6 md:pt-48 md:pb-32 relative overflow-hidden">
         {/* Decorative Background (Ora Bianco Panna) */}
@@ -670,8 +673,10 @@ const TomoeLanding: React.FC = () => {
           </div>
         </div>
       </section>
+        </>
+      )}
 
-      {/* --- FOOTER --- */}
+      {/* --- FOOTER (Global) --- */}
       <footer
         className="py-8 px-6 border-t"
         style={{ backgroundColor: COLORS.charcoal, borderColor: 'rgba(255,255,255,0.1)' }}

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, ChevronDown, Calendar, Clock, User, ArrowLeft, Check, MapPin } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, ChevronDown, Calendar, Clock, User, Check, MapPin } from 'lucide-react';
 
 // --- Types & Interfaces ---
 
@@ -67,17 +67,43 @@ const TIME_SLOTS = generateTimeSlots();
 const DAYS_IT = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
 const MONTHS_IT = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
 
-interface CalendarPageProps {
-  onBack: () => void;
-}
-
-const CalendarPage: React.FC<CalendarPageProps> = ({ onBack }) => {
+const CalendarPage: React.FC = () => {
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
   const [artistMenuOpen, setArtistMenuOpen] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
+
+  // Animation states
+  const [calendarCollapsed, setCalendarCollapsed] = useState<boolean>(false);
+  const [showTimeSlots, setShowTimeSlots] = useState<boolean>(false);
+  const [showSummary, setShowSummary] = useState<boolean>(false);
+
+  // Handle animations when artist and date are selected
+  useEffect(() => {
+    if (selectedArtist && selectedDate) {
+      // First collapse the calendar
+      setCalendarCollapsed(true);
+      // Then show time slots after a small delay
+      const timeSlotsTimer = setTimeout(() => {
+        setShowTimeSlots(true);
+      }, 100);
+      // Then show summary after calendar animation completes
+      const summaryTimer = setTimeout(() => {
+        setShowSummary(true);
+      }, 400);
+
+      return () => {
+        clearTimeout(timeSlotsTimer);
+        clearTimeout(summaryTimer);
+      };
+    } else {
+      setCalendarCollapsed(false);
+      setShowTimeSlots(false);
+      setShowSummary(false);
+    }
+  }, [selectedArtist, selectedDate]);
 
   // Get all days in current month
   const getDaysInMonth = (): (DaySchedule | null)[] => {
@@ -163,36 +189,17 @@ const CalendarPage: React.FC<CalendarPageProps> = ({ onBack }) => {
     return `${DAYS_IT[date.getDay()]} ${date.getDate()} ${MONTHS_IT[date.getMonth()]} ${date.getFullYear()}`;
   };
 
+  const formatShortDate = (date: Date): string => {
+    return `${date.getDate()} ${MONTHS_IT[date.getMonth()]}`;
+  };
+
   const canBook = selectedArtist && selectedDate && selectedTime;
 
   // Confirmation Page
   if (showConfirmation && selectedArtist && selectedDate && selectedTime) {
     return (
-      <div
-        style={{ backgroundColor: COLORS.sand, color: COLORS.charcoal }}
-        className="min-h-screen font-sans"
-      >
-        {/* Header */}
-        <header
-          className="sticky top-0 z-50 backdrop-blur-md border-b border-stone-200/50"
-          style={{ backgroundColor: 'rgba(253, 251, 247, 0.95)' }}
-        >
-          <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-            <button
-              onClick={() => setShowConfirmation(false)}
-              className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
-              aria-label="Torna indietro"
-            >
-              <ArrowLeft size={24} />
-            </button>
-            <div>
-              <h1 className="text-xl font-bold">Prenotazione Confermata</h1>
-              <p className="text-sm text-stone-500">Tattoo Studio</p>
-            </div>
-          </div>
-        </header>
-
-        <div className="max-w-2xl mx-auto px-6 py-12">
+      <div className="pt-24 pb-12 px-6 min-h-[calc(100vh-200px)]">
+        <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
             <div
               className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
@@ -265,15 +272,7 @@ const CalendarPage: React.FC<CalendarPageProps> = ({ onBack }) => {
             </p>
           </div>
 
-          <button
-            onClick={onBack}
-            className="w-full py-4 rounded-xl font-bold text-white transition-all hover:brightness-110 mt-6"
-            style={{ backgroundColor: COLORS.crimson }}
-          >
-            Torna alla Home
-          </button>
-
-          <p className="text-center text-sm text-stone-500 mt-4">
+          <p className="text-center text-sm text-stone-500 mt-6">
             Riceverai una conferma via email con tutti i dettagli
           </p>
         </div>
@@ -282,31 +281,14 @@ const CalendarPage: React.FC<CalendarPageProps> = ({ onBack }) => {
   }
 
   return (
-    <div
-      style={{ backgroundColor: COLORS.sand, color: COLORS.charcoal }}
-      className="min-h-screen font-sans"
-    >
-      {/* Header */}
-      <header
-        className="sticky top-0 z-50 backdrop-blur-md border-b border-stone-200/50"
-        style={{ backgroundColor: 'rgba(253, 251, 247, 0.95)' }}
-      >
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-4">
-          <button
-            onClick={onBack}
-            className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
-            aria-label="Torna indietro"
-          >
-            <ArrowLeft size={24} />
-          </button>
-          <div>
-            <h1 className="text-xl font-bold">Prenota Appuntamento</h1>
-            <p className="text-sm text-stone-500">Tattoo Studio</p>
-          </div>
+    <div className="pt-24 pb-12 px-6 min-h-[calc(100vh-200px)]">
+      <div className="max-w-6xl mx-auto">
+        {/* Page Title */}
+        <div className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">Prenota Appuntamento</h1>
+          <p className="text-stone-600">Scegli l'artista, la data e l'orario per la tua consultazione</p>
         </div>
-      </header>
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="grid md:grid-cols-[300px_1fr] gap-8">
           {/* Sidebar - Artist Selection & Hours */}
           <div className="space-y-6">
@@ -430,16 +412,23 @@ const CalendarPage: React.FC<CalendarPageProps> = ({ onBack }) => {
             </div>
           </div>
 
-          {/* Main Content - Calendar */}
+          {/* Main Content - Calendar & Time Slots */}
           <div className="space-y-6">
             {/* Calendar */}
             <div
-              className="rounded-2xl p-6"
+              className={`rounded-2xl p-6 transition-all duration-300 ease-out overflow-hidden ${
+                calendarCollapsed ? 'max-h-[280px]' : 'max-h-[600px]'
+              }`}
               style={{ backgroundColor: COLORS.sage }}
             >
               <div className="flex items-center gap-3 mb-6">
                 <Calendar size={20} style={{ color: COLORS.crimson }} />
                 <h3 className="font-bold">Seleziona Data</h3>
+                {selectedDate && calendarCollapsed && (
+                  <span className="ml-auto text-sm font-medium" style={{ color: COLORS.crimson }}>
+                    {formatShortDate(selectedDate)}
+                  </span>
+                )}
               </div>
 
               {/* Month Navigation */}
@@ -506,113 +495,121 @@ const CalendarPage: React.FC<CalendarPageProps> = ({ onBack }) => {
               </div>
             </div>
 
-            {/* Time Slots - Show when date is selected */}
-            {selectedDate && (
-              <div
-                className="rounded-2xl p-6"
-                style={{ backgroundColor: COLORS.sage }}
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <Clock size={20} style={{ color: COLORS.crimson }} />
-                  <h3 className="font-bold">
-                    Orari disponibili - {formatDate(selectedDate)}
-                  </h3>
-                </div>
+            {/* Time Slots - Show when date is selected with animation */}
+            <div
+              className={`rounded-2xl p-6 transition-all duration-300 ease-out ${
+                showTimeSlots ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none h-0 p-0 overflow-hidden'
+              }`}
+              style={{ backgroundColor: showTimeSlots ? COLORS.sage : 'transparent' }}
+            >
+              {selectedDate && (
+                <>
+                  <div className="flex items-center gap-3 mb-4">
+                    <Clock size={20} style={{ color: COLORS.crimson }} />
+                    <h3 className="font-bold">
+                      Orari disponibili - {formatDate(selectedDate)}
+                    </h3>
+                  </div>
 
-                {/* Morning Slots */}
-                <div className="mb-6">
-                  <p className="text-sm text-stone-500 mb-3">Mattina (10:00 - 13:00)</p>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                    {TIME_SLOTS.filter((slot) => {
-                      const hour = parseInt(slot.time.split(':')[0]);
-                      return hour < 14;
-                    }).map((slot) => (
-                      <button
-                        key={slot.time}
-                        onClick={() => handleTimeSelect(slot.time)}
-                        className={`py-3 px-2 rounded-lg text-sm font-medium transition-all ${
-                          selectedTime === slot.time
-                            ? 'text-white'
-                            : 'bg-white hover:bg-stone-100'
-                        }`}
-                        style={{
-                          backgroundColor: selectedTime === slot.time ? COLORS.crimson : undefined,
-                        }}
-                      >
-                        {slot.time}
-                      </button>
-                    ))}
+                  {/* Morning Slots */}
+                  <div className="mb-6">
+                    <p className="text-sm text-stone-500 mb-3">Mattina (10:00 - 13:00)</p>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                      {TIME_SLOTS.filter((slot) => {
+                        const hour = parseInt(slot.time.split(':')[0]);
+                        return hour < 14;
+                      }).map((slot) => (
+                        <button
+                          key={slot.time}
+                          onClick={() => handleTimeSelect(slot.time)}
+                          className={`py-3 px-2 rounded-lg text-sm font-medium transition-all ${
+                            selectedTime === slot.time
+                              ? 'text-white'
+                              : 'bg-white hover:bg-stone-100'
+                          }`}
+                          style={{
+                            backgroundColor: selectedTime === slot.time ? COLORS.crimson : undefined,
+                          }}
+                        >
+                          {slot.time}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                {/* Afternoon Slots */}
-                <div>
-                  <p className="text-sm text-stone-500 mb-3">Pomeriggio (14:00 - 19:00)</p>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                    {TIME_SLOTS.filter((slot) => {
-                      const hour = parseInt(slot.time.split(':')[0]);
-                      return hour >= 14;
-                    }).map((slot) => (
-                      <button
-                        key={slot.time}
-                        onClick={() => handleTimeSelect(slot.time)}
-                        className={`py-3 px-2 rounded-lg text-sm font-medium transition-all ${
-                          selectedTime === slot.time
-                            ? 'text-white'
-                            : 'bg-white hover:bg-stone-100'
-                        }`}
-                        style={{
-                          backgroundColor: selectedTime === slot.time ? COLORS.crimson : undefined,
-                        }}
-                      >
-                        {slot.time}
-                      </button>
-                    ))}
+                  {/* Afternoon Slots */}
+                  <div>
+                    <p className="text-sm text-stone-500 mb-3">Pomeriggio (14:00 - 19:00)</p>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                      {TIME_SLOTS.filter((slot) => {
+                        const hour = parseInt(slot.time.split(':')[0]);
+                        return hour >= 14;
+                      }).map((slot) => (
+                        <button
+                          key={slot.time}
+                          onClick={() => handleTimeSelect(slot.time)}
+                          className={`py-3 px-2 rounded-lg text-sm font-medium transition-all ${
+                            selectedTime === slot.time
+                              ? 'text-white'
+                              : 'bg-white hover:bg-stone-100'
+                          }`}
+                          style={{
+                            backgroundColor: selectedTime === slot.time ? COLORS.crimson : undefined,
+                          }}
+                        >
+                          {slot.time}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </div>
-            )}
+                </>
+              )}
+            </div>
 
-            {/* Booking Summary & Button */}
-            {(selectedArtist || selectedDate || selectedTime) && (
-              <div
-                className="rounded-2xl p-6"
-                style={{ backgroundColor: COLORS.charcoal }}
-              >
-                <h3 className="font-bold text-white mb-4">Riepilogo Prenotazione</h3>
-                <div className="space-y-2 text-sm mb-6">
-                  <div className="flex justify-between">
-                    <span className="text-stone-400">Artista</span>
-                    <span className="text-white font-medium">
-                      {selectedArtist ? selectedArtist.fullName : '—'}
-                    </span>
+            {/* Booking Summary & Button - Animated appearance */}
+            <div
+              className={`rounded-2xl p-6 transition-all duration-300 ease-out ${
+                showSummary ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none h-0 p-0 overflow-hidden'
+              }`}
+              style={{ backgroundColor: showSummary ? COLORS.charcoal : 'transparent' }}
+            >
+              {showSummary && (
+                <>
+                  <h3 className="font-bold text-white mb-4">Riepilogo Prenotazione</h3>
+                  <div className="space-y-2 text-sm mb-6">
+                    <div className="flex justify-between">
+                      <span className="text-stone-400">Artista</span>
+                      <span className="text-white font-medium">
+                        {selectedArtist ? selectedArtist.fullName : '—'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-stone-400">Data</span>
+                      <span className="text-white font-medium">
+                        {selectedDate ? formatShortDate(selectedDate) : '—'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-stone-400">Orario</span>
+                      <span className="text-white font-medium">
+                        {selectedTime || '—'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-stone-400">Data</span>
-                    <span className="text-white font-medium">
-                      {selectedDate ? `${selectedDate.getDate()} ${MONTHS_IT[selectedDate.getMonth()]}` : '—'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-stone-400">Orario</span>
-                    <span className="text-white font-medium">
-                      {selectedTime || '—'}
-                    </span>
-                  </div>
-                </div>
 
-                <button
-                  onClick={handleConfirmBooking}
-                  disabled={!canBook}
-                  className={`w-full py-4 rounded-xl font-bold text-white transition-all ${
-                    canBook ? 'hover:brightness-110' : 'opacity-50 cursor-not-allowed'
-                  }`}
-                  style={{ backgroundColor: COLORS.crimson }}
-                >
-                  Conferma Prenotazione
-                </button>
-              </div>
-            )}
+                  <button
+                    onClick={handleConfirmBooking}
+                    disabled={!canBook}
+                    className={`w-full py-4 rounded-xl font-bold text-white transition-all ${
+                      canBook ? 'hover:brightness-110' : 'opacity-50 cursor-not-allowed'
+                    }`}
+                    style={{ backgroundColor: COLORS.crimson }}
+                  >
+                    Conferma Prenotazione
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
