@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Instagram, MapPin, Calendar, ArrowRight, Menu, X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
+import CalendarPage from './CalendarPage';
 
 // Importazione Immagini
 import studioImg1 from './elements/studio1.PNG';
@@ -44,6 +45,7 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
 const STUDIO_IMAGES = [studioImg1, studioImg2, studioImg3];
 
 const TomoeLanding: React.FC = () => {
+  const [showCalendar, setShowCalendar] = useState<boolean>(false);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [currentStudioImage, setCurrentStudioImage] = useState<number>(0);
   const [hoverOffset, setHoverOffset] = useState<number>(0);
@@ -269,12 +271,17 @@ const TomoeLanding: React.FC = () => {
     }
   };
 
+  // Show Calendar Page
+  if (showCalendar) {
+    return <CalendarPage onBack={() => setShowCalendar(false)} />;
+  }
+
   return (
-    <div 
-      style={{ backgroundColor: COLORS.sand, color: COLORS.charcoal }} 
+    <div
+      style={{ backgroundColor: COLORS.sand, color: COLORS.charcoal }}
       className="min-h-screen font-sans selection:bg-red-200"
     >
-      
+
       {/* --- NAVIGATION --- */}
       <nav
         className="fixed w-full z-50 backdrop-blur-md border-b border-stone-200/50"
@@ -290,7 +297,8 @@ const TomoeLanding: React.FC = () => {
             <a href="#studio" className="hover:text-red-800 transition-colors">Studio</a>
             <a href="#works" className="hover:text-red-800 transition-colors">Opere</a>
             <a href="#contact" className="hover:text-red-800 transition-colors">Contatti</a>
-            <button 
+            <button
+              onClick={() => setShowCalendar(true)}
               className="px-5 py-2 text-white rounded-full transition-transform hover:scale-105 shadow-md"
               style={{ backgroundColor: COLORS.crimson }}
             >
@@ -319,6 +327,7 @@ const TomoeLanding: React.FC = () => {
           <a href="#works" onClick={toggleMenu} className="text-lg font-medium">Opere</a>
           <a href="#contact" onClick={toggleMenu} className="text-lg font-medium">Contatti</a>
           <button
+            onClick={() => { toggleMenu(); setShowCalendar(true); }}
             className="w-full py-3 text-white rounded-lg font-bold mt-2"
             style={{ backgroundColor: COLORS.crimson }}
           >
@@ -349,7 +358,8 @@ const TomoeLanding: React.FC = () => {
               Linee pulite, ambiente rilassato, inchiostro indelebile.
             </p>
             <div className="pt-4 flex gap-4">
-              <button 
+              <button
+                onClick={() => setShowCalendar(true)}
                 className="px-8 py-4 text-white rounded-lg font-semibold flex items-center gap-2 transition-all hover:gap-4 shadow-lg hover:shadow-xl"
                 style={{ backgroundColor: COLORS.crimson }}
               >
@@ -633,7 +643,8 @@ const TomoeLanding: React.FC = () => {
             <p className="text-stone-700 leading-relaxed font-medium">
               Raccontaci la tua idea, scegli l'artista e blocca la data.
             </p>
-            <button 
+            <button
+              onClick={() => setShowCalendar(true)}
               className="mt-4 px-8 py-4 text-white font-bold rounded-lg w-full md:w-auto hover:brightness-110 transition-all shadow-lg"
               style={{ backgroundColor: COLORS.crimson }}
             >
