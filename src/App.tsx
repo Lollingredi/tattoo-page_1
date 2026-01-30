@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Instagram, MapPin, Calendar, ArrowRight, Menu, X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
 import CalendarPage from './CalendarPage';
+import ArtistsPage from './ArtistsPage';
+
+type PageType = 'home' | 'calendar' | 'artists';
 
 // Importazione Immagini
 import studioImg1 from './elements/studio1.PNG';
@@ -45,28 +48,40 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
 const STUDIO_IMAGES = [studioImg1, studioImg2, studioImg3];
 
 const TomoeLanding: React.FC = () => {
-  // Initialize showCalendar based on current URL
-  const [showCalendar, setShowCalendar] = useState<boolean>(() => {
-    return window.location.pathname === '/prenota';
+  // Initialize currentPage based on current URL
+  const getPageFromPath = (pathname: string): PageType => {
+    if (pathname === '/prenota') return 'calendar';
+    if (pathname === '/artisti') return 'artists';
+    return 'home';
+  };
+
+  const [currentPage, setCurrentPage] = useState<PageType>(() => {
+    return getPageFromPath(window.location.pathname);
   });
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   // Navigate to calendar page with URL update
   const navigateToCalendar = useCallback(() => {
     window.history.pushState({}, '', '/prenota');
-    setShowCalendar(true);
+    setCurrentPage('calendar');
+  }, []);
+
+  // Navigate to artists page with URL update
+  const navigateToArtists = useCallback(() => {
+    window.history.pushState({}, '', '/artisti');
+    setCurrentPage('artists');
   }, []);
 
   // Navigate to home page with URL update
   const navigateToHome = useCallback(() => {
     window.history.pushState({}, '', '/');
-    setShowCalendar(false);
+    setCurrentPage('home');
   }, []);
 
   // Handle browser back/forward navigation
   useEffect(() => {
     const handlePopState = () => {
-      setShowCalendar(window.location.pathname === '/prenota');
+      setCurrentPage(getPageFromPath(window.location.pathname));
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -319,6 +334,7 @@ const TomoeLanding: React.FC = () => {
           <div className="hidden md:flex gap-8 items-center font-medium text-sm tracking-wide">
             <a href="#studio" onClick={() => navigateToHome()} className="hover:text-red-800 transition-colors">Studio</a>
             <a href="#works" onClick={() => navigateToHome()} className="hover:text-red-800 transition-colors">Opere</a>
+            <button onClick={() => navigateToArtists()} className="hover:text-red-800 transition-colors">Artisti</button>
             <a href="#contact" onClick={() => navigateToHome()} className="hover:text-red-800 transition-colors">Contatti</a>
             <button
               onClick={() => navigateToCalendar()}
@@ -342,12 +358,13 @@ const TomoeLanding: React.FC = () => {
         {/* Mobile Menu - Slide down animation */}
         <div
           className={`md:hidden absolute w-full border-b border-stone-200/50 flex flex-col gap-4 shadow-xl overflow-hidden transition-all duration-300 ease-out ${
-            isMenuOpen ? 'max-h-80 py-6 px-6 opacity-100' : 'max-h-0 py-0 px-6 opacity-0'
+            isMenuOpen ? 'max-h-96 py-6 px-6 opacity-100' : 'max-h-0 py-0 px-6 opacity-0'
           }`}
           style={{ backgroundColor: COLORS.sage }}
         >
           <a href="#studio" onClick={() => { toggleMenu(); navigateToHome(); }} className="text-lg font-medium">Studio</a>
           <a href="#works" onClick={() => { toggleMenu(); navigateToHome(); }} className="text-lg font-medium">Opere</a>
+          <button onClick={() => { toggleMenu(); navigateToArtists(); }} className="text-lg font-medium text-left">Artisti</button>
           <a href="#contact" onClick={() => { toggleMenu(); navigateToHome(); }} className="text-lg font-medium">Contatti</a>
           <button
             onClick={() => { toggleMenu(); navigateToCalendar(); }}
@@ -360,8 +377,10 @@ const TomoeLanding: React.FC = () => {
       </nav>
 
       {/* --- CONTENT --- */}
-      {showCalendar ? (
+      {currentPage === 'calendar' ? (
         <CalendarPage />
+      ) : currentPage === 'artists' ? (
+        <ArtistsPage />
       ) : (
         <>
       {/* --- HERO SECTION --- */}
