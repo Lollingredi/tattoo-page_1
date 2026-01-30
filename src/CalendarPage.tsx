@@ -221,7 +221,7 @@ const CalendarPage: React.FC = () => {
 
   // Get wrapper styles based on state
   const getWrapperStyles = () => {
-    const baseStyles = 'rounded-2xl p-6 transition-all duration-300 ease-out overflow-hidden';
+    const baseStyles = 'rounded-2xl p-6 transition-all duration-300 ease-out overflow-hidden order-2 md:order-none md:row-span-3';
 
     switch (wrapperState) {
       case 'calendar':
@@ -253,133 +253,130 @@ const CalendarPage: React.FC = () => {
           <p className="text-stone-600">Scegli l'artista, la data e l'orario per la tua consultazione</p>
         </div>
 
-        <div className="grid md:grid-cols-[300px_1fr] gap-8">
-          {/* Sidebar - Artist Selection & Hours */}
-          <div className="space-y-6">
-            {/* Artist Dropdown */}
-            <div
-              className="rounded-2xl p-6"
-              style={{ backgroundColor: COLORS.sage }}
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <User size={20} style={{ color: COLORS.crimson }} />
-                <h3 className="font-bold">Scegli Artista</h3>
-              </div>
+        <div className="grid md:grid-cols-[300px_1fr] gap-6 md:gap-8">
+          {/* Artist Dropdown - Always first */}
+          <div
+            className="rounded-2xl p-6 order-1 md:order-none"
+            style={{ backgroundColor: COLORS.sage }}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <User size={20} style={{ color: COLORS.crimson }} />
+              <h3 className="font-bold">Scegli Artista</h3>
+            </div>
 
-              <div className="relative">
-                <button
-                  onClick={() => setArtistMenuOpen(!artistMenuOpen)}
-                  disabled={wrapperState !== 'calendar'}
-                  className={`w-full p-4 rounded-xl border-2 flex items-center justify-between transition-all ${
-                    wrapperState !== 'calendar' ? 'opacity-60 cursor-not-allowed' : ''
-                  }`}
-                  style={{
-                    backgroundColor: 'white',
-                    borderColor: selectedArtist ? COLORS.crimson : COLORS.leather,
-                  }}
+            <div className="relative">
+              <button
+                onClick={() => setArtistMenuOpen(!artistMenuOpen)}
+                disabled={wrapperState !== 'calendar'}
+                className={`w-full p-4 rounded-xl border-2 flex items-center justify-between transition-all ${
+                  wrapperState !== 'calendar' ? 'opacity-60 cursor-not-allowed' : ''
+                }`}
+                style={{
+                  backgroundColor: 'white',
+                  borderColor: selectedArtist ? COLORS.crimson : COLORS.leather,
+                }}
+              >
+                {selectedArtist ? (
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white"
+                      style={{ backgroundColor: COLORS.leather }}
+                    >
+                      {selectedArtist.nickname[0]}
+                    </div>
+                    <div className="text-left">
+                      <p className="font-medium">{selectedArtist.name}</p>
+                      <p className="text-sm text-stone-500">"{selectedArtist.nickname}"</p>
+                    </div>
+                  </div>
+                ) : (
+                  <span className="text-stone-400">Seleziona un artista...</span>
+                )}
+                <ChevronDown
+                  size={20}
+                  className={`text-stone-400 transition-transform ${artistMenuOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+
+              {/* Dropdown Menu */}
+              {artistMenuOpen && wrapperState === 'calendar' && (
+                <div
+                  className="absolute top-full left-0 right-0 mt-2 rounded-xl shadow-xl border overflow-hidden z-20"
+                  style={{ backgroundColor: 'white', borderColor: COLORS.sand }}
                 >
-                  {selectedArtist ? (
-                    <div className="flex items-center gap-3">
+                  {ARTISTS.map((artist) => (
+                    <button
+                      key={artist.id}
+                      onClick={() => {
+                        setSelectedArtist(artist);
+                        setArtistMenuOpen(false);
+                      }}
+                      className={`w-full p-4 flex items-center gap-3 hover:bg-stone-50 transition-colors ${
+                        selectedArtist?.id === artist.id ? 'bg-stone-100' : ''
+                      }`}
+                    >
                       <div
                         className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white"
                         style={{ backgroundColor: COLORS.leather }}
                       >
-                        {selectedArtist.nickname[0]}
+                        {artist.nickname[0]}
                       </div>
                       <div className="text-left">
-                        <p className="font-medium">{selectedArtist.name}</p>
-                        <p className="text-sm text-stone-500">"{selectedArtist.nickname}"</p>
+                        <p className="font-medium">{artist.fullName}</p>
                       </div>
-                    </div>
-                  ) : (
-                    <span className="text-stone-400">Seleziona un artista...</span>
-                  )}
-                  <ChevronDown
-                    size={20}
-                    className={`text-stone-400 transition-transform ${artistMenuOpen ? 'rotate-180' : ''}`}
-                  />
-                </button>
-
-                {/* Dropdown Menu */}
-                {artistMenuOpen && wrapperState === 'calendar' && (
-                  <div
-                    className="absolute top-full left-0 right-0 mt-2 rounded-xl shadow-xl border overflow-hidden z-20"
-                    style={{ backgroundColor: 'white', borderColor: COLORS.sand }}
-                  >
-                    {ARTISTS.map((artist) => (
-                      <button
-                        key={artist.id}
-                        onClick={() => {
-                          setSelectedArtist(artist);
-                          setArtistMenuOpen(false);
-                        }}
-                        className={`w-full p-4 flex items-center gap-3 hover:bg-stone-50 transition-colors ${
-                          selectedArtist?.id === artist.id ? 'bg-stone-100' : ''
-                        }`}
-                      >
-                        <div
-                          className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white"
-                          style={{ backgroundColor: COLORS.leather }}
-                        >
-                          {artist.nickname[0]}
-                        </div>
-                        <div className="text-left">
-                          <p className="font-medium">{artist.fullName}</p>
-                        </div>
-                        {selectedArtist?.id === artist.id && (
-                          <Check size={18} className="ml-auto" style={{ color: COLORS.crimson }} />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Opening Hours */}
-            <div
-              className="rounded-2xl p-6"
-              style={{ backgroundColor: COLORS.sage }}
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <Clock size={20} style={{ color: COLORS.crimson }} />
-                <h3 className="font-bold">Orari di Apertura</h3>
-              </div>
-
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-stone-500">Martedì - Sabato</span>
-                  <span className="font-medium">10:00 - 13:00</span>
+                      {selectedArtist?.id === artist.id && (
+                        <Check size={18} className="ml-auto" style={{ color: COLORS.crimson }} />
+                      )}
+                    </button>
+                  ))}
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-stone-500"></span>
-                  <span className="font-medium">14:00 - 19:00</span>
-                </div>
-                <div className="h-px bg-stone-200 my-2" />
-                <div className="flex justify-between">
-                  <span className="text-stone-500">Domenica - Lunedì</span>
-                  <span className="text-stone-400">Chiuso</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Location */}
-            <div
-              className="rounded-2xl p-6"
-              style={{ backgroundColor: COLORS.sage }}
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <MapPin size={20} style={{ color: COLORS.crimson }} />
-                <h3 className="font-bold">Dove Siamo</h3>
-              </div>
-              <p className="text-sm text-stone-600">
-                Via Example 123<br />
-                Città, Regione
-              </p>
+              )}
             </div>
           </div>
 
-          {/* Main Content - Single Transforming Wrapper */}
+          {/* Opening Hours - Third on mobile, second on desktop (sidebar) */}
+          <div
+            className="rounded-2xl p-6 order-3 md:order-none"
+            style={{ backgroundColor: COLORS.sage }}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <Clock size={20} style={{ color: COLORS.crimson }} />
+              <h3 className="font-bold">Orari di Apertura</h3>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-stone-500">Martedì - Sabato</span>
+                <span className="font-medium">10:00 - 13:00</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-stone-500"></span>
+                <span className="font-medium">14:00 - 19:00</span>
+              </div>
+              <div className="h-px bg-stone-200 my-2" />
+              <div className="flex justify-between">
+                <span className="text-stone-500">Domenica - Lunedì</span>
+                <span className="text-stone-400">Chiuso</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Location - Fourth on mobile, third on desktop (sidebar) */}
+          <div
+            className="rounded-2xl p-6 order-4 md:order-none"
+            style={{ backgroundColor: COLORS.sage }}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <MapPin size={20} style={{ color: COLORS.crimson }} />
+              <h3 className="font-bold">Dove Siamo</h3>
+            </div>
+            <p className="text-sm text-stone-600">
+              Via Example 123<br />
+              Città, Regione
+            </p>
+          </div>
+
+          {/* Main Content - Second on mobile, spans full right column on desktop */}
           <div
             className={wrapperStyles.className}
             style={wrapperStyles.style}
