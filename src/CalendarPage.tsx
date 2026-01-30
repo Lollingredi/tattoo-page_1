@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Calendar, Clock, User, ArrowLeft, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, Calendar, Clock, User, ArrowLeft, Check, MapPin } from 'lucide-react';
 
 // --- Types & Interfaces ---
 
@@ -73,51 +73,57 @@ interface CalendarPageProps {
 
 const CalendarPage: React.FC<CalendarPageProps> = ({ onBack }) => {
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const [artistMenuOpen, setArtistMenuOpen] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => {
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-    const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-    return new Date(today.setDate(diff));
-  });
-  const [step, setStep] = useState<1 | 2 | 3>(1); // 1: Artist, 2: Date/Time, 3: Confirm
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
 
-  // Get week days starting from Monday
-  const getWeekDays = (): DaySchedule[] => {
-    const days: DaySchedule[] = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(currentWeekStart);
-      date.setDate(currentWeekStart.getDate() + i);
+  // Get all days in current month
+  const getDaysInMonth = (): (DaySchedule | null)[] => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const days: (DaySchedule | null)[] = [];
+
+    // Add empty slots for days before the first day of month
+    const startDayOfWeek = firstDay.getDay();
+    const emptySlots = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1; // Monday = 0
+    for (let i = 0; i < emptySlots; i++) {
+      days.push(null);
+    }
+
+    // Add all days of the month
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+      const date = new Date(year, month, day);
       days.push({
         dayName: DAYS_IT[date.getDay()],
-        dayNumber: date.getDate(),
-        month: date.getMonth(),
-        year: date.getFullYear(),
+        dayNumber: day,
+        month: month,
+        year: year,
         isOpen: OPEN_DAYS.includes(date.getDay()),
-        date: new Date(date),
+        date: date,
       });
     }
+
     return days;
   };
 
-  const weekDays = getWeekDays();
-
-  const goToPreviousWeek = () => {
-    const newDate = new Date(currentWeekStart);
-    newDate.setDate(newDate.getDate() - 7);
-    // Don't go to past weeks
+  const goToPreviousMonth = () => {
+    const newDate = new Date(currentMonth);
+    newDate.setMonth(newDate.getMonth() - 1);
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (newDate >= today || newDate.getTime() + 6 * 24 * 60 * 60 * 1000 >= today.getTime()) {
-      setCurrentWeekStart(newDate);
+    if (newDate.getFullYear() > today.getFullYear() ||
+        (newDate.getFullYear() === today.getFullYear() && newDate.getMonth() >= today.getMonth())) {
+      setCurrentMonth(newDate);
     }
   };
 
-  const goToNextWeek = () => {
-    const newDate = new Date(currentWeekStart);
-    newDate.setDate(newDate.getDate() + 7);
-    setCurrentWeekStart(newDate);
+  const goToNextMonth = () => {
+    const newDate = new Date(currentMonth);
+    newDate.setMonth(newDate.getMonth() + 1);
+    setCurrentMonth(newDate);
   };
 
   const isDateInPast = (date: Date): boolean => {
@@ -147,19 +153,9 @@ const CalendarPage: React.FC<CalendarPageProps> = ({ onBack }) => {
     setSelectedTime(time);
   };
 
-  const handleContinue = () => {
-    if (step === 1 && selectedArtist) {
-      setStep(2);
-    } else if (step === 2 && selectedDate && selectedTime) {
-      setStep(3);
-    }
-  };
-
-  const handleBack = () => {
-    if (step === 2) {
-      setStep(1);
-    } else if (step === 3) {
-      setStep(2);
+  const handleConfirmBooking = () => {
+    if (selectedArtist && selectedDate && selectedTime) {
+      setShowConfirmation(true);
     }
   };
 
@@ -167,15 +163,123 @@ const CalendarPage: React.FC<CalendarPageProps> = ({ onBack }) => {
     return `${DAYS_IT[date.getDay()]} ${date.getDate()} ${MONTHS_IT[date.getMonth()]} ${date.getFullYear()}`;
   };
 
-  const getWeekRangeText = (): string => {
-    const endDate = new Date(currentWeekStart);
-    endDate.setDate(endDate.getDate() + 6);
+  const canBook = selectedArtist && selectedDate && selectedTime;
 
-    if (currentWeekStart.getMonth() === endDate.getMonth()) {
-      return `${currentWeekStart.getDate()} - ${endDate.getDate()} ${MONTHS_IT[currentWeekStart.getMonth()]} ${currentWeekStart.getFullYear()}`;
-    }
-    return `${currentWeekStart.getDate()} ${MONTHS_IT[currentWeekStart.getMonth()]} - ${endDate.getDate()} ${MONTHS_IT[endDate.getMonth()]} ${endDate.getFullYear()}`;
-  };
+  // Confirmation Page
+  if (showConfirmation && selectedArtist && selectedDate && selectedTime) {
+    return (
+      <div
+        style={{ backgroundColor: COLORS.sand, color: COLORS.charcoal }}
+        className="min-h-screen font-sans"
+      >
+        {/* Header */}
+        <header
+          className="sticky top-0 z-50 backdrop-blur-md border-b border-stone-200/50"
+          style={{ backgroundColor: 'rgba(253, 251, 247, 0.95)' }}
+        >
+          <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
+            <button
+              onClick={() => setShowConfirmation(false)}
+              className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
+              aria-label="Torna indietro"
+            >
+              <ArrowLeft size={24} />
+            </button>
+            <div>
+              <h1 className="text-xl font-bold">Prenotazione Confermata</h1>
+              <p className="text-sm text-stone-500">Tattoo Studio</p>
+            </div>
+          </div>
+        </header>
+
+        <div className="max-w-2xl mx-auto px-6 py-12">
+          <div className="text-center mb-8">
+            <div
+              className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+              style={{ backgroundColor: COLORS.crimson }}
+            >
+              <Check size={40} className="text-white" />
+            </div>
+            <h2 className="text-3xl font-bold mb-2">Prenotazione completata!</h2>
+            <p className="text-stone-600">Ecco i dettagli del tuo appuntamento</p>
+          </div>
+
+          <div
+            className="rounded-2xl p-6 md:p-8 space-y-6"
+            style={{ backgroundColor: COLORS.sage }}
+          >
+            {/* Artist */}
+            <div className="flex items-center gap-4">
+              <div
+                className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold text-white"
+                style={{ backgroundColor: COLORS.leather }}
+              >
+                {selectedArtist.nickname[0]}
+              </div>
+              <div>
+                <p className="text-sm text-stone-500">Artista</p>
+                <p className="font-bold text-lg">{selectedArtist.fullName}</p>
+              </div>
+            </div>
+
+            <div className="h-px bg-stone-200" />
+
+            {/* Date */}
+            <div className="flex items-center gap-4">
+              <div
+                className="w-14 h-14 rounded-full flex items-center justify-center text-white"
+                style={{ backgroundColor: COLORS.crimson }}
+              >
+                <Calendar size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-stone-500">Data</p>
+                <p className="font-bold text-lg">{formatDate(selectedDate)}</p>
+              </div>
+            </div>
+
+            <div className="h-px bg-stone-200" />
+
+            {/* Time */}
+            <div className="flex items-center gap-4">
+              <div
+                className="w-14 h-14 rounded-full flex items-center justify-center text-white"
+                style={{ backgroundColor: COLORS.crimson }}
+              >
+                <Clock size={24} />
+              </div>
+              <div>
+                <p className="text-sm text-stone-500">Orario</p>
+                <p className="font-bold text-lg">{selectedTime}</p>
+                <p className="text-sm text-stone-400">Durata: 30 minuti</p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="rounded-xl p-4 border mt-6"
+            style={{ backgroundColor: '#FEF3C7', borderColor: '#F59E0B' }}
+          >
+            <p className="text-sm text-amber-800">
+              <strong>Nota:</strong> Questa è una consultazione iniziale. La durata effettiva della sessione di tatuaggio verrà discussa durante l'appuntamento.
+            </p>
+          </div>
+
+          <button
+            onClick={onBack}
+            className="w-full py-4 rounded-xl font-bold text-white transition-all hover:brightness-110 mt-6"
+            style={{ backgroundColor: COLORS.crimson }}
+          >
+            Torna alla Home
+          </button>
+
+          <p className="text-center text-sm text-stone-500 mt-4">
+            Riceverai una conferma via email con tutti i dettagli
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -187,7 +291,7 @@ const CalendarPage: React.FC<CalendarPageProps> = ({ onBack }) => {
         className="sticky top-0 z-50 backdrop-blur-md border-b border-stone-200/50"
         style={{ backgroundColor: 'rgba(253, 251, 247, 0.95)' }}
       >
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-4">
           <button
             onClick={onBack}
             className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
@@ -202,345 +306,313 @@ const CalendarPage: React.FC<CalendarPageProps> = ({ onBack }) => {
         </div>
       </header>
 
-      {/* Progress Steps */}
-      <div className="max-w-4xl mx-auto px-6 py-6">
-        <div className="flex items-center justify-center gap-2 mb-8">
-          {[1, 2, 3].map((s) => (
-            <React.Fragment key={s}>
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all ${
-                  step >= s
-                    ? 'text-white'
-                    : 'bg-stone-300 text-stone-500'
-                }`}
-                style={{ backgroundColor: step >= s ? COLORS.crimson : undefined }}
-              >
-                {step > s ? <Check size={20} /> : s}
-              </div>
-              {s < 3 && (
-                <div
-                  className={`w-16 md:w-24 h-1 rounded-full transition-all ${
-                    step > s ? '' : 'bg-stone-300'
-                  }`}
-                  style={{ backgroundColor: step > s ? COLORS.crimson : undefined }}
-                />
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-
-        {/* Step 1: Select Artist */}
-        {step === 1 && (
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="grid md:grid-cols-[300px_1fr] gap-8">
+          {/* Sidebar - Artist Selection & Hours */}
           <div className="space-y-6">
-            <div className="text-center mb-8">
-              <User className="w-12 h-12 mx-auto mb-4" style={{ color: COLORS.crimson }} />
-              <h2 className="text-2xl font-bold mb-2">Scegli il tuo artista</h2>
-              <p className="text-stone-600">Seleziona uno dei nostri tatuatori resident</p>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-3">
-              {ARTISTS.map((artist) => (
-                <button
-                  key={artist.id}
-                  onClick={() => setSelectedArtist(artist)}
-                  className={`p-6 rounded-2xl border-2 transition-all text-left ${
-                    selectedArtist?.id === artist.id
-                      ? 'border-current shadow-lg scale-[1.02]'
-                      : 'border-transparent hover:border-stone-300'
-                  }`}
-                  style={{
-                    backgroundColor: COLORS.sage,
-                    borderColor: selectedArtist?.id === artist.id ? COLORS.crimson : undefined,
-                  }}
-                >
-                  <div
-                    className="w-16 h-16 rounded-full mb-4 flex items-center justify-center text-2xl font-bold text-white"
-                    style={{ backgroundColor: COLORS.leather }}
-                  >
-                    {artist.nickname[0]}
-                  </div>
-                  <h3 className="font-bold text-lg">{artist.name}</h3>
-                  <p className="text-stone-500">"{artist.nickname}"</p>
-                  <p className="text-sm text-stone-400 mt-1">{artist.fullName.split(' ').pop()}</p>
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={handleContinue}
-              disabled={!selectedArtist}
-              className={`w-full py-4 rounded-xl font-bold text-white transition-all ${
-                selectedArtist ? 'hover:brightness-110' : 'opacity-50 cursor-not-allowed'
-              }`}
-              style={{ backgroundColor: COLORS.crimson }}
-            >
-              Continua
-            </button>
-          </div>
-        )}
-
-        {/* Step 2: Select Date & Time */}
-        {step === 2 && (
-          <div className="space-y-6">
-            <button
-              onClick={handleBack}
-              className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors mb-4"
-            >
-              <ChevronLeft size={20} />
-              Cambia artista
-            </button>
-
-            <div className="text-center mb-6">
-              <Calendar className="w-12 h-12 mx-auto mb-4" style={{ color: COLORS.crimson }} />
-              <h2 className="text-2xl font-bold mb-2">Scegli data e orario</h2>
-              <p className="text-stone-600">
-                Appuntamento con <span className="font-semibold">{selectedArtist?.fullName}</span>
-              </p>
-            </div>
-
-            {/* Week Navigation */}
+            {/* Artist Dropdown */}
             <div
               className="rounded-2xl p-6"
               style={{ backgroundColor: COLORS.sage }}
             >
+              <div className="flex items-center gap-3 mb-4">
+                <User size={20} style={{ color: COLORS.crimson }} />
+                <h3 className="font-bold">Scegli Artista</h3>
+              </div>
+
+              <div className="relative">
+                <button
+                  onClick={() => setArtistMenuOpen(!artistMenuOpen)}
+                  className="w-full p-4 rounded-xl border-2 flex items-center justify-between transition-all"
+                  style={{
+                    backgroundColor: 'white',
+                    borderColor: selectedArtist ? COLORS.crimson : COLORS.leather,
+                  }}
+                >
+                  {selectedArtist ? (
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white"
+                        style={{ backgroundColor: COLORS.leather }}
+                      >
+                        {selectedArtist.nickname[0]}
+                      </div>
+                      <div className="text-left">
+                        <p className="font-medium">{selectedArtist.name}</p>
+                        <p className="text-sm text-stone-500">"{selectedArtist.nickname}"</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-stone-400">Seleziona un artista...</span>
+                  )}
+                  <ChevronDown
+                    size={20}
+                    className={`text-stone-400 transition-transform ${artistMenuOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {/* Dropdown Menu */}
+                {artistMenuOpen && (
+                  <div
+                    className="absolute top-full left-0 right-0 mt-2 rounded-xl shadow-xl border overflow-hidden z-20"
+                    style={{ backgroundColor: 'white', borderColor: COLORS.sand }}
+                  >
+                    {ARTISTS.map((artist) => (
+                      <button
+                        key={artist.id}
+                        onClick={() => {
+                          setSelectedArtist(artist);
+                          setArtistMenuOpen(false);
+                        }}
+                        className={`w-full p-4 flex items-center gap-3 hover:bg-stone-50 transition-colors ${
+                          selectedArtist?.id === artist.id ? 'bg-stone-100' : ''
+                        }`}
+                      >
+                        <div
+                          className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white"
+                          style={{ backgroundColor: COLORS.leather }}
+                        >
+                          {artist.nickname[0]}
+                        </div>
+                        <div className="text-left">
+                          <p className="font-medium">{artist.fullName}</p>
+                        </div>
+                        {selectedArtist?.id === artist.id && (
+                          <Check size={18} className="ml-auto" style={{ color: COLORS.crimson }} />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Opening Hours */}
+            <div
+              className="rounded-2xl p-6"
+              style={{ backgroundColor: COLORS.sage }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <Clock size={20} style={{ color: COLORS.crimson }} />
+                <h3 className="font-bold">Orari di Apertura</h3>
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-stone-500">Martedì - Sabato</span>
+                  <span className="font-medium">10:00 - 13:00</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-stone-500"></span>
+                  <span className="font-medium">14:00 - 19:00</span>
+                </div>
+                <div className="h-px bg-stone-200 my-2" />
+                <div className="flex justify-between">
+                  <span className="text-stone-500">Domenica - Lunedì</span>
+                  <span className="text-stone-400">Chiuso</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Location */}
+            <div
+              className="rounded-2xl p-6"
+              style={{ backgroundColor: COLORS.sage }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <MapPin size={20} style={{ color: COLORS.crimson }} />
+                <h3 className="font-bold">Dove Siamo</h3>
+              </div>
+              <p className="text-sm text-stone-600">
+                Via Example 123<br />
+                Città, Regione
+              </p>
+            </div>
+          </div>
+
+          {/* Main Content - Calendar */}
+          <div className="space-y-6">
+            {/* Calendar */}
+            <div
+              className="rounded-2xl p-6"
+              style={{ backgroundColor: COLORS.sage }}
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <Calendar size={20} style={{ color: COLORS.crimson }} />
+                <h3 className="font-bold">Seleziona Data</h3>
+              </div>
+
+              {/* Month Navigation */}
               <div className="flex items-center justify-between mb-6">
                 <button
-                  onClick={goToPreviousWeek}
+                  onClick={goToPreviousMonth}
                   className="p-2 hover:bg-stone-200 rounded-lg transition-colors"
-                  aria-label="Settimana precedente"
+                  aria-label="Mese precedente"
                 >
                   <ChevronLeft size={24} />
                 </button>
-                <h3 className="font-bold text-lg">{getWeekRangeText()}</h3>
+                <h4 className="font-bold text-lg">
+                  {MONTHS_IT[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+                </h4>
                 <button
-                  onClick={goToNextWeek}
+                  onClick={goToNextMonth}
                   className="p-2 hover:bg-stone-200 rounded-lg transition-colors"
-                  aria-label="Settimana successiva"
+                  aria-label="Mese successivo"
                 >
                   <ChevronRight size={24} />
                 </button>
               </div>
 
-              {/* Days Grid */}
-              <div className="grid grid-cols-7 gap-2 mb-6">
-                {weekDays.map((day, index) => {
+              {/* Days Header */}
+              <div className="grid grid-cols-7 gap-1 mb-2">
+                {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map((day) => (
+                  <div key={day} className="text-center text-sm font-medium text-stone-500 py-2">
+                    {day}
+                  </div>
+                ))}
+              </div>
+
+              {/* Calendar Grid */}
+              <div className="grid grid-cols-7 gap-1">
+                {getDaysInMonth().map((day, index) => {
+                  if (!day) {
+                    return <div key={`empty-${index}`} className="aspect-square" />;
+                  }
+
                   const isPast = isDateInPast(day.date);
                   const isSelected = isDateSelected(day.date);
                   const isDisabled = !day.isOpen || isPast;
 
                   return (
                     <button
-                      key={index}
+                      key={day.dayNumber}
                       onClick={() => handleDateSelect(day)}
                       disabled={isDisabled}
-                      className={`p-2 md:p-3 rounded-xl text-center transition-all ${
+                      className={`aspect-square rounded-xl flex items-center justify-center text-sm font-medium transition-all ${
                         isDisabled
-                          ? 'opacity-40 cursor-not-allowed'
+                          ? 'text-stone-300 cursor-not-allowed'
                           : isSelected
-                          ? 'text-white shadow-lg scale-105'
+                          ? 'text-white shadow-lg'
                           : 'hover:bg-stone-200'
                       }`}
                       style={{
                         backgroundColor: isSelected ? COLORS.crimson : undefined,
                       }}
                     >
-                      <div className="text-xs font-medium mb-1 truncate">
-                        {day.dayName.substring(0, 3)}
-                      </div>
-                      <div className="text-lg font-bold">{day.dayNumber}</div>
-                      {!day.isOpen && (
-                        <div className="text-[10px] text-stone-400">Chiuso</div>
-                      )}
+                      {day.dayNumber}
                     </button>
                   );
                 })}
               </div>
-
-              {/* Time Slots */}
-              {selectedDate && (
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Clock size={20} style={{ color: COLORS.crimson }} />
-                    <h4 className="font-bold">Orari disponibili - {formatDate(selectedDate)}</h4>
-                  </div>
-
-                  {/* Morning Slots */}
-                  <div className="mb-4">
-                    <p className="text-sm text-stone-500 mb-2">Mattina (10:00 - 13:00)</p>
-                    <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                      {TIME_SLOTS.filter((slot) => {
-                        const hour = parseInt(slot.time.split(':')[0]);
-                        return hour < 14;
-                      }).map((slot) => (
-                        <button
-                          key={slot.time}
-                          onClick={() => handleTimeSelect(slot.time)}
-                          className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-                            selectedTime === slot.time
-                              ? 'text-white'
-                              : 'bg-white hover:bg-stone-100'
-                          }`}
-                          style={{
-                            backgroundColor: selectedTime === slot.time ? COLORS.crimson : undefined,
-                          }}
-                        >
-                          {slot.time}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Afternoon Slots */}
-                  <div>
-                    <p className="text-sm text-stone-500 mb-2">Pomeriggio (14:00 - 19:00)</p>
-                    <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                      {TIME_SLOTS.filter((slot) => {
-                        const hour = parseInt(slot.time.split(':')[0]);
-                        return hour >= 14;
-                      }).map((slot) => (
-                        <button
-                          key={slot.time}
-                          onClick={() => handleTimeSelect(slot.time)}
-                          className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-                            selectedTime === slot.time
-                              ? 'text-white'
-                              : 'bg-white hover:bg-stone-100'
-                          }`}
-                          style={{
-                            backgroundColor: selectedTime === slot.time ? COLORS.crimson : undefined,
-                          }}
-                        >
-                          {slot.time}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
-            <button
-              onClick={handleContinue}
-              disabled={!selectedDate || !selectedTime}
-              className={`w-full py-4 rounded-xl font-bold text-white transition-all ${
-                selectedDate && selectedTime ? 'hover:brightness-110' : 'opacity-50 cursor-not-allowed'
-              }`}
-              style={{ backgroundColor: COLORS.crimson }}
-            >
-              Continua
-            </button>
-          </div>
-        )}
-
-        {/* Step 3: Confirmation */}
-        {step === 3 && selectedArtist && selectedDate && selectedTime && (
-          <div className="space-y-6">
-            <button
-              onClick={handleBack}
-              className="flex items-center gap-2 text-stone-500 hover:text-stone-700 transition-colors mb-4"
-            >
-              <ChevronLeft size={20} />
-              Modifica data/orario
-            </button>
-
-            <div className="text-center mb-8">
-              <Check className="w-12 h-12 mx-auto mb-4" style={{ color: COLORS.crimson }} />
-              <h2 className="text-2xl font-bold mb-2">Conferma prenotazione</h2>
-              <p className="text-stone-600">Verifica i dettagli del tuo appuntamento</p>
-            </div>
-
-            <div
-              className="rounded-2xl p-6 md:p-8 space-y-6"
-              style={{ backgroundColor: COLORS.sage }}
-            >
-              {/* Artist */}
-              <div className="flex items-center gap-4">
-                <div
-                  className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold text-white"
-                  style={{ backgroundColor: COLORS.leather }}
-                >
-                  {selectedArtist.nickname[0]}
+            {/* Time Slots - Show when date is selected */}
+            {selectedDate && (
+              <div
+                className="rounded-2xl p-6"
+                style={{ backgroundColor: COLORS.sage }}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <Clock size={20} style={{ color: COLORS.crimson }} />
+                  <h3 className="font-bold">
+                    Orari disponibili - {formatDate(selectedDate)}
+                  </h3>
                 </div>
+
+                {/* Morning Slots */}
+                <div className="mb-6">
+                  <p className="text-sm text-stone-500 mb-3">Mattina (10:00 - 13:00)</p>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                    {TIME_SLOTS.filter((slot) => {
+                      const hour = parseInt(slot.time.split(':')[0]);
+                      return hour < 14;
+                    }).map((slot) => (
+                      <button
+                        key={slot.time}
+                        onClick={() => handleTimeSelect(slot.time)}
+                        className={`py-3 px-2 rounded-lg text-sm font-medium transition-all ${
+                          selectedTime === slot.time
+                            ? 'text-white'
+                            : 'bg-white hover:bg-stone-100'
+                        }`}
+                        style={{
+                          backgroundColor: selectedTime === slot.time ? COLORS.crimson : undefined,
+                        }}
+                      >
+                        {slot.time}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Afternoon Slots */}
                 <div>
-                  <p className="text-sm text-stone-500">Artista</p>
-                  <p className="font-bold text-lg">{selectedArtist.fullName}</p>
+                  <p className="text-sm text-stone-500 mb-3">Pomeriggio (14:00 - 19:00)</p>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                    {TIME_SLOTS.filter((slot) => {
+                      const hour = parseInt(slot.time.split(':')[0]);
+                      return hour >= 14;
+                    }).map((slot) => (
+                      <button
+                        key={slot.time}
+                        onClick={() => handleTimeSelect(slot.time)}
+                        className={`py-3 px-2 rounded-lg text-sm font-medium transition-all ${
+                          selectedTime === slot.time
+                            ? 'text-white'
+                            : 'bg-white hover:bg-stone-100'
+                        }`}
+                        style={{
+                          backgroundColor: selectedTime === slot.time ? COLORS.crimson : undefined,
+                        }}
+                      >
+                        {slot.time}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
+            )}
 
-              <div className="h-px bg-stone-200" />
+            {/* Booking Summary & Button */}
+            {(selectedArtist || selectedDate || selectedTime) && (
+              <div
+                className="rounded-2xl p-6"
+                style={{ backgroundColor: COLORS.charcoal }}
+              >
+                <h3 className="font-bold text-white mb-4">Riepilogo Prenotazione</h3>
+                <div className="space-y-2 text-sm mb-6">
+                  <div className="flex justify-between">
+                    <span className="text-stone-400">Artista</span>
+                    <span className="text-white font-medium">
+                      {selectedArtist ? selectedArtist.fullName : '—'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-stone-400">Data</span>
+                    <span className="text-white font-medium">
+                      {selectedDate ? `${selectedDate.getDate()} ${MONTHS_IT[selectedDate.getMonth()]}` : '—'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-stone-400">Orario</span>
+                    <span className="text-white font-medium">
+                      {selectedTime || '—'}
+                    </span>
+                  </div>
+                </div>
 
-              {/* Date */}
-              <div className="flex items-center gap-4">
-                <div
-                  className="w-14 h-14 rounded-full flex items-center justify-center text-white"
+                <button
+                  onClick={handleConfirmBooking}
+                  disabled={!canBook}
+                  className={`w-full py-4 rounded-xl font-bold text-white transition-all ${
+                    canBook ? 'hover:brightness-110' : 'opacity-50 cursor-not-allowed'
+                  }`}
                   style={{ backgroundColor: COLORS.crimson }}
                 >
-                  <Calendar size={24} />
-                </div>
-                <div>
-                  <p className="text-sm text-stone-500">Data</p>
-                  <p className="font-bold text-lg">{formatDate(selectedDate)}</p>
-                </div>
+                  Conferma Prenotazione
+                </button>
               </div>
-
-              <div className="h-px bg-stone-200" />
-
-              {/* Time */}
-              <div className="flex items-center gap-4">
-                <div
-                  className="w-14 h-14 rounded-full flex items-center justify-center text-white"
-                  style={{ backgroundColor: COLORS.crimson }}
-                >
-                  <Clock size={24} />
-                </div>
-                <div>
-                  <p className="text-sm text-stone-500">Orario</p>
-                  <p className="font-bold text-lg">{selectedTime}</p>
-                  <p className="text-sm text-stone-400">Durata: 30 minuti</p>
-                </div>
-              </div>
-            </div>
-
-            <div
-              className="rounded-xl p-4 border"
-              style={{ backgroundColor: '#FEF3C7', borderColor: '#F59E0B' }}
-            >
-              <p className="text-sm text-amber-800">
-                <strong>Nota:</strong> Questa è una consultazione iniziale. La durata effettiva della sessione di tatuaggio verrà discussa durante l'appuntamento.
-              </p>
-            </div>
-
-            <button
-              className="w-full py-4 rounded-xl font-bold text-white transition-all hover:brightness-110"
-              style={{ backgroundColor: COLORS.crimson }}
-            >
-              Conferma Prenotazione
-            </button>
-
-            <p className="text-center text-sm text-stone-500">
-              Riceverai una conferma via email con tutti i dettagli
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Opening Hours Info */}
-      <div className="max-w-4xl mx-auto px-6 pb-12">
-        <div
-          className="rounded-xl p-6 text-center"
-          style={{ backgroundColor: COLORS.charcoal }}
-        >
-          <h3 className="text-white font-bold mb-4">Orari di apertura</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <p className="text-stone-400">Mar - Sab</p>
-              <p className="text-white font-medium">10:00 - 13:00</p>
-              <p className="text-white font-medium">14:00 - 19:00</p>
-            </div>
-            <div>
-              <p className="text-stone-400">Dom - Lun</p>
-              <p className="text-stone-500">Chiuso</p>
-            </div>
+            )}
           </div>
         </div>
       </div>
