@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, X, Quote } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { ChevronLeft, ChevronRight, X, Quote, ArrowLeft } from 'lucide-react';
 
 // Import artist profile images
 import tattooer1 from './elements/tattooer1.png';
@@ -27,6 +27,7 @@ interface Artist {
   studio: string;
   experience: string;
   specialization: string[];
+  specializationShort: string;
   subjects: string[];
   bio: string;
   quote: string;
@@ -52,6 +53,7 @@ const ARTISTS: Artist[] = [
     fullName: 'Leo "L\'Ancora" Rossi',
     studio: 'Porto Antico Tattoo, Genova',
     experience: '25+ anni',
+    specializationShort: 'American Traditional / Old School',
     specialization: [
       'American Traditional / Old School: Linee spesse e audaci (bold lines), tavolozza di colori limitata (rosso, verde, giallo, nero), ombreggiature pesanti a frusta (whip shading).',
     ],
@@ -68,6 +70,7 @@ const ARTISTS: Artist[] = [
     fullName: 'Elena "Luna" Moretti',
     studio: 'Atelier Ethereal, Milano',
     experience: '6 anni',
+    specializationShort: 'Fine Line, Dotwork & Geometrico',
     specialization: [
       'Fine Line (Linea Sottile): Uso di aghi singoli o molto sottili per lavori delicati e precisi.',
       'Dotwork & Geometrico: Creazione di immagini e sfumature attraverso migliaia di puntini; pattern sacri e mandala.',
@@ -86,6 +89,7 @@ const ARTISTS: Artist[] = [
     fullName: 'Matteo "Kroma" Bianchi',
     studio: 'Inchiostro Vivo, Roma',
     experience: '12 anni',
+    specializationShort: 'Neo-Traditional & Realismo Illustrativo',
     specialization: [
       'Neo-Traditional: Evoluzione dell\'Old School con linee di diverso spessore, una tavolozza di colori più ampia e vibrante, e soggetti più complessi e illustrativi.',
       'Realismo Illustrativo: Ritratti di animali o volti che mescolano realismo con elementi grafici o surreali.',
@@ -100,6 +104,11 @@ const ARTISTS: Artist[] = [
 ];
 
 const ArtistsPage: React.FC = () => {
+  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const [mobileCardIndex, setMobileCardIndex] = useState<number>(0);
+  const cardsScrollRef = useRef<HTMLDivElement>(null);
+
+  // Lightbox states
   const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
   const [lightboxImages, setLightboxImages] = useState<string[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState<number>(0);
@@ -108,6 +117,17 @@ const ArtistsPage: React.FC = () => {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const minSwipeDistance = 50;
+
+  const handleCardScroll = () => {
+    if (cardsScrollRef.current) {
+      const scrollLeft = cardsScrollRef.current.scrollLeft;
+      const width = cardsScrollRef.current.clientWidth;
+      const newIndex = Math.round(scrollLeft / width);
+      if (newIndex !== mobileCardIndex && newIndex >= 0 && newIndex < ARTISTS.length) {
+        setMobileCardIndex(newIndex);
+      }
+    }
+  };
 
   const openLightbox = (images: string[], index: number) => {
     setLightboxImages(images);
@@ -153,136 +173,242 @@ const ArtistsPage: React.FC = () => {
   const getLightboxPrevIndex = () => (lightboxIndex === 0 ? lightboxImages.length - 1 : lightboxIndex - 1);
   const getLightboxNextIndex = () => (lightboxIndex === lightboxImages.length - 1 ? 0 : lightboxIndex + 1);
 
+  // Render mini card for an artist
+  const renderMiniCard = (artist: Artist) => (
+    <div
+      key={artist.id}
+      className="rounded-2xl overflow-hidden shadow-xl cursor-pointer group transition-transform hover:scale-[1.02] flex-shrink-0 w-full md:w-auto"
+      style={{ backgroundColor: COLORS.sage }}
+      onClick={() => setSelectedArtist(artist)}
+    >
+      {/* Two images side by side */}
+      <div className="flex h-48 md:h-56">
+        {/* Artist photo */}
+        <div className="w-1/2 relative overflow-hidden">
+          <img
+            src={artist.profileImage}
+            alt={artist.fullName}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+        </div>
+        {/* One work sample */}
+        <div className="w-1/2 relative overflow-hidden">
+          <img
+            src={artist.works[0]}
+            alt={`${artist.name} - Lavoro`}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+        </div>
+      </div>
+
+      {/* Artist info */}
+      <div className="p-4 md:p-5">
+        <h3 className="text-xl font-bold mb-1">{artist.fullName}</h3>
+        <p className="text-sm text-stone-500 mb-3">{artist.experience}</p>
+        <p
+          className="text-sm font-medium"
+          style={{ color: COLORS.crimson }}
+        >
+          {artist.specializationShort}
+        </p>
+      </div>
+    </div>
+  );
+
+  // Render full artist profile
+  const renderFullProfile = (artist: Artist) => (
+    <div className="animate-fadeIn">
+      {/* Back button */}
+      <button
+        onClick={() => setSelectedArtist(null)}
+        className="flex items-center gap-2 text-stone-600 hover:text-stone-900 transition-colors mb-6"
+      >
+        <ArrowLeft size={20} />
+        <span className="font-medium">Torna agli artisti</span>
+      </button>
+
+      <article
+        className="rounded-3xl overflow-hidden shadow-xl"
+        style={{ backgroundColor: COLORS.sage }}
+      >
+        {/* Artist Header */}
+        <div className="flex flex-col md:flex-row">
+          {/* Profile Image */}
+          <div className="md:w-2/5 aspect-square md:aspect-auto relative overflow-hidden">
+            <img
+              src={artist.profileImage}
+              alt={artist.fullName}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent md:hidden" />
+            <div className="absolute bottom-4 left-4 md:hidden">
+              <h2 className="text-2xl font-bold text-white">{artist.fullName}</h2>
+              <p className="text-white/80">{artist.studio}</p>
+            </div>
+          </div>
+
+          {/* Artist Info */}
+          <div className="md:w-3/5 p-6 md:p-10">
+            {/* Name - Hidden on mobile (shown on image) */}
+            <div className="hidden md:block mb-6">
+              <h2 className="text-3xl font-bold mb-2">{artist.fullName}</h2>
+              <div className="flex items-center gap-4 text-stone-600">
+                <span>{artist.studio}</span>
+                <span className="w-1 h-1 rounded-full bg-stone-400" />
+                <span>{artist.experience}</span>
+              </div>
+            </div>
+
+            {/* Mobile experience */}
+            <div className="md:hidden mb-4">
+              <span className="text-sm text-stone-500">{artist.experience} di esperienza</span>
+            </div>
+
+            {/* Specializations */}
+            <div className="mb-6">
+              <h3 className="font-bold text-lg mb-3" style={{ color: COLORS.crimson }}>
+                Specializzazione
+              </h3>
+              <ul className="space-y-2">
+                {artist.specialization.map((spec, i) => (
+                  <li key={i} className="text-stone-700 text-sm leading-relaxed">
+                    {spec}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Subjects */}
+            <div className="mb-6">
+              <h3 className="font-bold text-lg mb-3" style={{ color: COLORS.crimson }}>
+                Soggetti Classici
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {artist.subjects.map((subject, i) => (
+                  <span
+                    key={i}
+                    className="px-3 py-1 rounded-full text-sm font-medium"
+                    style={{ backgroundColor: COLORS.sand, color: COLORS.charcoal }}
+                  >
+                    {subject}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Bio */}
+            <div className="mb-6">
+              <h3 className="font-bold text-lg mb-3" style={{ color: COLORS.crimson }}>
+                Filosofia
+              </h3>
+              <p className="text-stone-700 leading-relaxed">{artist.bio}</p>
+            </div>
+
+            {/* Quote */}
+            <div
+              className="rounded-xl p-4 flex items-start gap-3"
+              style={{ backgroundColor: COLORS.sand }}
+            >
+              <Quote size={24} className="shrink-0 mt-1" style={{ color: COLORS.crimson }} />
+              <p className="italic text-stone-700 font-medium">"{artist.quote}"</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Artist Works Gallery */}
+        <div className="p-6 pt-0 md:p-10 md:pt-0">
+          <h3 className="font-bold text-lg mb-4">Lavori Recenti</h3>
+          <div className="grid grid-cols-3 gap-2 md:gap-4">
+            {artist.works.map((work, workIndex) => (
+              <div
+                key={workIndex}
+                className="aspect-square rounded-xl overflow-hidden cursor-pointer group relative"
+                onClick={() => openLightbox(artist.works, workIndex)}
+              >
+                <img
+                  src={work}
+                  alt={`${artist.name} - Lavoro ${workIndex + 1}`}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                  <span className="text-white font-bold tracking-widest uppercase border border-white px-4 py-2 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity hidden md:block">
+                    View
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </article>
+    </div>
+  );
+
   return (
-    <div className="pt-24 pb-12 px-6">
+    <div className="pt-24 pb-12 px-6 min-h-[calc(100vh-200px)]">
       <div className="max-w-6xl mx-auto">
         {/* Page Title */}
-        <div className="mb-12 text-center">
+        <div className="mb-8 md:mb-12 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">I Nostri Artisti</h1>
           <p className="text-stone-600 max-w-2xl mx-auto">
-            Ogni artista porta una visione unica e anni di esperienza. Scopri il loro stile e trova quello perfetto per il tuo prossimo tatuaggio.
+            {selectedArtist
+              ? 'Scopri di più su questo artista'
+              : 'Ogni artista porta una visione unica. Clicca per scoprire il loro stile.'}
           </p>
         </div>
 
-        {/* Artists List */}
-        <div className="space-y-16">
-          {ARTISTS.map((artist, artistIndex) => (
-            <article
-              key={artist.id}
-              className="rounded-3xl overflow-hidden shadow-xl"
-              style={{ backgroundColor: COLORS.sage }}
-            >
-              {/* Artist Header */}
-              <div className={`flex flex-col ${artistIndex % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
-                {/* Profile Image */}
-                <div className="md:w-2/5 aspect-square md:aspect-auto relative overflow-hidden">
-                  <img
-                    src={artist.profileImage}
-                    alt={artist.fullName}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent md:hidden" />
-                  <div className="absolute bottom-4 left-4 md:hidden">
-                    <h2 className="text-2xl font-bold text-white">{artist.fullName}</h2>
-                    <p className="text-white/80">{artist.studio}</p>
-                  </div>
-                </div>
+        {selectedArtist ? (
+          // Full profile view
+          renderFullProfile(selectedArtist)
+        ) : (
+          // Mini cards view
+          <>
+            {/* Desktop: Grid of 3 cards */}
+            <div className="hidden md:grid md:grid-cols-3 gap-6">
+              {ARTISTS.map((artist) => renderMiniCard(artist))}
+            </div>
 
-                {/* Artist Info */}
-                <div className="md:w-3/5 p-6 md:p-10">
-                  {/* Name - Hidden on mobile (shown on image) */}
-                  <div className="hidden md:block mb-6">
-                    <h2 className="text-3xl font-bold mb-2">{artist.fullName}</h2>
-                    <div className="flex items-center gap-4 text-stone-600">
-                      <span>{artist.studio}</span>
-                      <span className="w-1 h-1 rounded-full bg-stone-400" />
-                      <span>{artist.experience}</span>
-                    </div>
-                  </div>
-
-                  {/* Mobile experience */}
-                  <div className="md:hidden mb-4">
-                    <span className="text-sm text-stone-500">{artist.experience} di esperienza</span>
-                  </div>
-
-                  {/* Specializations */}
-                  <div className="mb-6">
-                    <h3 className="font-bold text-lg mb-3" style={{ color: COLORS.crimson }}>
-                      Specializzazione
-                    </h3>
-                    <ul className="space-y-2">
-                      {artist.specialization.map((spec, i) => (
-                        <li key={i} className="text-stone-700 text-sm leading-relaxed">
-                          {spec}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Subjects */}
-                  <div className="mb-6">
-                    <h3 className="font-bold text-lg mb-3" style={{ color: COLORS.crimson }}>
-                      Soggetti Classici
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {artist.subjects.map((subject, i) => (
-                        <span
-                          key={i}
-                          className="px-3 py-1 rounded-full text-sm font-medium"
-                          style={{ backgroundColor: COLORS.sand, color: COLORS.charcoal }}
-                        >
-                          {subject}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Bio */}
-                  <div className="mb-6">
-                    <h3 className="font-bold text-lg mb-3" style={{ color: COLORS.crimson }}>
-                      Filosofia
-                    </h3>
-                    <p className="text-stone-700 leading-relaxed">{artist.bio}</p>
-                  </div>
-
-                  {/* Quote */}
+            {/* Mobile: Horizontal scroll snap */}
+            <div className="md:hidden">
+              <div
+                ref={cardsScrollRef}
+                onScroll={handleCardScroll}
+                className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 scrollbar-hide"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {ARTISTS.map((artist) => (
                   <div
-                    className="rounded-xl p-4 flex items-start gap-3"
-                    style={{ backgroundColor: COLORS.sand }}
+                    key={artist.id}
+                    className="snap-center min-w-[85%]"
                   >
-                    <Quote size={24} className="shrink-0 mt-1" style={{ color: COLORS.crimson }} />
-                    <p className="italic text-stone-700 font-medium">"{artist.quote}"</p>
+                    {renderMiniCard(artist)}
                   </div>
-                </div>
+                ))}
               </div>
 
-              {/* Artist Works Gallery */}
-              <div className="p-6 pt-0 md:p-10 md:pt-0">
-                <h3 className="font-bold text-lg mb-4">Lavori Recenti</h3>
-                <div className="grid grid-cols-3 gap-2 md:gap-4">
-                  {artist.works.map((work, workIndex) => (
-                    <div
-                      key={workIndex}
-                      className="aspect-square rounded-xl overflow-hidden cursor-pointer group relative"
-                      onClick={() => openLightbox(artist.works, workIndex)}
-                    >
-                      <img
-                        src={work}
-                        alt={`${artist.name} - Lavoro ${workIndex + 1}`}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                        <span className="text-white font-bold tracking-widest uppercase border border-white px-4 py-2 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity hidden md:block">
-                          View
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              {/* Mobile indicators */}
+              <div className="flex justify-center gap-2 mt-4">
+                {ARTISTS.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setMobileCardIndex(index);
+                      cardsScrollRef.current?.scrollTo({
+                        left: index * (cardsScrollRef.current?.clientWidth * 0.85 + 16 || 0),
+                        behavior: 'smooth',
+                      });
+                    }}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      index === mobileCardIndex
+                        ? 'bg-stone-700 w-6'
+                        : 'bg-stone-400 hover:bg-stone-500'
+                    }`}
+                    aria-label={`Vai all'artista ${index + 1}`}
+                  />
+                ))}
               </div>
-            </article>
-          ))}
-        </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Lightbox Modal */}
@@ -374,6 +500,17 @@ const ArtistsPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Custom CSS for fade animation */}
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 };
