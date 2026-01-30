@@ -58,7 +58,62 @@ const TomoeLanding: React.FC = () => {
   const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
   const [lightboxIndex, setLightboxIndex] = useState<number>(0);
 
+  // Touch/Swipe states
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  // Galleria mobile index
+  const [mobileGalleryIndex, setMobileGalleryIndex] = useState<number>(0);
+
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  // Swipe handlers
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEndStudio = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    if (isLeftSwipe) {
+      setCurrentStudioImage((prev) => (prev === STUDIO_IMAGES.length - 1 ? 0 : prev + 1));
+    } else if (isRightSwipe) {
+      setCurrentStudioImage((prev) => (prev === 0 ? STUDIO_IMAGES.length - 1 : prev - 1));
+    }
+  };
+
+  const onTouchEndGallery = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    if (isLeftSwipe) {
+      setMobileGalleryIndex((prev) => (prev === PORTFOLIO_ITEMS.length - 1 ? 0 : prev + 1));
+    } else if (isRightSwipe) {
+      setMobileGalleryIndex((prev) => (prev === 0 ? PORTFOLIO_ITEMS.length - 1 : prev - 1));
+    }
+  };
+
+  const onTouchEndLightbox = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    if (isLeftSwipe) {
+      nextLightboxImage();
+    } else if (isRightSwipe) {
+      prevLightboxImage();
+    }
+  };
 
   // Lightbox functions
   const openLightbox = (index: number) => {
@@ -391,13 +446,18 @@ const TomoeLanding: React.FC = () => {
             
           </div>
 
-          {/* Image Area - Mobile (senza effetti hover avanzati) */}
-          <div className="relative md:hidden">
+          {/* Image Area - Mobile (con swipe) */}
+          <div
+            className="relative md:hidden"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEndStudio}
+          >
             <div className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative">
               <img
                 src={STUDIO_IMAGES[currentStudioImage]}
                 alt={`Tomoe Studio Interior ${currentStudioImage + 1}`}
-                className="object-cover w-full h-full opacity-90"
+                className="object-cover w-full h-full opacity-90 transition-opacity duration-300"
               />
               <div className="absolute inset-0 bg-black/10 pointer-events-none"></div>
 
@@ -442,7 +502,8 @@ const TomoeLanding: React.FC = () => {
             </a>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
+          {/* Galleria Desktop */}
+          <div className="hidden md:grid md:grid-cols-3 gap-1">
             {PORTFOLIO_ITEMS.map((item, index) => (
               <div
                 key={item.id}
@@ -462,7 +523,38 @@ const TomoeLanding: React.FC = () => {
               </div>
             ))}
           </div>
-          
+
+          {/* Galleria Mobile - Singola foto con swipe */}
+          <div
+            className="md:hidden relative"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEndGallery}
+          >
+            <div className="aspect-square bg-stone-800 rounded-xl overflow-hidden relative">
+              <img
+                src={PORTFOLIO_ITEMS[mobileGalleryIndex].src}
+                alt={PORTFOLIO_ITEMS[mobileGalleryIndex].alt}
+                className="w-full h-full object-cover transition-opacity duration-300"
+              />
+            </div>
+            {/* Indicatori mobile galleria */}
+            <div className="flex justify-center gap-2 mt-4">
+              {PORTFOLIO_ITEMS.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setMobileGalleryIndex(index)}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    index === mobileGalleryIndex
+                      ? 'bg-stone-700 w-6'
+                      : 'bg-stone-400 hover:bg-stone-500'
+                  }`}
+                  aria-label={`Vai all'immagine ${index + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+
           <div className="mt-8 flex justify-center md:hidden">
             <a href="#" className="flex items-center gap-2 font-medium hover:text-stone-600 transition-colors">
               Instagram <Instagram size={18} />
@@ -521,30 +613,33 @@ const TomoeLanding: React.FC = () => {
 
           {/* Contenitore carosello */}
           <div
-            className="relative z-10 flex items-center justify-center w-full h-full"
+            className="relative z-10 flex items-center justify-center w-full h-full px-4"
             onClick={(e) => e.stopPropagation()}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEndLightbox}
           >
             {/* Immagine precedente (sfocata, 90%) */}
-            <div className="absolute left-4 md:left-12 w-[30%] md:w-[25%] aspect-square opacity-50 transition-all duration-300">
+            <div className="hidden md:block absolute left-12 w-[20%] max-h-[70vh] opacity-50 transition-all duration-300">
               <img
                 src={PORTFOLIO_ITEMS[getLightboxPrevIndex()].src}
                 alt={PORTFOLIO_ITEMS[getLightboxPrevIndex()].alt}
-                className="w-full h-full object-cover rounded-xl blur-sm scale-90"
+                className="w-full h-full object-contain rounded-xl blur-sm scale-90"
               />
             </div>
 
             {/* Immagine centrale */}
-            <div className="relative w-[70%] md:w-[50%] max-w-3xl aspect-square group">
+            <div className="relative w-full md:w-[50%] max-w-3xl max-h-[80vh] group flex items-center justify-center">
               <img
                 src={PORTFOLIO_ITEMS[lightboxIndex].src}
                 alt={PORTFOLIO_ITEMS[lightboxIndex].alt}
-                className="w-full h-full object-cover rounded-2xl shadow-2xl"
+                className="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl"
               />
 
               {/* Freccia sinistra */}
               <button
                 onClick={prevLightboxImage}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full md:-translate-x-1/2 w-12 h-24 flex items-center justify-center bg-black/50 hover:bg-black/70 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300"
+                className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-12 h-24 items-center justify-center bg-black/50 hover:bg-black/70 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300"
                 aria-label="Immagine precedente"
               >
                 <ChevronLeft size={32} />
@@ -553,7 +648,7 @@ const TomoeLanding: React.FC = () => {
               {/* Freccia destra */}
               <button
                 onClick={nextLightboxImage}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full md:translate-x-1/2 w-12 h-24 flex items-center justify-center bg-black/50 hover:bg-black/70 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300"
+                className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-12 h-24 items-center justify-center bg-black/50 hover:bg-black/70 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300"
                 aria-label="Immagine successiva"
               >
                 <ChevronRight size={32} />
@@ -561,11 +656,11 @@ const TomoeLanding: React.FC = () => {
             </div>
 
             {/* Immagine successiva (sfocata, 90%) */}
-            <div className="absolute right-4 md:right-12 w-[30%] md:w-[25%] aspect-square opacity-50 transition-all duration-300">
+            <div className="hidden md:block absolute right-12 w-[20%] max-h-[70vh] opacity-50 transition-all duration-300">
               <img
                 src={PORTFOLIO_ITEMS[getLightboxNextIndex()].src}
                 alt={PORTFOLIO_ITEMS[getLightboxNextIndex()].alt}
-                className="w-full h-full object-cover rounded-xl blur-sm scale-90"
+                className="w-full h-full object-contain rounded-xl blur-sm scale-90"
               />
             </div>
 
