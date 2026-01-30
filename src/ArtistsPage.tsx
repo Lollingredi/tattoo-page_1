@@ -344,7 +344,7 @@ const ArtistsPage: React.FC = () => {
   );
 
   return (
-    <div className="pt-24 pb-12 px-6 min-h-[calc(100vh-200px)]">
+    <div className="pt-28 pb-12 px-6 min-h-[calc(100vh-200px)]">
       <div className="max-w-6xl mx-auto">
         {/* Page Title */}
         <div className="mb-8 md:mb-12 text-center">
