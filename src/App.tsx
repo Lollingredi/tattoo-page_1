@@ -401,16 +401,42 @@ const TomoeLanding: React.FC = () => {
               <span className="font-bold italic">anima zen.</span>
             </h1>
             <p className="text-lg text-stone-700 max-w-md leading-relaxed">
-              Uno spazio dove il tatuaggio tradizionale incontra la calma moderna. 
+              Uno spazio dove il tatuaggio tradizionale incontra la calma moderna.
               Linee pulite, ambiente rilassato, inchiostro indelebile.
             </p>
-            <div className="pt-4 flex gap-4">
+
+            {/* Stats row - Desktop */}
+            <div className="hidden md:flex gap-8 pt-2">
+              <div>
+                <p className="text-2xl font-bold" style={{ color: COLORS.crimson }}>3</p>
+                <p className="text-sm text-stone-500 mt-0.5">Artisti resident</p>
+              </div>
+              <div className="w-px bg-stone-300" />
+              <div>
+                <p className="text-2xl font-bold" style={{ color: COLORS.crimson }}>25+</p>
+                <p className="text-sm text-stone-500 mt-0.5">Anni di esperienza</p>
+              </div>
+              <div className="w-px bg-stone-300" />
+              <div>
+                <p className="text-2xl font-bold" style={{ color: COLORS.crimson }}>Mar–Sab</p>
+                <p className="text-sm text-stone-500 mt-0.5">Apertura</p>
+              </div>
+            </div>
+
+            <div className="pt-2 flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => navigateToCalendar()}
                 className="px-8 py-4 text-white rounded-lg font-semibold flex items-center gap-2 transition-all hover:gap-4 shadow-lg hover:shadow-xl"
                 style={{ backgroundColor: COLORS.crimson }}
               >
                 Prenota una consultazione <ArrowRight size={20} />
+              </button>
+              <button
+                onClick={() => navigateToArtists()}
+                className="px-8 py-4 rounded-lg font-semibold border-2 transition-all hover:bg-stone-100"
+                style={{ borderColor: COLORS.charcoal, color: COLORS.charcoal }}
+              >
+                Scopri gli Artisti
               </button>
             </div>
           </div>
@@ -470,7 +496,7 @@ const TomoeLanding: React.FC = () => {
 
             {/* Immagine principale */}
             <div
-              className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative z-10"
+              className="aspect-4/5 md:aspect-[3/4] bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative z-10"
               style={{
                 transform: `translateX(${isTransitioning ? 0 : -hoverOffset * 30}px) scale(${isHovering && !isTransitioning ? 1.02 : 1})`,
                 transition: isTransitioning ? 'opacity 0.4s ease-out' : 'transform 0.2s ease-out',
