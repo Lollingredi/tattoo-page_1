@@ -6,9 +6,9 @@ import ArtistsPage from './ArtistsPage';
 type PageType = 'home' | 'calendar' | 'artists';
 
 // Importazione Immagini
-import studioImg1 from './elements/studio1.PNG';
-import studioImg2 from './elements/studio2.PNG';
-import studioImg3 from './elements/studio3.PNG';
+import studioImg1 from './elements/studio1.webp';
+import studioImg2 from './elements/studio2.webp';
+import studioImg3 from './elements/studio3.webp';
 import tat1 from './elements/tat1.PNG';
 import tat2 from './elements/tat2.PNG';
 import tat3 from './elements/tat3.PNG';
@@ -357,9 +357,8 @@ const TomoeLanding: React.FC = () => {
 
         {/* Mobile Menu - Slide down animation */}
         <div
-          className={`md:hidden absolute w-full border-b border-stone-200/50 flex flex-col gap-4 shadow-xl overflow-hidden transition-all duration-300 ease-out ${
-            isMenuOpen ? 'max-h-96 py-6 px-6 opacity-100' : 'max-h-0 py-0 px-6 opacity-0'
-          }`}
+          className={`md:hidden absolute w-full border-b border-stone-200/50 flex flex-col gap-4 shadow-xl overflow-hidden transition-all duration-300 ease-out ${isMenuOpen ? 'max-h-96 py-6 px-6 opacity-100' : 'max-h-0 py-0 px-6 opacity-0'
+            }`}
           style={{ backgroundColor: COLORS.sage }}
         >
           <a href="#studio" onClick={() => { toggleMenu(); navigateToHome(); }} className="text-lg font-medium">Studio</a>
@@ -383,340 +382,337 @@ const TomoeLanding: React.FC = () => {
         <ArtistsPage />
       ) : (
         <>
-      {/* --- HERO SECTION --- */}
-      <header id="studio" className="pt-32 pb-20 px-6 md:pt-48 md:pb-32 relative overflow-hidden">
-        {/* Decorative Background (Ora Bianco Panna) */}
-        <div 
-          className="absolute top-0 right-0 w-2/3 h-full -z-10 opacity-60 blur-3xl rounded-bl-full pointer-events-none"
-          style={{ backgroundColor: COLORS.sage }}
-        />
-
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <p className="text-sm font-bold tracking-widest uppercase opacity-60 text-stone-600">
-              Città, Regione
-            </p>
-            <h1 className="text-5xl md:text-7xl font-light leading-tight text-stone-900">
-              Arte su pelle, <br />
-              <span className="font-bold italic">anima zen.</span>
-            </h1>
-            <p className="text-lg text-stone-700 max-w-md leading-relaxed">
-              Uno spazio dove il tatuaggio tradizionale incontra la calma moderna. 
-              Linee pulite, ambiente rilassato, inchiostro indelebile.
-            </p>
-            <div className="pt-4 flex gap-4">
-              <button
-                onClick={() => navigateToCalendar()}
-                className="px-8 py-4 text-white rounded-lg font-semibold flex items-center gap-2 transition-all hover:gap-4 shadow-lg hover:shadow-xl"
-                style={{ backgroundColor: COLORS.crimson }}
-              >
-                Prenota una consultazione <ArrowRight size={20} />
-              </button>
-            </div>
-          </div>
-          
-          {/* Image Area - Studio Slider */}
-          <div
-            className="relative group hidden md:block"
-            onMouseMove={handleMouseMove}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
-            {/* Anteprima sinistra (immagine precedente) */}
+          {/* --- HERO SECTION --- */}
+          <header id="studio" className="pt-32 pb-20 px-6 md:pt-48 md:pb-32 relative overflow-hidden">
+            {/* Decorative Background (Ora Bianco Panna) */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 overflow-hidden pointer-events-none z-0"
-              style={{
-                right: isTransitioning && transitionDirection === 'left'
-                  ? '0%'
-                  : `calc(100% + ${hoverOffset * 30}px)`,
-                width: isTransitioning && transitionDirection === 'left'
-                  ? '100%'
-                  : `${(isHovering || isTransitioning) && hoverOffset < 0 ? Math.abs(hoverOffset) * 30 : 0}px`,
-                height: isTransitioning && transitionDirection === 'left' ? '100%' : '90%',
-                opacity: (isHovering || transitionDirection === 'left') && hoverOffset < 0 ? 1 : 0,
-                transition: isTransitioning ? 'all 0.4s ease-out' : 'none',
-                borderRadius: isTransitioning && transitionDirection === 'left' ? '1rem' : '1rem 0 0 1rem',
-              }}
-            >
-              <img
-                src={STUDIO_IMAGES[getPreviewImageIndex('left')]}
-                alt="Immagine precedente"
-                className="w-full h-full object-cover"
-              />
-            </div>
+              className="absolute top-0 right-0 w-2/3 h-full -z-10 opacity-60 blur-3xl rounded-bl-full pointer-events-none"
+              style={{ backgroundColor: COLORS.sage }}
+            />
 
-            {/* Anteprima destra (immagine successiva) */}
-            <div
-              className="absolute top-1/2 -translate-y-1/2 overflow-hidden pointer-events-none z-0"
-              style={{
-                left: isTransitioning && transitionDirection === 'right'
-                  ? '0%'
-                  : `calc(100% - ${hoverOffset * 30}px)`,
-                width: isTransitioning && transitionDirection === 'right'
-                  ? '100%'
-                  : `${(isHovering || isTransitioning) && hoverOffset > 0 ? hoverOffset * 30 : 0}px`,
-                height: isTransitioning && transitionDirection === 'right' ? '100%' : '90%',
-                opacity: (isHovering || transitionDirection === 'right') && hoverOffset > 0 ? 1 : 0,
-                transition: isTransitioning ? 'all 0.4s ease-out' : 'none',
-                borderRadius: isTransitioning && transitionDirection === 'right' ? '1rem' : '0 1rem 1rem 0',
-              }}
-            >
-              <img
-                src={STUDIO_IMAGES[getPreviewImageIndex('right')]}
-                alt="Immagine successiva"
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            {/* Immagine principale */}
-            <div
-              className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative z-10"
-              style={{
-                transform: `translateX(${isTransitioning ? 0 : -hoverOffset * 30}px) scale(${isHovering && !isTransitioning ? 1.02 : 1})`,
-                transition: isTransitioning ? 'opacity 0.4s ease-out' : 'transform 0.2s ease-out',
-                opacity: mainImageOpacity,
-              }}
-            >
-              <img
-                src={STUDIO_IMAGES[currentStudioImage]}
-                alt={`Studio Interior ${currentStudioImage + 1}`}
-                className="object-cover w-full h-full opacity-90"
-              />
-              <div className="absolute inset-0 bg-black/10 pointer-events-none transition-colors duration-500 group-hover:bg-black/5"></div>
-
-              {/* Frecce di navigazione - solo desktop */}
-              <button
-                onClick={prevStudioImage}
-                className="flex absolute left-0 top-1/2 -translate-y-1/2 w-12 h-24 items-center justify-center bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-full group-hover:translate-x-0 rounded-r-lg"
-                aria-label="Immagine precedente"
-              >
-                <ChevronLeft size={32} />
-              </button>
-              <button
-                onClick={nextStudioImage}
-                className="flex absolute right-0 top-1/2 -translate-y-1/2 w-12 h-24 items-center justify-center bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-full group-hover:translate-x-0 rounded-l-lg"
-                aria-label="Immagine successiva"
-              >
-                <ChevronRight size={32} />
-              </button>
-
-              {/* Indicatori */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                {STUDIO_IMAGES.map((_, index) => (
+            <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+              <div className="space-y-6">
+                <p className="text-sm font-bold tracking-widest uppercase opacity-60 text-stone-600">
+                  Città, Regione
+                </p>
+                <h1 className="text-5xl md:text-7xl font-light leading-tight text-stone-900">
+                  Arte su pelle, <br />
+                  <span className="font-bold italic">anima zen.</span>
+                </h1>
+                <p className="text-lg text-stone-700 max-w-md leading-relaxed">
+                  Uno spazio dove il tatuaggio tradizionale incontra la calma moderna.
+                  Linee pulite, ambiente rilassato, inchiostro indelebile.
+                </p>
+                <div className="pt-4 flex gap-4">
                   <button
-                    key={index}
-                    onClick={() => setCurrentStudioImage(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      index === currentStudioImage
-                        ? 'bg-white w-6'
-                        : 'bg-white/50 hover:bg-white/80'
-                    }`}
-                    aria-label={`Vai all'immagine ${index + 1}`}
-                  />
-                ))}
+                    onClick={() => navigateToCalendar()}
+                    className="px-8 py-4 text-white rounded-lg font-semibold flex items-center gap-2 transition-all hover:gap-4 shadow-lg hover:shadow-xl"
+                    style={{ backgroundColor: COLORS.crimson }}
+                  >
+                    Prenota una consultazione <ArrowRight size={20} />
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Badge - Desktop */}
-            
-          </div>
-
-          {/* Image Area - Mobile (con scroll snap) */}
-          <div className="relative md:hidden">
-            <div
-              ref={studioScrollRef}
-              onScroll={handleStudioScroll}
-              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide rounded-2xl shadow-2xl"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {STUDIO_IMAGES.map((img, index) => (
+              {/* Image Area - Studio Slider */}
+              <div
+                className="relative group hidden md:block"
+                onMouseMove={handleMouseMove}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
+                {/* Anteprima sinistra (immagine precedente) */}
                 <div
-                  key={index}
-                  className="flex-shrink-0 w-full aspect-4/5 snap-center"
+                  className="absolute top-1/2 -translate-y-1/2 overflow-hidden pointer-events-none z-0"
+                  style={{
+                    right: isTransitioning && transitionDirection === 'left'
+                      ? '0%'
+                      : `calc(100% + ${hoverOffset * 30}px)`,
+                    width: isTransitioning && transitionDirection === 'left'
+                      ? '100%'
+                      : `${(isHovering || isTransitioning) && hoverOffset < 0 ? Math.abs(hoverOffset) * 30 : 0}px`,
+                    height: isTransitioning && transitionDirection === 'left' ? '100%' : '90%',
+                    opacity: (isHovering || transitionDirection === 'left') && hoverOffset < 0 ? 1 : 0,
+                    transition: isTransitioning ? 'all 0.4s ease-out' : 'none',
+                    borderRadius: isTransitioning && transitionDirection === 'left' ? '1rem' : '1rem 0 0 1rem',
+                  }}
                 >
-                  <div className="relative w-full h-full bg-stone-200">
-                    <img
-                      src={img}
-                      alt={`Studio Interior ${index + 1}`}
-                      className="object-cover w-full h-full opacity-90"
-                    />
-                    <div className="absolute inset-0 bg-black/10 pointer-events-none"></div>
+                  <img
+                    src={STUDIO_IMAGES[getPreviewImageIndex('left')]}
+                    alt="Immagine precedente"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                {/* Anteprima destra (immagine successiva) */}
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 overflow-hidden pointer-events-none z-0"
+                  style={{
+                    left: isTransitioning && transitionDirection === 'right'
+                      ? '0%'
+                      : `calc(100% - ${hoverOffset * 30}px)`,
+                    width: isTransitioning && transitionDirection === 'right'
+                      ? '100%'
+                      : `${(isHovering || isTransitioning) && hoverOffset > 0 ? hoverOffset * 30 : 0}px`,
+                    height: isTransitioning && transitionDirection === 'right' ? '100%' : '90%',
+                    opacity: (isHovering || transitionDirection === 'right') && hoverOffset > 0 ? 1 : 0,
+                    transition: isTransitioning ? 'all 0.4s ease-out' : 'none',
+                    borderRadius: isTransitioning && transitionDirection === 'right' ? '1rem' : '0 1rem 1rem 0',
+                  }}
+                >
+                  <img
+                    src={STUDIO_IMAGES[getPreviewImageIndex('right')]}
+                    alt="Immagine successiva"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                {/* Immagine principale */}
+                <div
+                  className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative z-10"
+                  style={{
+                    transform: `translateX(${isTransitioning ? 0 : -hoverOffset * 30}px) scale(${isHovering && !isTransitioning ? 1.02 : 1})`,
+                    transition: isTransitioning ? 'opacity 0.4s ease-out' : 'transform 0.2s ease-out',
+                    opacity: mainImageOpacity,
+                  }}
+                >
+                  <img
+                    src={STUDIO_IMAGES[currentStudioImage]}
+                    alt={`Studio Interior ${currentStudioImage + 1}`}
+                    className="object-cover w-full h-full opacity-90"
+                  />
+                  <div className="absolute inset-0 bg-black/10 pointer-events-none transition-colors duration-500 group-hover:bg-black/5"></div>
+
+                  {/* Frecce di navigazione - solo desktop */}
+                  <button
+                    onClick={prevStudioImage}
+                    className="flex absolute left-0 top-1/2 -translate-y-1/2 w-12 h-24 items-center justify-center bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-full group-hover:translate-x-0 rounded-r-lg"
+                    aria-label="Immagine precedente"
+                  >
+                    <ChevronLeft size={32} />
+                  </button>
+                  <button
+                    onClick={nextStudioImage}
+                    className="flex absolute right-0 top-1/2 -translate-y-1/2 w-12 h-24 items-center justify-center bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-full group-hover:translate-x-0 rounded-l-lg"
+                    aria-label="Immagine successiva"
+                  >
+                    <ChevronRight size={32} />
+                  </button>
+
+                  {/* Indicatori */}
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                    {STUDIO_IMAGES.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentStudioImage(index)}
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentStudioImage
+                            ? 'bg-white w-6'
+                            : 'bg-white/50 hover:bg-white/80'
+                          }`}
+                        aria-label={`Vai all'immagine ${index + 1}`}
+                      />
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
 
-            {/* Indicatori mobile */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-              {STUDIO_IMAGES.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setCurrentStudioImage(index);
-                    studioScrollRef.current?.scrollTo({ left: index * (studioScrollRef.current?.clientWidth || 0), behavior: 'smooth' });
-                  }}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    index === currentStudioImage
-                      ? 'bg-white w-6'
-                      : 'bg-white/50 hover:bg-white/80'
-                  }`}
-                  aria-label={`Vai all'immagine ${index + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </header>
+                {/* Badge - Desktop */}
 
-      {/* --- GALLERY SECTION (Le nostre opere) --- */}
-      <section
-        id="works"
-        className="py-24 px-6"
-        style={{ backgroundColor: '#FFFDF9' }} // Sfondo sezione bianco caldo
-      >
-        {/* WRAPPER PIÙ SCURO PER CONTRASTO */}
-        <div
-          className="max-w-6xl mx-auto p-8 md:p-12 rounded-3xl shadow-lg"
-          style={{ backgroundColor: '#E8E0D8', color: COLORS.charcoal }}
-        > 
-          <div className="flex justify-between items-end mb-12">
-            <div>
-              <h2 className="text-4xl font-bold mb-2">Le nostre opere</h2>
-              <div className="h-1 w-24" style={{ backgroundColor: COLORS.crimson }}></div>
-            </div>
-            <a href="#" className="hidden md:flex items-center gap-2 font-medium hover:text-stone-600 transition-colors">
-              Vedi tutto su Instagram <Instagram size={18} />
-            </a>
-          </div>
+              </div>
 
-          {/* Galleria Desktop */}
-          <div className="hidden md:grid md:grid-cols-3 gap-1">
-            {PORTFOLIO_ITEMS.map((item, index) => (
-              <div
-                key={item.id}
-                className="aspect-square bg-stone-800 relative group overflow-hidden cursor-pointer"
-                onClick={() => openLightbox(index)}
-              >
-                <img
-                  src={item.src}
-                  alt={item.alt}
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                  <span className="text-white font-bold tracking-widest uppercase border border-white px-4 py-2 backdrop-blur-sm">
-                    View
-                  </span>
+              {/* Image Area - Mobile (con scroll snap) */}
+              <div className="relative md:hidden">
+                <div
+                  ref={studioScrollRef}
+                  onScroll={handleStudioScroll}
+                  className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide rounded-2xl shadow-2xl"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                  {STUDIO_IMAGES.map((img, index) => (
+                    <div
+                      key={index}
+                      className="flex-shrink-0 w-full aspect-4/5 snap-center"
+                    >
+                      <div className="relative w-full h-full bg-stone-200">
+                        <img
+                          src={img}
+                          alt={`Studio Interior ${index + 1}`}
+                          className="object-cover w-full h-full opacity-90"
+                        />
+                        <div className="absolute inset-0 bg-black/10 pointer-events-none"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Indicatori mobile */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                  {STUDIO_IMAGES.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setCurrentStudioImage(index);
+                        studioScrollRef.current?.scrollTo({ left: index * (studioScrollRef.current?.clientWidth || 0), behavior: 'smooth' });
+                      }}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentStudioImage
+                          ? 'bg-white w-6'
+                          : 'bg-white/50 hover:bg-white/80'
+                        }`}
+                      aria-label={`Vai all'immagine ${index + 1}`}
+                    />
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          </header>
 
-          {/* Galleria Mobile - Scroll snap con tap-to-zoom */}
-          <div className="md:hidden relative">
+          {/* --- GALLERY SECTION (Le nostre opere) --- */}
+          <section
+            id="works"
+            className="py-24 px-6"
+            style={{ backgroundColor: '#FFFDF9' }} // Sfondo sezione bianco caldo
+          >
+            {/* WRAPPER PIÙ SCURO PER CONTRASTO */}
             <div
-              ref={galleryScrollRef}
-              onScroll={() => {
-                handleGalleryScroll();
-                setMobileGalleryTapped(false); // Reset tap state on scroll
-              }}
-              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide rounded-xl"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              className="max-w-6xl mx-auto p-8 md:p-12 rounded-3xl shadow-lg"
+              style={{ backgroundColor: '#E8E0D8', color: COLORS.charcoal }}
             >
-              {PORTFOLIO_ITEMS.map((item, index) => (
-                <div
-                  key={item.id}
-                  className="flex-shrink-0 w-full aspect-square snap-center relative cursor-pointer"
-                  onClick={handleMobileGalleryTap}
-                >
-                  <div className="relative w-full h-full bg-stone-800">
+              <div className="flex justify-between items-end mb-12">
+                <div>
+                  <h2 className="text-4xl font-bold mb-2">Le nostre opere</h2>
+                  <div className="h-1 w-24" style={{ backgroundColor: COLORS.crimson }}></div>
+                </div>
+                <a href="#" className="hidden md:flex items-center gap-2 font-medium hover:text-stone-600 transition-colors">
+                  Vedi tutto su Instagram <Instagram size={18} />
+                </a>
+              </div>
+
+              {/* Galleria Desktop */}
+              <div className="hidden md:grid md:grid-cols-3 gap-1">
+                {PORTFOLIO_ITEMS.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className="aspect-square bg-stone-800 relative group overflow-hidden cursor-pointer"
+                    onClick={() => openLightbox(index)}
+                  >
                     <img
                       src={item.src}
                       alt={item.alt}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                     />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <span className="text-white font-bold tracking-widest uppercase border border-white px-4 py-2 backdrop-blur-sm">
+                        View
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
-                    {/* Overlay tap-to-zoom */}
-                    {mobileGalleryTapped && index === mobileGalleryIndex && (
-                      <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center transition-opacity duration-300">
-                        <ZoomIn size={48} className="text-white mb-3" />
-                        <p className="text-white text-sm font-medium text-center px-4">
-                          Tocca per vedere la galleria completa
-                        </p>
+              {/* Galleria Mobile - Scroll snap con tap-to-zoom */}
+              <div className="md:hidden relative">
+                <div
+                  ref={galleryScrollRef}
+                  onScroll={() => {
+                    handleGalleryScroll();
+                    setMobileGalleryTapped(false); // Reset tap state on scroll
+                  }}
+                  className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide rounded-xl"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                  {PORTFOLIO_ITEMS.map((item, index) => (
+                    <div
+                      key={item.id}
+                      className="flex-shrink-0 w-full aspect-square snap-center relative cursor-pointer"
+                      onClick={handleMobileGalleryTap}
+                    >
+                      <div className="relative w-full h-full bg-stone-800">
+                        <img
+                          src={item.src}
+                          alt={item.alt}
+                          className="w-full h-full object-cover"
+                        />
+
+                        {/* Overlay tap-to-zoom */}
+                        {mobileGalleryTapped && index === mobileGalleryIndex && (
+                          <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center transition-opacity duration-300">
+                            <ZoomIn size={48} className="text-white mb-3" />
+                            <p className="text-white text-sm font-medium text-center px-4">
+                              Tocca per vedere la galleria completa
+                            </p>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Indicatori mobile galleria */}
+                <div className="flex justify-center gap-2 mt-4">
+                  {PORTFOLIO_ITEMS.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setMobileGalleryIndex(index);
+                        setMobileGalleryTapped(false);
+                        galleryScrollRef.current?.scrollTo({ left: index * (galleryScrollRef.current?.clientWidth || 0), behavior: 'smooth' });
+                      }}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${index === mobileGalleryIndex
+                          ? 'bg-stone-700 w-6'
+                          : 'bg-stone-400 hover:bg-stone-500'
+                        }`}
+                      aria-label={`Vai all'immagine ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-8 flex justify-center md:hidden">
+                <a href="#" className="flex items-center gap-2 font-medium hover:text-stone-600 transition-colors">
+                  Instagram <Instagram size={18} />
+                </a>
+              </div>
+            </div>
+          </section>
+
+          {/* --- FOOTER / CONTACT --- */}
+          <section id="contact" className="py-24 px-6">
+            <div
+              className="max-w-5xl mx-auto rounded-3xl p-8 md:p-16 flex flex-col md:flex-row gap-12 shadow-2xl relative"
+              style={{ backgroundColor: COLORS.sage, color: COLORS.charcoal }} // Sfondo Bianco Panna
+            >
+              <div className="flex-1 space-y-6 z-10">
+                <Calendar className="w-12 h-12" style={{ color: COLORS.crimson }} />
+                <h2 className="text-3xl md:text-4xl font-bold">Prenota il tuo appuntamento</h2>
+                <p className="text-stone-700 leading-relaxed font-medium">
+                  Raccontaci la tua idea, scegli l'artista e blocca la data.
+                </p>
+                <button
+                  onClick={() => navigateToCalendar()}
+                  className="mt-4 px-8 py-4 text-white font-bold rounded-lg w-full md:w-auto hover:brightness-110 transition-all shadow-lg"
+                  style={{ backgroundColor: COLORS.crimson }}
+                >
+                  Apri Calendario
+                </button>
+              </div>
+
+              <div className="flex-1 space-y-8 md:border-l md:border-stone-200 md:pl-12 flex flex-col justify-center z-10">
+                <div className="flex items-start gap-4 group">
+                  <MapPin className="mt-1 shrink-0 text-stone-700 group-hover:text-red-800 transition-colors" />
+                  <div>
+                    <h3 className="font-bold text-lg">Tattoo Studio</h3>
+                    <p className="text-stone-700">Via Example 123<br />Città, Regione</p>
                   </div>
                 </div>
-              ))}
+                <div className="flex items-start gap-4 group">
+                  <Instagram className="mt-1 shrink-0 text-stone-700 group-hover:text-red-800 transition-colors" />
+                  <div>
+                    <h3 className="font-bold text-lg">Seguici</h3>
+                    <p className="text-stone-700">@studio_tattoo</p>
+                  </div>
+                </div>
+              </div>
             </div>
-
-            {/* Indicatori mobile galleria */}
-            <div className="flex justify-center gap-2 mt-4">
-              {PORTFOLIO_ITEMS.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setMobileGalleryIndex(index);
-                    setMobileGalleryTapped(false);
-                    galleryScrollRef.current?.scrollTo({ left: index * (galleryScrollRef.current?.clientWidth || 0), behavior: 'smooth' });
-                  }}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    index === mobileGalleryIndex
-                      ? 'bg-stone-700 w-6'
-                      : 'bg-stone-400 hover:bg-stone-500'
-                  }`}
-                  aria-label={`Vai all'immagine ${index + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-8 flex justify-center md:hidden">
-            <a href="#" className="flex items-center gap-2 font-medium hover:text-stone-600 transition-colors">
-              Instagram <Instagram size={18} />
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* --- FOOTER / CONTACT --- */}
-      <section id="contact" className="py-24 px-6">
-        <div 
-          className="max-w-5xl mx-auto rounded-3xl p-8 md:p-16 flex flex-col md:flex-row gap-12 shadow-2xl relative"
-          style={{ backgroundColor: COLORS.sage, color: COLORS.charcoal }} // Sfondo Bianco Panna
-        >
-          <div className="flex-1 space-y-6 z-10">
-            <Calendar className="w-12 h-12" style={{ color: COLORS.crimson }} />
-            <h2 className="text-3xl md:text-4xl font-bold">Prenota il tuo appuntamento</h2>
-            <p className="text-stone-700 leading-relaxed font-medium">
-              Raccontaci la tua idea, scegli l'artista e blocca la data.
-            </p>
-            <button
-              onClick={() => navigateToCalendar()}
-              className="mt-4 px-8 py-4 text-white font-bold rounded-lg w-full md:w-auto hover:brightness-110 transition-all shadow-lg"
-              style={{ backgroundColor: COLORS.crimson }}
-            >
-              Apri Calendario
-            </button>
-          </div>
-
-          <div className="flex-1 space-y-8 md:border-l md:border-stone-200 md:pl-12 flex flex-col justify-center z-10">
-             <div className="flex items-start gap-4 group">
-               <MapPin className="mt-1 shrink-0 text-stone-700 group-hover:text-red-800 transition-colors" />
-               <div>
-                 <h3 className="font-bold text-lg">Tattoo Studio</h3>
-                 <p className="text-stone-700">Via Example 123<br/>Città, Regione</p>
-               </div>
-             </div>
-             <div className="flex items-start gap-4 group">
-               <Instagram className="mt-1 shrink-0 text-stone-700 group-hover:text-red-800 transition-colors" />
-               <div>
-                 <h3 className="font-bold text-lg">Seguici</h3>
-                 <p className="text-stone-700">@studio_tattoo</p>
-               </div>
-             </div>
-          </div>
-        </div>
-      </section>
+          </section>
         </>
       )}
 
@@ -840,11 +836,10 @@ const TomoeLanding: React.FC = () => {
                 <button
                   key={index}
                   onClick={() => setLightboxIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    index === lightboxIndex
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${index === lightboxIndex
                       ? 'bg-white w-6'
                       : 'bg-white/50 hover:bg-white/80'
-                  }`}
+                    }`}
                   aria-label={`Vai all'immagine ${index + 1}`}
                 />
               ))}
