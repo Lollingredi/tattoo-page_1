@@ -496,7 +496,7 @@ const TomoeLanding: React.FC = () => {
 
             {/* Immagine principale */}
             <div
-              className="aspect-4/5 md:aspect-[3/4] bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative z-10"
+              className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative z-10"
               style={{
                 transform: `translateX(${isTransitioning ? 0 : -hoverOffset * 30}px) scale(${isHovering && !isTransitioning ? 1.02 : 1})`,
                 transition: isTransitioning ? 'opacity 0.4s ease-out' : 'transform 0.2s ease-out',
