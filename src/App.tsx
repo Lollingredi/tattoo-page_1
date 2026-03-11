@@ -207,35 +207,21 @@ const TomoeLanding: React.FC = () => {
     setTransitionDirection('left');
     setTransitionTargetImage(targetIndex);
     setHoverEnabled(false);
-    setHoverOffset(-1);
 
-    // Fase 1: Fade out immagine centrale
-    setTimeout(() => {
-      setMainImageOpacity(0);
-    }, 50);
-
-    // Fase 2: Cambia immagine quando l'anteprima è completamente espansa
+    // L'immagine principale scorre verso destra mentre l'anteprima si espande
     setTimeout(() => {
       setCurrentStudioImage(targetIndex);
-    }, 450);
-
-    // Fase 3: Mostra nuova immagine centrale
-    setTimeout(() => {
       setMainImageOpacity(1);
-    }, 500);
-
-    // Fase 4: Reset stati transizione
-    setTimeout(() => {
-      setHoverOffset(0);
       setTransitionDirection(null);
       setTransitionTargetImage(null);
       setIsTransitioning(false);
-    }, 550);
+      setHoverOffset(0);
+    }, 600);
 
-    // Fase 5: Riattiva hover
+    // Riattiva hover dopo un breve delay
     setTimeout(() => {
       setHoverEnabled(true);
-    }, 1500);
+    }, 800);
   };
 
   const nextStudioImage = () => {
@@ -247,35 +233,21 @@ const TomoeLanding: React.FC = () => {
     setTransitionDirection('right');
     setTransitionTargetImage(targetIndex);
     setHoverEnabled(false);
-    setHoverOffset(1);
 
-    // Fase 1: Fade out immagine centrale
-    setTimeout(() => {
-      setMainImageOpacity(0);
-    }, 50);
-
-    // Fase 2: Cambia immagine quando l'anteprima è completamente espansa
+    // L'immagine principale scorre verso sinistra mentre l'anteprima si espande
     setTimeout(() => {
       setCurrentStudioImage(targetIndex);
-    }, 450);
-
-    // Fase 3: Mostra nuova immagine centrale
-    setTimeout(() => {
       setMainImageOpacity(1);
-    }, 500);
-
-    // Fase 4: Reset stati transizione
-    setTimeout(() => {
-      setHoverOffset(0);
       setTransitionDirection(null);
       setTransitionTargetImage(null);
       setIsTransitioning(false);
-    }, 550);
+      setHoverOffset(0);
+    }, 600);
 
-    // Fase 5: Riattiva hover
+    // Riattiva hover dopo un breve delay
     setTimeout(() => {
       setHoverEnabled(true);
-    }, 1500);
+    }, 800);
   };
 
   const getPrevImageIndex = () => (currentStudioImage === 0 ? STUDIO_IMAGES.length - 1 : currentStudioImage - 1);
@@ -382,28 +354,162 @@ const TomoeLanding: React.FC = () => {
         <ArtistsPage />
       ) : (
         <>
-          {/* --- HERO SECTION --- */}
-          <header id="studio" className="pt-32 pb-20 px-6 md:pt-48 md:pb-32 relative overflow-hidden">
-            {/* Decorative Background (Ora Bianco Panna) */}
-            <div
-              className="absolute top-0 right-0 w-2/3 h-full -z-10 opacity-60 blur-3xl rounded-bl-full pointer-events-none"
-              style={{ backgroundColor: COLORS.sage }}
-            />
+      {/* --- HERO SECTION --- */}
+      <header id="studio" className="pt-32 pb-20 px-6 md:pt-48 md:pb-32 relative overflow-hidden">
+        {/* Decorative Background (Ora Bianco Panna) */}
+        <div 
+          className="absolute top-0 right-0 w-2/3 h-full -z-10 opacity-60 blur-3xl rounded-bl-full pointer-events-none"
+          style={{ backgroundColor: COLORS.sage }}
+        />
 
-            <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
-              <div className="space-y-6">
-                <p className="text-sm font-bold tracking-widest uppercase opacity-60 text-stone-600">
-                  Città, Regione
-                </p>
-                <h1 className="text-5xl md:text-7xl font-light leading-tight text-stone-900">
-                  Arte su pelle, <br />
-                  <span className="font-bold italic">anima zen.</span>
-                </h1>
-                <p className="text-lg text-stone-700 max-w-md leading-relaxed">
-                  Uno spazio dove il tatuaggio tradizionale incontra la calma moderna.
-                  Linee pulite, ambiente rilassato, inchiostro indelebile.
-                </p>
-                <div className="pt-4 flex gap-4">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <p className="text-sm font-bold tracking-widest uppercase opacity-60 text-stone-600">
+              Città, Regione
+            </p>
+            <h1 className="text-5xl md:text-7xl font-light leading-tight text-stone-900">
+              Arte su pelle, <br />
+              <span className="font-bold italic">anima zen.</span>
+            </h1>
+            <p className="text-lg text-stone-700 max-w-md leading-relaxed">
+              Uno spazio dove il tatuaggio tradizionale incontra la calma moderna.
+              Linee pulite, ambiente rilassato, inchiostro indelebile.
+            </p>
+
+            {/* Stats row - Desktop */}
+            <div className="hidden md:flex gap-8 pt-2">
+              <div>
+                <p className="text-2xl font-bold" style={{ color: COLORS.crimson }}>3</p>
+                <p className="text-sm text-stone-500 mt-0.5">Artisti resident</p>
+              </div>
+              <div className="w-px bg-stone-300" />
+              <div>
+                <p className="text-2xl font-bold" style={{ color: COLORS.crimson }}>25+</p>
+                <p className="text-sm text-stone-500 mt-0.5">Anni di esperienza</p>
+              </div>
+              <div className="w-px bg-stone-300" />
+              <div>
+                <p className="text-2xl font-bold" style={{ color: COLORS.crimson }}>Mar–Sab</p>
+                <p className="text-sm text-stone-500 mt-0.5">Apertura</p>
+              </div>
+            </div>
+
+            <div className="pt-2 flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => navigateToCalendar()}
+                className="px-8 py-4 text-white rounded-lg font-semibold flex items-center gap-2 transition-all hover:gap-4 shadow-lg hover:shadow-xl"
+                style={{ backgroundColor: COLORS.crimson }}
+              >
+                Prenota una consultazione <ArrowRight size={20} />
+              </button>
+              <button
+                onClick={() => navigateToArtists()}
+                className="px-8 py-4 rounded-lg font-semibold border-2 transition-all hover:bg-stone-100"
+                style={{ borderColor: COLORS.charcoal, color: COLORS.charcoal }}
+              >
+                Scopri gli Artisti
+              </button>
+            </div>
+          </div>
+          
+          {/* Image Area - Studio Slider */}
+          <div
+            className="relative group hidden md:block"
+            onMouseMove={handleMouseMove}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            {/* Anteprima sinistra (immagine precedente) - Morph effect */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 overflow-hidden pointer-events-none rounded-2xl"
+              style={{
+                right: isTransitioning && transitionDirection === 'left' ? '0%' : '100%',
+                width: isTransitioning && transitionDirection === 'left' ? '100%' : `${(isHovering && hoverOffset < 0) ? Math.abs(hoverOffset) * 40 : 0}px`,
+                height: isTransitioning && transitionDirection === 'left' ? '100%' : '85%',
+                opacity: (isHovering && hoverOffset < 0) || transitionDirection === 'left' ? 1 : 0,
+                transition: isTransitioning
+                  ? 'right 0.5s cubic-bezier(0.4, 0, 0.2, 1), width 0.5s cubic-bezier(0.4, 0, 0.2, 1), height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-out'
+                  : 'width 0.15s ease-out, opacity 0.15s ease-out',
+                zIndex: isTransitioning && transitionDirection === 'left' ? 20 : 0,
+                boxShadow: isTransitioning && transitionDirection === 'left' ? '0 25px 50px -12px rgba(0, 0, 0, 0.4)' : 'none',
+              }}
+            >
+              <img
+                src={STUDIO_IMAGES[getPreviewImageIndex('left')]}
+                alt="Immagine precedente"
+                className="w-full h-full object-cover"
+                style={{
+                  transform: isTransitioning && transitionDirection === 'left' ? 'scale(1)' : 'scale(1.1)',
+                  transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
+              />
+            </div>
+
+            {/* Anteprima destra (immagine successiva) - Morph effect */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 overflow-hidden pointer-events-none rounded-2xl"
+              style={{
+                left: isTransitioning && transitionDirection === 'right' ? '0%' : '100%',
+                width: isTransitioning && transitionDirection === 'right' ? '100%' : `${(isHovering && hoverOffset > 0) ? hoverOffset * 40 : 0}px`,
+                height: isTransitioning && transitionDirection === 'right' ? '100%' : '85%',
+                opacity: (isHovering && hoverOffset > 0) || transitionDirection === 'right' ? 1 : 0,
+                transition: isTransitioning
+                  ? 'left 0.5s cubic-bezier(0.4, 0, 0.2, 1), width 0.5s cubic-bezier(0.4, 0, 0.2, 1), height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-out'
+                  : 'width 0.15s ease-out, opacity 0.15s ease-out',
+                zIndex: isTransitioning && transitionDirection === 'right' ? 20 : 0,
+                boxShadow: isTransitioning && transitionDirection === 'right' ? '0 25px 50px -12px rgba(0, 0, 0, 0.4)' : 'none',
+              }}
+            >
+              <img
+                src={STUDIO_IMAGES[getPreviewImageIndex('right')]}
+                alt="Immagine successiva"
+                className="w-full h-full object-cover"
+                style={{
+                  transform: isTransitioning && transitionDirection === 'right' ? 'scale(1)' : 'scale(1.1)',
+                  transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
+              />
+            </div>
+
+            {/* Immagine principale */}
+            <div
+              className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative z-10"
+              style={{
+                transform: isTransitioning
+                  ? `translateX(${transitionDirection === 'left' ? '30%' : transitionDirection === 'right' ? '-30%' : '0'}) scale(0.9)`
+                  : `translateX(${-hoverOffset * 25}px) scale(${isHovering ? 1.02 : 1})`,
+                opacity: isTransitioning ? 0 : 1,
+                transition: isTransitioning
+                  ? 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-out'
+                  : 'transform 0.2s ease-out, opacity 0.2s ease-out',
+              }}
+            >
+              <img
+                src={STUDIO_IMAGES[currentStudioImage]}
+                alt={`Studio Interior ${currentStudioImage + 1}`}
+                className="object-cover w-full h-full opacity-90"
+              />
+              <div className="absolute inset-0 bg-black/10 pointer-events-none transition-colors duration-500 group-hover:bg-black/5"></div>
+
+              {/* Frecce di navigazione - solo desktop */}
+              <button
+                onClick={prevStudioImage}
+                className="flex absolute left-0 top-1/2 -translate-y-1/2 w-12 h-24 items-center justify-center bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-full group-hover:translate-x-0 rounded-r-lg"
+                aria-label="Immagine precedente"
+              >
+                <ChevronLeft size={32} />
+              </button>
+              <button
+                onClick={nextStudioImage}
+                className="flex absolute right-0 top-1/2 -translate-y-1/2 w-12 h-24 items-center justify-center bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-full group-hover:translate-x-0 rounded-l-lg"
+                aria-label="Immagine successiva"
+              >
+                <ChevronRight size={32} />
+              </button>
+
+              {/* Indicatori */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                {STUDIO_IMAGES.map((_, index) => (
                   <button
                     onClick={() => navigateToCalendar()}
                     className="px-8 py-4 text-white rounded-lg font-semibold flex items-center gap-2 transition-all hover:gap-4 shadow-lg hover:shadow-xl"
