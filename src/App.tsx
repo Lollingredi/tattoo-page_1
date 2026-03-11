@@ -207,35 +207,21 @@ const TomoeLanding: React.FC = () => {
     setTransitionDirection('left');
     setTransitionTargetImage(targetIndex);
     setHoverEnabled(false);
-    setHoverOffset(-1);
 
-    // Fase 1: Fade out immagine centrale
-    setTimeout(() => {
-      setMainImageOpacity(0);
-    }, 50);
-
-    // Fase 2: Cambia immagine quando l'anteprima è completamente espansa
+    // L'immagine principale scorre verso destra mentre l'anteprima si espande
     setTimeout(() => {
       setCurrentStudioImage(targetIndex);
-    }, 450);
-
-    // Fase 3: Mostra nuova immagine centrale
-    setTimeout(() => {
       setMainImageOpacity(1);
-    }, 500);
-
-    // Fase 4: Reset stati transizione
-    setTimeout(() => {
-      setHoverOffset(0);
       setTransitionDirection(null);
       setTransitionTargetImage(null);
       setIsTransitioning(false);
-    }, 550);
+      setHoverOffset(0);
+    }, 600);
 
-    // Fase 5: Riattiva hover
+    // Riattiva hover dopo un breve delay
     setTimeout(() => {
       setHoverEnabled(true);
-    }, 1500);
+    }, 800);
   };
 
   const nextStudioImage = () => {
@@ -247,35 +233,21 @@ const TomoeLanding: React.FC = () => {
     setTransitionDirection('right');
     setTransitionTargetImage(targetIndex);
     setHoverEnabled(false);
-    setHoverOffset(1);
 
-    // Fase 1: Fade out immagine centrale
-    setTimeout(() => {
-      setMainImageOpacity(0);
-    }, 50);
-
-    // Fase 2: Cambia immagine quando l'anteprima è completamente espansa
+    // L'immagine principale scorre verso sinistra mentre l'anteprima si espande
     setTimeout(() => {
       setCurrentStudioImage(targetIndex);
-    }, 450);
-
-    // Fase 3: Mostra nuova immagine centrale
-    setTimeout(() => {
       setMainImageOpacity(1);
-    }, 500);
-
-    // Fase 4: Reset stati transizione
-    setTimeout(() => {
-      setHoverOffset(0);
       setTransitionDirection(null);
       setTransitionTargetImage(null);
       setIsTransitioning(false);
-    }, 550);
+      setHoverOffset(0);
+    }, 600);
 
-    // Fase 5: Riattiva hover
+    // Riattiva hover dopo un breve delay
     setTimeout(() => {
       setHoverEnabled(true);
-    }, 1500);
+    }, 800);
   };
 
   const getPrevImageIndex = () => (currentStudioImage === 0 ? STUDIO_IMAGES.length - 1 : currentStudioImage - 1);
@@ -448,49 +420,55 @@ const TomoeLanding: React.FC = () => {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            {/* Anteprima sinistra (immagine precedente) */}
+            {/* Anteprima sinistra (immagine precedente) - Morph effect */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 overflow-hidden pointer-events-none z-0"
+              className="absolute top-1/2 -translate-y-1/2 overflow-hidden pointer-events-none rounded-2xl"
               style={{
-                right: isTransitioning && transitionDirection === 'left'
-                  ? '0%'
-                  : `calc(100% + ${hoverOffset * 30}px)`,
-                width: isTransitioning && transitionDirection === 'left'
-                  ? '100%'
-                  : `${(isHovering || isTransitioning) && hoverOffset < 0 ? Math.abs(hoverOffset) * 30 : 0}px`,
-                height: isTransitioning && transitionDirection === 'left' ? '100%' : '90%',
-                opacity: (isHovering || transitionDirection === 'left') && hoverOffset < 0 ? 1 : 0,
-                transition: isTransitioning ? 'all 0.4s ease-out' : 'none',
-                borderRadius: isTransitioning && transitionDirection === 'left' ? '1rem' : '1rem 0 0 1rem',
+                right: isTransitioning && transitionDirection === 'left' ? '0%' : '100%',
+                width: isTransitioning && transitionDirection === 'left' ? '100%' : `${(isHovering && hoverOffset < 0) ? Math.abs(hoverOffset) * 40 : 0}px`,
+                height: isTransitioning && transitionDirection === 'left' ? '100%' : '85%',
+                opacity: (isHovering && hoverOffset < 0) || transitionDirection === 'left' ? 1 : 0,
+                transition: isTransitioning
+                  ? 'right 0.5s cubic-bezier(0.4, 0, 0.2, 1), width 0.5s cubic-bezier(0.4, 0, 0.2, 1), height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-out'
+                  : 'width 0.15s ease-out, opacity 0.15s ease-out',
+                zIndex: isTransitioning && transitionDirection === 'left' ? 20 : 0,
+                boxShadow: isTransitioning && transitionDirection === 'left' ? '0 25px 50px -12px rgba(0, 0, 0, 0.4)' : 'none',
               }}
             >
               <img
                 src={STUDIO_IMAGES[getPreviewImageIndex('left')]}
                 alt="Immagine precedente"
                 className="w-full h-full object-cover"
+                style={{
+                  transform: isTransitioning && transitionDirection === 'left' ? 'scale(1)' : 'scale(1.1)',
+                  transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
               />
             </div>
 
-            {/* Anteprima destra (immagine successiva) */}
+            {/* Anteprima destra (immagine successiva) - Morph effect */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 overflow-hidden pointer-events-none z-0"
+              className="absolute top-1/2 -translate-y-1/2 overflow-hidden pointer-events-none rounded-2xl"
               style={{
-                left: isTransitioning && transitionDirection === 'right'
-                  ? '0%'
-                  : `calc(100% - ${hoverOffset * 30}px)`,
-                width: isTransitioning && transitionDirection === 'right'
-                  ? '100%'
-                  : `${(isHovering || isTransitioning) && hoverOffset > 0 ? hoverOffset * 30 : 0}px`,
-                height: isTransitioning && transitionDirection === 'right' ? '100%' : '90%',
-                opacity: (isHovering || transitionDirection === 'right') && hoverOffset > 0 ? 1 : 0,
-                transition: isTransitioning ? 'all 0.4s ease-out' : 'none',
-                borderRadius: isTransitioning && transitionDirection === 'right' ? '1rem' : '0 1rem 1rem 0',
+                left: isTransitioning && transitionDirection === 'right' ? '0%' : '100%',
+                width: isTransitioning && transitionDirection === 'right' ? '100%' : `${(isHovering && hoverOffset > 0) ? hoverOffset * 40 : 0}px`,
+                height: isTransitioning && transitionDirection === 'right' ? '100%' : '85%',
+                opacity: (isHovering && hoverOffset > 0) || transitionDirection === 'right' ? 1 : 0,
+                transition: isTransitioning
+                  ? 'left 0.5s cubic-bezier(0.4, 0, 0.2, 1), width 0.5s cubic-bezier(0.4, 0, 0.2, 1), height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-out'
+                  : 'width 0.15s ease-out, opacity 0.15s ease-out',
+                zIndex: isTransitioning && transitionDirection === 'right' ? 20 : 0,
+                boxShadow: isTransitioning && transitionDirection === 'right' ? '0 25px 50px -12px rgba(0, 0, 0, 0.4)' : 'none',
               }}
             >
               <img
                 src={STUDIO_IMAGES[getPreviewImageIndex('right')]}
                 alt="Immagine successiva"
                 className="w-full h-full object-cover"
+                style={{
+                  transform: isTransitioning && transitionDirection === 'right' ? 'scale(1)' : 'scale(1.1)',
+                  transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
               />
             </div>
 
@@ -498,9 +476,13 @@ const TomoeLanding: React.FC = () => {
             <div
               className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative z-10"
               style={{
-                transform: `translateX(${isTransitioning ? 0 : -hoverOffset * 30}px) scale(${isHovering && !isTransitioning ? 1.02 : 1})`,
-                transition: isTransitioning ? 'opacity 0.4s ease-out' : 'transform 0.2s ease-out',
-                opacity: mainImageOpacity,
+                transform: isTransitioning
+                  ? `translateX(${transitionDirection === 'left' ? '30%' : transitionDirection === 'right' ? '-30%' : '0'}) scale(0.9)`
+                  : `translateX(${-hoverOffset * 25}px) scale(${isHovering ? 1.02 : 1})`,
+                opacity: isTransitioning ? 0 : 1,
+                transition: isTransitioning
+                  ? 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-out'
+                  : 'transform 0.2s ease-out, opacity 0.2s ease-out',
               }}
             >
               <img
