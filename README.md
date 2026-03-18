@@ -1,73 +1,93 @@
-# React + TypeScript + Vite
+# Tomoe Studio - Sito Web Tattoo Studio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sito web moderno per uno studio di tatuaggi, costruito con React e TypeScript.
 
-Currently, two official plugins are available:
+## Stack Tecnologico
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+| Tecnologia | Versione | Scopo |
+|------------|----------|-------|
+| React | 19.2.0 | UI Library |
+| TypeScript | 5.9.3 | Type Safety |
+| Vite | 7.2.4 | Build Tool & Dev Server |
+| Tailwind CSS | 4.1.18 | Styling |
+| Lucide React | 0.563.0 | Icone |
 
-## React Compiler
+## Struttura del Progetto
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── App.tsx           # Componente principale (Home, Hero, Gallery, Footer)
+├── CalendarPage.tsx  # Sistema di prenotazione appuntamenti
+├── ArtistsPage.tsx   # Pagina profili artisti con galleria lavori
+├── elements/         # Immagini studio e portfolio
+└── assets/           # Asset statici
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Funzionalità Principali
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Homepage
+- **Hero Section** con slider immagini studio interattivo
+- **Animazione Morph/Scale** per transizioni fluide tra immagini
+- **Galleria Portfolio** con lightbox e supporto swipe mobile
+- **Sezione Contatti** con CTA per prenotazioni
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Sistema di Navigazione
+- Routing client-side con `pushState` (no dipendenze esterne)
+- URL semantici: `/`, `/prenota`, `/artisti`
+- Supporto navigazione browser back/forward
+
+### Animazioni Studio Slider (Desktop)
+- Effetto parallasse su hover del mouse
+- Anteprime laterali che seguono il movimento del cursore
+- Transizione Morph: l'anteprima si espande fluidamente fino a diventare l'immagine principale
+- Curve di animazione `cubic-bezier` per movimenti naturali
+
+### Mobile
+- Layout responsive con breakpoint `md:` (768px)
+- Scroll snap orizzontale per gallerie
+- Indicatori touch-friendly
+- Tap-to-zoom per immagini portfolio
+
+## Palette Colori
+
+```typescript
+const COLORS = {
+  sage: '#FDFBF7',      // Bianco Panna (Sfondo Hero)
+  sand: '#D5CAC0',      // Sabbia/Grigio (Sfondo Pagina)
+  leather: '#BBA18B',   // Marrone (Dettagli)
+  charcoal: '#1F1C18',  // Nero caldo (Testi)
+  crimson: '#8A1C1C',   // Rosso scuro (Accenti/CTA)
+};
 ```
+
+## Comandi
+
+```bash
+# Installazione dipendenze
+npm install
+
+# Avvio development server
+npm run dev
+
+# Build produzione
+npm run build
+
+# Preview build
+npm run preview
+
+# Linting
+npm run lint
+```
+
+## Requisiti
+
+- Node.js 18+
+- npm 9+
+
+## Note Tecniche
+
+- **SWC** utilizzato per Fast Refresh (più veloce di Babel)
+- **ESLint** configurato con regole TypeScript e React Hooks
+- **PostCSS** con Autoprefixer per compatibilità browser
+- Nessuna dipendenza di routing esterna (vanilla JS)
+- Immagini importate come moduli ES per ottimizzazione Vite
