@@ -91,9 +91,6 @@ const TattooStudio: React.FC = () => {
   const [hoverOffset, setHoverOffset] = useState<number>(0);
   const [isHovering, setIsHovering] = useState<boolean>(false);
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
-  const [transitionDirection, setTransitionDirection] = useState<'left' | 'right' | null>(null);
-  const [hoverEnabled, setHoverEnabled] = useState<boolean>(true);
-  const [transitionTargetImage, setTransitionTargetImage] = useState<number | null>(null);
 
   // Lightbox states
   const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
@@ -199,67 +196,23 @@ const TattooStudio: React.FC = () => {
 
   const prevStudioImage = () => {
     if (isTransitioning) return;
-
-    const targetIndex = currentStudioImage === 0 ? STUDIO_IMAGES.length - 1 : currentStudioImage - 1;
-
     setIsTransitioning(true);
-    setTransitionDirection('left');
-    setTransitionTargetImage(targetIndex);
-    setHoverEnabled(false);
-
-    // L'immagine principale scorre verso destra mentre l'anteprima si espande
-    setTimeout(() => {
-      setCurrentStudioImage(targetIndex);
-      setTransitionDirection(null);
-      setTransitionTargetImage(null);
-      setIsTransitioning(false);
-      setHoverOffset(0);
-    }, 600);
-
-    // Riattiva hover dopo un breve delay
-    setTimeout(() => {
-      setHoverEnabled(true);
-    }, 800);
+    const targetIndex = currentStudioImage === 0 ? STUDIO_IMAGES.length - 1 : currentStudioImage - 1;
+    setCurrentStudioImage(targetIndex);
+    setTimeout(() => setIsTransitioning(false), 500);
   };
 
   const nextStudioImage = () => {
     if (isTransitioning) return;
-
-    const targetIndex = currentStudioImage === STUDIO_IMAGES.length - 1 ? 0 : currentStudioImage + 1;
-
     setIsTransitioning(true);
-    setTransitionDirection('right');
-    setTransitionTargetImage(targetIndex);
-    setHoverEnabled(false);
-
-    // L'immagine principale scorre verso sinistra mentre l'anteprima si espande
-    setTimeout(() => {
-      setCurrentStudioImage(targetIndex);
-      setTransitionDirection(null);
-      setTransitionTargetImage(null);
-      setIsTransitioning(false);
-      setHoverOffset(0);
-    }, 600);
-
-    // Riattiva hover dopo un breve delay
-    setTimeout(() => {
-      setHoverEnabled(true);
-    }, 800);
+    const targetIndex = currentStudioImage === STUDIO_IMAGES.length - 1 ? 0 : currentStudioImage + 1;
+    setCurrentStudioImage(targetIndex);
+    setTimeout(() => setIsTransitioning(false), 500);
   };
 
-  const getPrevImageIndex = () => (currentStudioImage === 0 ? STUDIO_IMAGES.length - 1 : currentStudioImage - 1);
-  const getNextImageIndex = () => (currentStudioImage === STUDIO_IMAGES.length - 1 ? 0 : currentStudioImage + 1);
-
-  // Durante la transizione usa l'indice salvato, altrimenti calcola dinamicamente
-  const getPreviewImageIndex = (direction: 'left' | 'right') => {
-    if (isTransitioning && transitionTargetImage !== null) {
-      return transitionTargetImage;
-    }
-    return direction === 'left' ? getPrevImageIndex() : getNextImageIndex();
-  };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!hoverEnabled || isTransitioning) return;
+    if (isTransitioning) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const width = rect.width;
@@ -268,7 +221,7 @@ const TattooStudio: React.FC = () => {
   };
 
   const handleMouseEnter = () => {
-    if (hoverEnabled && !isTransitioning) {
+    if (!isTransitioning) {
       setIsHovering(true);
     }
   };
@@ -416,96 +369,48 @@ const TattooStudio: React.FC = () => {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            {/* Anteprima sinistra (immagine precedente) - Morph effect */}
+            {/* Contenitore immagini con crossfade */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 overflow-hidden pointer-events-none rounded-2xl"
+              className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative"
               style={{
-                right: isTransitioning && transitionDirection === 'left' ? '0%' : '100%',
-                width: isTransitioning && transitionDirection === 'left' ? '100%' : `${(isHovering && hoverOffset < 0) ? Math.abs(hoverOffset) * 40 : 0}px`,
-                height: isTransitioning && transitionDirection === 'left' ? '100%' : '85%',
-                opacity: (isHovering && hoverOffset < 0) || transitionDirection === 'left' ? 1 : 0,
-                transition: isTransitioning
-                  ? 'right 0.5s cubic-bezier(0.4, 0, 0.2, 1), width 0.5s cubic-bezier(0.4, 0, 0.2, 1), height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-out'
-                  : 'width 0.15s ease-out, opacity 0.15s ease-out',
-                zIndex: isTransitioning && transitionDirection === 'left' ? 20 : 0,
-                boxShadow: isTransitioning && transitionDirection === 'left' ? '0 25px 50px -12px rgba(0, 0, 0, 0.4)' : 'none',
+                transform: `translateX(${-hoverOffset * 15}px) scale(${isHovering && !isTransitioning ? 1.02 : 1})`,
+                transition: 'transform 0.2s ease-out',
               }}
             >
-              <img
-                src={STUDIO_IMAGES[getPreviewImageIndex('left')]}
-                alt="Immagine precedente"
-                className="w-full h-full object-cover"
-                style={{
-                  transform: isTransitioning && transitionDirection === 'left' ? 'scale(1)' : 'scale(1.1)',
-                  transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                }}
-              />
-            </div>
-
-            {/* Anteprima destra (immagine successiva) - Morph effect */}
-            <div
-              className="absolute top-1/2 -translate-y-1/2 overflow-hidden pointer-events-none rounded-2xl"
-              style={{
-                left: isTransitioning && transitionDirection === 'right' ? '0%' : '100%',
-                width: isTransitioning && transitionDirection === 'right' ? '100%' : `${(isHovering && hoverOffset > 0) ? hoverOffset * 40 : 0}px`,
-                height: isTransitioning && transitionDirection === 'right' ? '100%' : '85%',
-                opacity: (isHovering && hoverOffset > 0) || transitionDirection === 'right' ? 1 : 0,
-                transition: isTransitioning
-                  ? 'left 0.5s cubic-bezier(0.4, 0, 0.2, 1), width 0.5s cubic-bezier(0.4, 0, 0.2, 1), height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-out'
-                  : 'width 0.15s ease-out, opacity 0.15s ease-out',
-                zIndex: isTransitioning && transitionDirection === 'right' ? 20 : 0,
-                boxShadow: isTransitioning && transitionDirection === 'right' ? '0 25px 50px -12px rgba(0, 0, 0, 0.4)' : 'none',
-              }}
-            >
-              <img
-                src={STUDIO_IMAGES[getPreviewImageIndex('right')]}
-                alt="Immagine successiva"
-                className="w-full h-full object-cover"
-                style={{
-                  transform: isTransitioning && transitionDirection === 'right' ? 'scale(1)' : 'scale(1.1)',
-                  transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                }}
-              />
-            </div>
-
-            {/* Immagine principale */}
-            <div
-              className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative z-10"
-              style={{
-                transform: isTransitioning
-                  ? `translateX(${transitionDirection === 'left' ? '30%' : transitionDirection === 'right' ? '-30%' : '0'}) scale(0.9)`
-                  : `translateX(${-hoverOffset * 25}px) scale(${isHovering ? 1.02 : 1})`,
-                opacity: isTransitioning ? 0 : 1,
-                transition: isTransitioning
-                  ? 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-out'
-                  : 'transform 0.2s ease-out, opacity 0.2s ease-out',
-              }}
-            >
-              <img
-                src={STUDIO_IMAGES[currentStudioImage]}
-                alt={`Studio Interior ${currentStudioImage + 1}`}
-                className="object-cover w-full h-full opacity-90"
-              />
-              <div className="absolute inset-0 bg-black/10 pointer-events-none transition-colors duration-500 group-hover:bg-black/5"></div>
+              {/* Tutte le immagini sovrapposte con crossfade */}
+              {STUDIO_IMAGES.map((img, index) => (
+                <img
+                  key={index}
+                  src={img}
+                  alt={`Studio Interior ${index + 1}`}
+                  className="absolute inset-0 object-cover w-full h-full"
+                  style={{
+                    opacity: index === currentStudioImage ? 0.9 : 0,
+                    transition: 'opacity 0.5s ease-in-out',
+                    zIndex: index === currentStudioImage ? 1 : 0,
+                  }}
+                />
+              ))}
+              <div className="absolute inset-0 bg-black/10 pointer-events-none transition-colors duration-500 group-hover:bg-black/5 z-10"></div>
 
               {/* Frecce di navigazione - solo desktop */}
               <button
                 onClick={prevStudioImage}
-                className="flex absolute left-0 top-1/2 -translate-y-1/2 w-12 h-24 items-center justify-center bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-full group-hover:translate-x-0 rounded-r-lg"
+                className="flex absolute left-0 top-1/2 -translate-y-1/2 w-12 h-24 items-center justify-center bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-full group-hover:translate-x-0 rounded-r-lg z-20"
                 aria-label="Immagine precedente"
               >
                 <ChevronLeft size={32} />
               </button>
               <button
                 onClick={nextStudioImage}
-                className="flex absolute right-0 top-1/2 -translate-y-1/2 w-12 h-24 items-center justify-center bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-full group-hover:translate-x-0 rounded-l-lg"
+                className="flex absolute right-0 top-1/2 -translate-y-1/2 w-12 h-24 items-center justify-center bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-full group-hover:translate-x-0 rounded-l-lg z-20"
                 aria-label="Immagine successiva"
               >
                 <ChevronRight size={32} />
               </button>
 
               {/* Indicatori */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
                 {STUDIO_IMAGES.map((_, index) => (
                   <button
                     key={index}
