@@ -92,7 +92,6 @@ const TattooStudio: React.FC = () => {
   const [isHovering, setIsHovering] = useState<boolean>(false);
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
   const [transitionDirection, setTransitionDirection] = useState<'left' | 'right' | null>(null);
-  const [mainImageOpacity, setMainImageOpacity] = useState<number>(1);
   const [hoverEnabled, setHoverEnabled] = useState<boolean>(true);
   const [transitionTargetImage, setTransitionTargetImage] = useState<number | null>(null);
 
@@ -211,7 +210,6 @@ const TattooStudio: React.FC = () => {
     // L'immagine principale scorre verso destra mentre l'anteprima si espande
     setTimeout(() => {
       setCurrentStudioImage(targetIndex);
-      setMainImageOpacity(1);
       setTransitionDirection(null);
       setTransitionTargetImage(null);
       setIsTransitioning(false);
@@ -237,7 +235,6 @@ const TattooStudio: React.FC = () => {
     // L'immagine principale scorre verso sinistra mentre l'anteprima si espande
     setTimeout(() => {
       setCurrentStudioImage(targetIndex);
-      setMainImageOpacity(1);
       setTransitionDirection(null);
       setTransitionTargetImage(null);
       setIsTransitioning(false);
@@ -511,165 +508,66 @@ const TattooStudio: React.FC = () => {
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
                 {STUDIO_IMAGES.map((_, index) => (
                   <button
-                    onClick={() => navigateToCalendar()}
-                    className="px-8 py-4 text-white rounded-lg font-semibold flex items-center gap-2 transition-all hover:gap-4 shadow-lg hover:shadow-xl"
-                    style={{ backgroundColor: COLORS.crimson }}
-                  >
-                    Prenota una consultazione <ArrowRight size={20} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Image Area - Studio Slider */}
-              <div
-                className="relative group hidden md:block"
-                onMouseMove={handleMouseMove}
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                {/* Anteprima sinistra (immagine precedente) */}
-                <div
-                  className="absolute top-1/2 -translate-y-1/2 overflow-hidden pointer-events-none z-0"
-                  style={{
-                    right: isTransitioning && transitionDirection === 'left'
-                      ? '0%'
-                      : `calc(100% + ${hoverOffset * 30}px)`,
-                    width: isTransitioning && transitionDirection === 'left'
-                      ? '100%'
-                      : `${(isHovering || isTransitioning) && hoverOffset < 0 ? Math.abs(hoverOffset) * 30 : 0}px`,
-                    height: isTransitioning && transitionDirection === 'left' ? '100%' : '90%',
-                    opacity: (isHovering || transitionDirection === 'left') && hoverOffset < 0 ? 1 : 0,
-                    transition: isTransitioning ? 'all 0.4s ease-out' : 'none',
-                    borderRadius: isTransitioning && transitionDirection === 'left' ? '1rem' : '1rem 0 0 1rem',
-                  }}
-                >
-                  <img
-                    src={STUDIO_IMAGES[getPreviewImageIndex('left')]}
-                    alt="Immagine precedente"
-                    className="w-full h-full object-cover"
+                    key={index}
+                    onClick={() => setCurrentStudioImage(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      index === currentStudioImage
+                        ? 'bg-white w-6'
+                        : 'bg-white/50 hover:bg-white/80'
+                    }`}
+                    aria-label={`Vai all'immagine ${index + 1}`}
                   />
-                </div>
-
-                {/* Anteprima destra (immagine successiva) */}
-                <div
-                  className="absolute top-1/2 -translate-y-1/2 overflow-hidden pointer-events-none z-0"
-                  style={{
-                    left: isTransitioning && transitionDirection === 'right'
-                      ? '0%'
-                      : `calc(100% - ${hoverOffset * 30}px)`,
-                    width: isTransitioning && transitionDirection === 'right'
-                      ? '100%'
-                      : `${(isHovering || isTransitioning) && hoverOffset > 0 ? hoverOffset * 30 : 0}px`,
-                    height: isTransitioning && transitionDirection === 'right' ? '100%' : '90%',
-                    opacity: (isHovering || transitionDirection === 'right') && hoverOffset > 0 ? 1 : 0,
-                    transition: isTransitioning ? 'all 0.4s ease-out' : 'none',
-                    borderRadius: isTransitioning && transitionDirection === 'right' ? '1rem' : '0 1rem 1rem 0',
-                  }}
-                >
-                  <img
-                    src={STUDIO_IMAGES[getPreviewImageIndex('right')]}
-                    alt="Immagine successiva"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* Immagine principale */}
-                <div
-                  className="aspect-4/5 bg-stone-200 rounded-2xl overflow-hidden shadow-2xl relative z-10"
-                  style={{
-                    transform: `translateX(${isTransitioning ? 0 : -hoverOffset * 30}px) scale(${isHovering && !isTransitioning ? 1.02 : 1})`,
-                    transition: isTransitioning ? 'opacity 0.4s ease-out' : 'transform 0.2s ease-out',
-                    opacity: mainImageOpacity,
-                  }}
-                >
-                  <img
-                    src={STUDIO_IMAGES[currentStudioImage]}
-                    alt={`Studio Interior ${currentStudioImage + 1}`}
-                    className="object-cover w-full h-full opacity-90"
-                  />
-                  <div className="absolute inset-0 bg-black/10 pointer-events-none transition-colors duration-500 group-hover:bg-black/5"></div>
-
-                  {/* Frecce di navigazione - solo desktop */}
-                  <button
-                    onClick={prevStudioImage}
-                    className="flex absolute left-0 top-1/2 -translate-y-1/2 w-12 h-24 items-center justify-center bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-full group-hover:translate-x-0 rounded-r-lg"
-                    aria-label="Immagine precedente"
-                  >
-                    <ChevronLeft size={32} />
-                  </button>
-                  <button
-                    onClick={nextStudioImage}
-                    className="flex absolute right-0 top-1/2 -translate-y-1/2 w-12 h-24 items-center justify-center bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-full group-hover:translate-x-0 rounded-l-lg"
-                    aria-label="Immagine successiva"
-                  >
-                    <ChevronRight size={32} />
-                  </button>
-
-                  {/* Indicatori */}
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                    {STUDIO_IMAGES.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentStudioImage(index)}
-                        className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentStudioImage
-                            ? 'bg-white w-6'
-                            : 'bg-white/50 hover:bg-white/80'
-                          }`}
-                        aria-label={`Vai all'immagine ${index + 1}`}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                {/* Badge - Desktop */}
-
-              </div>
-
-              {/* Image Area - Mobile (con scroll snap) */}
-              <div className="relative md:hidden">
-                <div
-                  ref={studioScrollRef}
-                  onScroll={handleStudioScroll}
-                  className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide rounded-2xl shadow-2xl"
-                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                >
-                  {STUDIO_IMAGES.map((img, index) => (
-                    <div
-                      key={index}
-                      className="flex-shrink-0 w-full aspect-4/5 snap-center"
-                    >
-                      <div className="relative w-full h-full bg-stone-200">
-                        <img
-                          src={img}
-                          alt={`Studio Interior ${index + 1}`}
-                          className="object-cover w-full h-full opacity-90"
-                        />
-                        <div className="absolute inset-0 bg-black/10 pointer-events-none"></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Indicatori mobile */}
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-                  {STUDIO_IMAGES.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        setCurrentStudioImage(index);
-                        studioScrollRef.current?.scrollTo({ left: index * (studioScrollRef.current?.clientWidth || 0), behavior: 'smooth' });
-                      }}
-                      className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentStudioImage
-                          ? 'bg-white w-6'
-                          : 'bg-white/50 hover:bg-white/80'
-                        }`}
-                      aria-label={`Vai all'immagine ${index + 1}`}
-                    />
-                  ))}
-                </div>
+                ))}
               </div>
             </div>
-          </header>
+          </div>
+
+          {/* Image Area - Mobile (con scroll snap) */}
+          <div className="relative md:hidden">
+            <div
+              ref={studioScrollRef}
+              onScroll={handleStudioScroll}
+              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide rounded-2xl shadow-2xl"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {STUDIO_IMAGES.map((img, index) => (
+                <div
+                  key={index}
+                  className="flex-shrink-0 w-full aspect-4/5 snap-center"
+                >
+                  <div className="relative w-full h-full bg-stone-200">
+                    <img
+                      src={img}
+                      alt={`Studio Interior ${index + 1}`}
+                      className="object-cover w-full h-full opacity-90"
+                    />
+                    <div className="absolute inset-0 bg-black/10 pointer-events-none"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Indicatori mobile */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+              {STUDIO_IMAGES.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setCurrentStudioImage(index);
+                    studioScrollRef.current?.scrollTo({ left: index * (studioScrollRef.current?.clientWidth || 0), behavior: 'smooth' });
+                  }}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    index === currentStudioImage
+                      ? 'bg-white w-6'
+                      : 'bg-white/50 hover:bg-white/80'
+                  }`}
+                  aria-label={`Vai all'immagine ${index + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </header>
 
           {/* --- GALLERY SECTION (Le nostre opere) --- */}
           <section
