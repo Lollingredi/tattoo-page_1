@@ -47,7 +47,7 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
 
 const STUDIO_IMAGES = [studioImg1, studioImg2, studioImg3];
 
-const TomoeLanding: React.FC = () => {
+const TattooStudio: React.FC = () => {
   // Initialize currentPage based on current URL
   const getPageFromPath = (pathname: string): PageType => {
     if (pathname === '/prenota') return 'calendar';
@@ -957,4 +957,4 @@ const TomoeLanding: React.FC = () => {
   );
 };
 
-export default TomoeLanding;
+export default TattooStudio;

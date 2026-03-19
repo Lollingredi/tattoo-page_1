@@ -1,4 +1,4 @@
-# Tomoe Studio - Sito Web Tattoo Studio
+# Tattoo Studio - Sito Web
 
 Sito web moderno per uno studio di tatuaggi, costruito con React e TypeScript.
 
