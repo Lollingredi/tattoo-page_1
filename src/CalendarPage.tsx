@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, ChevronDown, Calendar, Clock, User, Check, MapPin } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Clock, User, Check, MapPin, Mail, Phone, MessageSquare, ArrowRight } from 'lucide-react';
+
+// Import artist images
+import tattooer1 from './elements/tattooer1.png';
+import tattooer2 from './elements/tattooer2.png';
+import tattooer3 from './elements/tattooer3.png';
 
 // --- Types & Interfaces ---
 
@@ -8,6 +13,9 @@ interface Artist {
   name: string;
   nickname: string;
   fullName: string;
+  specialization: string;
+  profileImage: string;
+  experience: string;
 }
 
 interface TimeSlot {
@@ -15,16 +23,7 @@ interface TimeSlot {
   available: boolean;
 }
 
-interface DaySchedule {
-  dayName: string;
-  dayNumber: number;
-  month: number;
-  year: number;
-  isOpen: boolean;
-  date: Date;
-}
-
-type WrapperState = 'calendar' | 'timeSlots' | 'confirmation';
+type BookingStep = 'artist' | 'date' | 'time' | 'details' | 'confirmation';
 
 // --- Data & Config ---
 
@@ -37,134 +36,102 @@ const COLORS = {
 };
 
 const ARTISTS: Artist[] = [
-  { id: 'artist1', name: 'Nome', nickname: 'Soprannome', fullName: 'Nome "Soprannome" Cognome' },
-  { id: 'artist2', name: 'Nome', nickname: 'Soprannome', fullName: 'Nome "Soprannome" Cognome' },
-  { id: 'artist3', name: 'Nome', nickname: 'Soprannome', fullName: 'Nome "Soprannome" Cognome' },
+  {
+    id: 'leo',
+    name: 'Leo',
+    nickname: "L'Ancora",
+    fullName: 'Leo "L\'Ancora" Rossi',
+    specialization: 'American Traditional / Old School',
+    profileImage: tattooer1,
+    experience: '25+ anni',
+  },
+  {
+    id: 'elena',
+    name: 'Elena',
+    nickname: 'Luna',
+    fullName: 'Elena "Luna" Moretti',
+    specialization: 'Fine Line, Dotwork & Geometrico',
+    profileImage: tattooer2,
+    experience: '6 anni',
+  },
+  {
+    id: 'matteo',
+    name: 'Matteo',
+    nickname: 'Kroma',
+    fullName: 'Matteo "Kroma" Bianchi',
+    specialization: 'Neo-Traditional & Realismo',
+    profileImage: tattooer3,
+    experience: '12 anni',
+  },
 ];
 
-// Days when studio is open (0 = Sunday, 1 = Monday, etc.)
 const OPEN_DAYS = [2, 3, 4, 5, 6]; // Tuesday to Saturday
 
-// Generate 30-minute time slots
 const generateTimeSlots = (): TimeSlot[] => {
   const slots: TimeSlot[] = [];
-
-  // Morning: 10:00 - 13:00
   for (let hour = 10; hour < 13; hour++) {
     slots.push({ time: `${hour}:00`, available: true });
     slots.push({ time: `${hour}:30`, available: true });
   }
-
-  // Afternoon: 14:00 - 19:00
   for (let hour = 14; hour < 19; hour++) {
     slots.push({ time: `${hour}:00`, available: true });
     slots.push({ time: `${hour}:30`, available: true });
   }
-
   return slots;
 };
 
 const TIME_SLOTS = generateTimeSlots();
-
 const DAYS_IT = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
 const MONTHS_IT = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
 
+const STEPS: { key: BookingStep; label: string; icon: React.ReactNode }[] = [
+  { key: 'artist', label: 'Artista', icon: <User size={16} /> },
+  { key: 'date', label: 'Data', icon: <Calendar size={16} /> },
+  { key: 'time', label: 'Orario', icon: <Clock size={16} /> },
+  { key: 'details', label: 'Dettagli', icon: <MessageSquare size={16} /> },
+];
+
+const STEP_ORDER: BookingStep[] = ['artist', 'date', 'time', 'details', 'confirmation'];
+
+// --- Component ---
+
 const CalendarPage: React.FC = () => {
+  const [currentStep, setCurrentStep] = useState<BookingStep>('artist');
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
-  const [artistMenuOpen, setArtistMenuOpen] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
-
-  // Wrapper state management
-  const [wrapperState, setWrapperState] = useState<WrapperState>('calendar');
   const [contentVisible, setContentVisible] = useState<boolean>(true);
-  const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
 
-  // Handle transition to time slots when artist and date are selected
-  useEffect(() => {
-    if (selectedArtist && selectedDate && wrapperState === 'calendar') {
-      // Start transition
-      setIsTransitioning(true);
-      setContentVisible(false);
+  // Form fields
+  const [formName, setFormName] = useState('');
+  const [formEmail, setFormEmail] = useState('');
+  const [formPhone, setFormPhone] = useState('');
+  const [formDescription, setFormDescription] = useState('');
 
-      // After content fades out, change wrapper state
-      const transitionTimer = setTimeout(() => {
-        setWrapperState('timeSlots');
-        // Show new content after wrapper resizes
-        setTimeout(() => {
-          setContentVisible(true);
-          setIsTransitioning(false);
-        }, 300);
-      }, 300);
+  const currentStepIndex = STEP_ORDER.indexOf(currentStep);
 
-      return () => clearTimeout(transitionTimer);
-    }
-  }, [selectedArtist, selectedDate]);
-
-  const handleConfirmBooking = () => {
-    if (selectedArtist && selectedDate && selectedTime) {
-      // Start transition to confirmation
-      setIsTransitioning(true);
-      setContentVisible(false);
-
-      // After content fades out, change to confirmation
-      setTimeout(() => {
-        setWrapperState('confirmation');
-        // Show confirmation content
-        setTimeout(() => {
-          setContentVisible(true);
-          setIsTransitioning(false);
-        }, 300);
-      }, 300);
-    }
-  };
-
-  const handleBackToCalendar = () => {
-    setIsTransitioning(true);
+  const transitionTo = (step: BookingStep) => {
     setContentVisible(false);
-
     setTimeout(() => {
-      setSelectedDate(null);
-      setSelectedTime(null);
-      setWrapperState('calendar');
-      setTimeout(() => {
-        setContentVisible(true);
-        setIsTransitioning(false);
-      }, 300);
-    }, 300);
+      setCurrentStep(step);
+      setContentVisible(true);
+    }, 250);
   };
 
-  // Get all days in current month
-  const getDaysInMonth = (): (DaySchedule | null)[] => {
-    const year = currentMonth.getFullYear();
-    const month = currentMonth.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const days: (DaySchedule | null)[] = [];
-
-    // Add empty slots for days before the first day of month
-    const startDayOfWeek = firstDay.getDay();
-    const emptySlots = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1; // Monday = 0
-    for (let i = 0; i < emptySlots; i++) {
-      days.push(null);
+  // Auto-advance to date after selecting artist
+  useEffect(() => {
+    if (selectedArtist && currentStep === 'artist') {
+      setTimeout(() => transitionTo('date'), 300);
     }
+  }, [selectedArtist]);
 
-    // Add all days of the month
-    for (let day = 1; day <= lastDay.getDate(); day++) {
-      const date = new Date(year, month, day);
-      days.push({
-        dayName: DAYS_IT[date.getDay()],
-        dayNumber: day,
-        month: month,
-        year: year,
-        isOpen: OPEN_DAYS.includes(date.getDay()),
-        date: date,
-      });
+  // Auto-advance to time after selecting date
+  useEffect(() => {
+    if (selectedDate && currentStep === 'date') {
+      setTimeout(() => transitionTo('time'), 300);
     }
-
-    return days;
-  };
+  }, [selectedDate]);
 
   const goToPreviousMonth = () => {
     const newDate = new Date(currentMonth);
@@ -182,6 +149,13 @@ const CalendarPage: React.FC = () => {
     setCurrentMonth(newDate);
   };
 
+  const isToday = (date: Date): boolean => {
+    const today = new Date();
+    return date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear();
+  };
+
   const isDateInPast = (date: Date): boolean => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -192,15 +166,35 @@ const CalendarPage: React.FC = () => {
 
   const isDateSelected = (date: Date): boolean => {
     if (!selectedDate) return false;
-    return (
-      date.getDate() === selectedDate.getDate() &&
+    return date.getDate() === selectedDate.getDate() &&
       date.getMonth() === selectedDate.getMonth() &&
-      date.getFullYear() === selectedDate.getFullYear()
-    );
+      date.getFullYear() === selectedDate.getFullYear();
   };
 
-  const handleDateSelect = (day: DaySchedule) => {
-    if (!day.isOpen || isDateInPast(day.date) || isTransitioning) return;
+  const getDaysInMonth = () => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const days: ({ dayNumber: number; date: Date; isOpen: boolean } | null)[] = [];
+
+    const startDayOfWeek = firstDay.getDay();
+    const emptySlots = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
+    for (let i = 0; i < emptySlots; i++) days.push(null);
+
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+      const date = new Date(year, month, day);
+      days.push({
+        dayNumber: day,
+        date,
+        isOpen: OPEN_DAYS.includes(date.getDay()),
+      });
+    }
+    return days;
+  };
+
+  const handleDateSelect = (day: { dayNumber: number; date: Date; isOpen: boolean }) => {
+    if (!day.isOpen || isDateInPast(day.date)) return;
     setSelectedDate(day.date);
     setSelectedTime(null);
   };
@@ -209,309 +203,318 @@ const CalendarPage: React.FC = () => {
     setSelectedTime(time);
   };
 
-  const formatDate = (date: Date): string => {
-    return `${DAYS_IT[date.getDay()]} ${date.getDate()} ${MONTHS_IT[date.getMonth()]} ${date.getFullYear()}`;
+  const handleConfirmTime = () => {
+    if (selectedTime) transitionTo('details');
   };
 
-  const formatShortDate = (date: Date): string => {
-    return `${date.getDate()} ${MONTHS_IT[date.getMonth()]}`;
+  const handleSubmitBooking = () => {
+    if (formName && formEmail) transitionTo('confirmation');
   };
 
-  const canBook = selectedArtist && selectedDate && selectedTime;
-
-  // Get wrapper styles based on state
-  const getWrapperStyles = () => {
-    const baseStyles = 'rounded-2xl p-6 transition-all duration-300 ease-out overflow-hidden order-2 md:col-start-2 md:row-start-1 md:row-span-3';
-
-    switch (wrapperState) {
-      case 'calendar':
-        return {
-          className: baseStyles,
-          style: { backgroundColor: COLORS.sage },
-        };
-      case 'timeSlots':
-        return {
-          className: baseStyles,
-          style: { backgroundColor: COLORS.sage },
-        };
-      case 'confirmation':
-        return {
-          className: baseStyles,
-          style: { backgroundColor: COLORS.charcoal },
-        };
+  const handleStepClick = (step: BookingStep) => {
+    const targetIndex = STEP_ORDER.indexOf(step);
+    if (targetIndex < currentStepIndex) {
+      // Reset downstream selections
+      if (targetIndex <= 0) { setSelectedArtist(null); setSelectedDate(null); setSelectedTime(null); }
+      else if (targetIndex <= 1) { setSelectedDate(null); setSelectedTime(null); }
+      else if (targetIndex <= 2) { setSelectedTime(null); }
+      transitionTo(step);
     }
   };
 
-  const wrapperStyles = getWrapperStyles();
+  const formatDate = (date: Date): string =>
+    `${DAYS_IT[date.getDay()]} ${date.getDate()} ${MONTHS_IT[date.getMonth()]}`;
+
+  const canSubmit = formName.trim() && formEmail.trim();
 
   return (
-    <div className="pt-24 pb-12 px-6 min-h-[calc(100vh-200px)]">
-      <div className="max-w-6xl mx-auto">
-        {/* Page Title */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Prenota Appuntamento</h1>
-          <p className="text-stone-600">Scegli l'artista, la data e l'orario per la tua consultazione</p>
+    <div className="pt-24 pb-12 px-4 md:px-6 min-h-[calc(100vh-200px)]">
+      <div className="max-w-5xl mx-auto">
+
+        {/* Header */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-4"
+            style={{ backgroundColor: `${COLORS.crimson}15`, color: COLORS.crimson }}>
+            <Calendar size={14} /> Prenota Online
+          </div>
+          <h1 className="text-3xl md:text-5xl font-bold mb-3" style={{ color: COLORS.charcoal }}>
+            Prenota il tuo appuntamento
+          </h1>
+          <p className="text-stone-500 max-w-lg mx-auto">
+            Scegli il tuo artista preferito, seleziona data e orario, e raccontaci la tua idea
+          </p>
         </div>
 
-        <div className="flex flex-col md:grid md:grid-cols-[300px_1fr] gap-6 md:gap-8">
-          {/* Artist Dropdown - First on mobile, row 1 col 1 on desktop */}
-          <div
-            className="rounded-2xl p-6 order-1 md:col-start-1 md:row-start-1"
-            style={{ backgroundColor: COLORS.sage }}
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <User size={20} style={{ color: COLORS.crimson }} />
-              <h3 className="font-bold">Scegli Artista</h3>
-            </div>
+        {/* Stepper */}
+        {currentStep !== 'confirmation' && (
+          <div className="flex items-center justify-center gap-0 mb-10 overflow-x-auto px-2">
+            {STEPS.map((step, index) => {
+              const stepIndex = STEP_ORDER.indexOf(step.key);
+              const isActive = stepIndex === currentStepIndex;
+              const isCompleted = stepIndex < currentStepIndex;
+              const isClickable = stepIndex < currentStepIndex;
 
-            <div className="relative">
-              <button
-                onClick={() => setArtistMenuOpen(!artistMenuOpen)}
-                disabled={wrapperState !== 'calendar'}
-                className={`w-full p-4 rounded-xl border-2 flex items-center justify-between transition-all ${
-                  wrapperState !== 'calendar' ? 'opacity-60 cursor-not-allowed' : ''
-                }`}
-                style={{
-                  backgroundColor: 'white',
-                  borderColor: selectedArtist ? COLORS.crimson : COLORS.leather,
-                }}
-              >
-                {selectedArtist ? (
-                  <div className="flex items-center gap-3">
+              return (
+                <React.Fragment key={step.key}>
+                  {index > 0 && (
                     <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white"
-                      style={{ backgroundColor: COLORS.leather }}
-                    >
-                      {selectedArtist.nickname[0]}
-                    </div>
-                    <div className="text-left">
-                      <p className="font-medium">{selectedArtist.name}</p>
-                      <p className="text-sm text-stone-500">"{selectedArtist.nickname}"</p>
-                    </div>
-                  </div>
-                ) : (
-                  <span className="text-stone-400">Seleziona un artista...</span>
-                )}
-                <ChevronDown
-                  size={20}
-                  className={`text-stone-400 transition-transform ${artistMenuOpen ? 'rotate-180' : ''}`}
-                />
-              </button>
+                      className="w-8 md:w-16 h-0.5 mx-1 transition-colors duration-300"
+                      style={{ backgroundColor: isCompleted ? COLORS.crimson : '#E5E0DB' }}
+                    />
+                  )}
+                  <button
+                    onClick={() => isClickable && handleStepClick(step.key)}
+                    className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                      isClickable ? 'cursor-pointer hover:opacity-80' : isActive ? '' : 'cursor-default'
+                    }`}
+                    style={{
+                      backgroundColor: isActive ? COLORS.crimson : isCompleted ? `${COLORS.crimson}15` : '#F0ECE8',
+                      color: isActive ? 'white' : isCompleted ? COLORS.crimson : '#A09890',
+                    }}
+                  >
+                    {isCompleted ? <Check size={16} /> : step.icon}
+                    <span className="hidden sm:inline">{step.label}</span>
+                  </button>
+                </React.Fragment>
+              );
+            })}
+          </div>
+        )}
 
-              {/* Dropdown Menu */}
-              {artistMenuOpen && wrapperState === 'calendar' && (
-                <div
-                  className="absolute top-full left-0 right-0 mt-2 rounded-xl shadow-xl border overflow-hidden z-20"
-                  style={{ backgroundColor: 'white', borderColor: COLORS.sand }}
-                >
-                  {ARTISTS.map((artist) => (
+        {/* Content area */}
+        <div className={`transition-all duration-250 ${contentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+
+          {/* STEP 1: Artist Selection */}
+          {currentStep === 'artist' && (
+            <div>
+              <h2 className="text-xl font-bold mb-6 text-center" style={{ color: COLORS.charcoal }}>
+                Chi sarà il tuo artista?
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                {ARTISTS.map((artist) => {
+                  const isSelected = selectedArtist?.id === artist.id;
+                  return (
                     <button
                       key={artist.id}
-                      onClick={() => {
-                        setSelectedArtist(artist);
-                        setArtistMenuOpen(false);
-                      }}
-                      className={`w-full p-4 flex items-center gap-3 hover:bg-stone-50 transition-colors ${
-                        selectedArtist?.id === artist.id ? 'bg-stone-100' : ''
+                      onClick={() => setSelectedArtist(artist)}
+                      className={`relative rounded-2xl overflow-hidden text-left transition-all duration-300 group ${
+                        isSelected ? 'scale-[1.02] shadow-xl' : 'hover:shadow-lg hover:scale-[1.01]'
                       }`}
+                      style={{
+                        backgroundColor: COLORS.sage,
+                        outlineColor: isSelected ? COLORS.crimson : undefined,
+                        outline: isSelected ? `3px solid ${COLORS.crimson}` : undefined,
+                      }}
                     >
-                      <div
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white"
-                        style={{ backgroundColor: COLORS.leather }}
-                      >
-                        {artist.nickname[0]}
+                      {/* Artist photo */}
+                      <div className="aspect-[4/3] overflow-hidden bg-stone-200">
+                        <img
+                          src={artist.profileImage}
+                          alt={artist.name}
+                          className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                        />
                       </div>
-                      <div className="text-left">
-                        <p className="font-medium">{artist.fullName}</p>
+
+                      {/* Info */}
+                      <div className="p-4">
+                        <div className="flex items-center justify-between mb-1">
+                          <h3 className="font-bold text-lg" style={{ color: COLORS.charcoal }}>
+                            {artist.name} <span className="font-normal text-stone-400">"{artist.nickname}"</span>
+                          </h3>
+                          {isSelected && (
+                            <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: COLORS.crimson }}>
+                              <Check size={14} className="text-white" />
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-sm text-stone-500 mb-2">{artist.specialization}</p>
+                        <span className="text-xs font-medium px-2 py-1 rounded-full" style={{ backgroundColor: `${COLORS.leather}20`, color: COLORS.leather }}>
+                          {artist.experience}
+                        </span>
                       </div>
-                      {selectedArtist?.id === artist.id && (
-                        <Check size={18} className="ml-auto" style={{ color: COLORS.crimson }} />
+
+                      {/* Selected overlay border */}
+                      {isSelected && (
+                        <div className="absolute inset-0 rounded-2xl pointer-events-none" style={{ border: `3px solid ${COLORS.crimson}` }} />
                       )}
                     </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Opening Hours - Third on mobile, row 2 col 1 on desktop */}
-          <div
-            className="rounded-2xl p-6 order-3 md:col-start-1 md:row-start-2"
-            style={{ backgroundColor: COLORS.sage }}
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <Clock size={20} style={{ color: COLORS.crimson }} />
-              <h3 className="font-bold">Orari di Apertura</h3>
-            </div>
-
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-stone-500">Martedì - Sabato</span>
-                <span className="font-medium">10:00 - 13:00</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-stone-500"></span>
-                <span className="font-medium">14:00 - 19:00</span>
-              </div>
-              <div className="h-px bg-stone-200 my-2" />
-              <div className="flex justify-between">
-                <span className="text-stone-500">Domenica - Lunedì</span>
-                <span className="text-stone-400">Chiuso</span>
+                  );
+                })}
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Location - Fourth on mobile, row 3 col 1 on desktop */}
-          <div
-            className="rounded-2xl p-6 order-4 md:col-start-1 md:row-start-3"
-            style={{ backgroundColor: COLORS.sage }}
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <MapPin size={20} style={{ color: COLORS.crimson }} />
-              <h3 className="font-bold">Dove Siamo</h3>
-            </div>
-            <p className="text-sm text-stone-600">
-              Via Example 123<br />
-              Città, Regione
-            </p>
-          </div>
+          {/* STEP 2: Date Selection */}
+          {currentStep === 'date' && (
+            <div className="max-w-3xl mx-auto">
+              <div className="flex flex-col md:flex-row gap-6">
+                {/* Calendar */}
+                <div className="flex-1 rounded-2xl p-6" style={{ backgroundColor: COLORS.sage }}>
+                  <h2 className="text-lg font-bold mb-5" style={{ color: COLORS.charcoal }}>Seleziona una data</h2>
 
-          {/* Main Content - Second on mobile, spans full right column on desktop */}
-          <div
-            className={wrapperStyles.className}
-            style={wrapperStyles.style}
-          >
-            {/* Calendar Content */}
-            {wrapperState === 'calendar' && (
-              <div
-                className={`transition-opacity duration-300 ${
-                  contentVisible ? 'opacity-100' : 'opacity-0'
-                }`}
-              >
-                <div className="flex items-center gap-3 mb-6">
-                  <Calendar size={20} style={{ color: COLORS.crimson }} />
-                  <h3 className="font-bold">Seleziona Data</h3>
-                </div>
+                  {/* Month nav */}
+                  <div className="flex items-center justify-between mb-5">
+                    <button onClick={goToPreviousMonth} className="p-2 hover:bg-stone-200 rounded-lg transition-colors">
+                      <ChevronLeft size={20} />
+                    </button>
+                    <h4 className="font-bold">
+                      {MONTHS_IT[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+                    </h4>
+                    <button onClick={goToNextMonth} className="p-2 hover:bg-stone-200 rounded-lg transition-colors">
+                      <ChevronRight size={20} />
+                    </button>
+                  </div>
 
-                {/* Month Navigation */}
-                <div className="flex items-center justify-between mb-6">
-                  <button
-                    onClick={goToPreviousMonth}
-                    className="p-2 hover:bg-stone-200 rounded-lg transition-colors"
-                    aria-label="Mese precedente"
-                  >
-                    <ChevronLeft size={24} />
-                  </button>
-                  <h4 className="font-bold text-lg">
-                    {MONTHS_IT[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-                  </h4>
-                  <button
-                    onClick={goToNextMonth}
-                    className="p-2 hover:bg-stone-200 rounded-lg transition-colors"
-                    aria-label="Mese successivo"
-                  >
-                    <ChevronRight size={24} />
-                  </button>
-                </div>
+                  {/* Day headers */}
+                  <div className="grid grid-cols-7 gap-1 mb-2">
+                    {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map((day, i) => (
+                      <div key={day} className={`text-center text-xs font-semibold py-2 ${
+                        i >= 5 ? 'text-stone-300' : 'text-stone-500'
+                      }`}>
+                        {day}
+                      </div>
+                    ))}
+                  </div>
 
-                {/* Days Header */}
-                <div className="grid grid-cols-7 gap-1 mb-2">
-                  {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map((day) => (
-                    <div key={day} className="text-center text-sm font-medium text-stone-500 py-2">
-                      {day}
+                  {/* Calendar grid */}
+                  <div className="grid grid-cols-7 gap-1">
+                    {getDaysInMonth().map((day, index) => {
+                      if (!day) return <div key={`empty-${index}`} className="aspect-square" />;
+
+                      const isPast = isDateInPast(day.date);
+                      const isSelected = isDateSelected(day.date);
+                      const isDisabled = !day.isOpen || isPast;
+                      const isTodayDate = isToday(day.date);
+                      const isWeekend = day.date.getDay() === 0 || day.date.getDay() === 1;
+
+                      return (
+                        <button
+                          key={day.dayNumber}
+                          onClick={() => handleDateSelect(day)}
+                          disabled={isDisabled}
+                          className={`aspect-square rounded-xl flex items-center justify-center text-sm font-medium transition-all relative ${
+                            isDisabled
+                              ? 'text-stone-300 cursor-not-allowed'
+                              : isSelected
+                              ? 'text-white shadow-lg scale-110'
+                              : isTodayDate
+                              ? 'font-bold'
+                              : isWeekend
+                              ? 'text-stone-300'
+                              : 'hover:bg-stone-200'
+                          }`}
+                          style={{
+                            backgroundColor: isSelected ? COLORS.crimson : isTodayDate && !isDisabled ? `${COLORS.crimson}10` : undefined,
+                            color: isTodayDate && !isSelected && !isDisabled ? COLORS.crimson : undefined,
+                          }}
+                        >
+                          {day.dayNumber}
+                          {isTodayDate && !isSelected && (
+                            <span className="absolute bottom-1 w-1 h-1 rounded-full" style={{ backgroundColor: COLORS.crimson }} />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Legend */}
+                  <div className="flex items-center gap-4 mt-5 text-xs text-stone-400">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS.crimson }} />
+                      Oggi
                     </div>
-                  ))}
-                </div>
-
-                {/* Calendar Grid */}
-                <div className="grid grid-cols-7 gap-1">
-                  {getDaysInMonth().map((day, index) => {
-                    if (!day) {
-                      return <div key={`empty-${index}`} className="aspect-square" />;
-                    }
-
-                    const isPast = isDateInPast(day.date);
-                    const isSelected = isDateSelected(day.date);
-                    const isDisabled = !day.isOpen || isPast;
-
-                    return (
-                      <button
-                        key={day.dayNumber}
-                        onClick={() => handleDateSelect(day)}
-                        disabled={isDisabled || !selectedArtist}
-                        className={`aspect-square rounded-xl flex items-center justify-center text-sm font-medium transition-all ${
-                          isDisabled || !selectedArtist
-                            ? 'text-stone-300 cursor-not-allowed'
-                            : isSelected
-                            ? 'text-white shadow-lg'
-                            : 'hover:bg-stone-200'
-                        }`}
-                        style={{
-                          backgroundColor: isSelected ? COLORS.crimson : undefined,
-                        }}
-                      >
-                        {day.dayNumber}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {!selectedArtist && (
-                  <p className="text-center text-sm text-stone-400 mt-6">
-                    Seleziona prima un artista per scegliere la data
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Time Slots Content */}
-            {wrapperState === 'timeSlots' && (
-              <div
-                className={`transition-opacity duration-300 ${
-                  contentVisible ? 'opacity-100' : 'opacity-0'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <Clock size={20} style={{ color: COLORS.crimson }} />
-                    <h3 className="font-bold">
-                      Orari disponibili
-                    </h3>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-stone-200" />
+                      Chiuso
+                    </div>
                   </div>
-                  <button
-                    onClick={handleBackToCalendar}
-                    className="text-sm text-stone-500 hover:text-stone-700 transition-colors flex items-center gap-1"
-                  >
-                    <ChevronLeft size={16} />
-                    Cambia data
+                </div>
+
+                {/* Sidebar info */}
+                <div className="md:w-56 space-y-4">
+                  {/* Selected artist recap */}
+                  {selectedArtist && (
+                    <div className="rounded-2xl p-4" style={{ backgroundColor: COLORS.sage }}>
+                      <div className="flex items-center gap-3">
+                        <img src={selectedArtist.profileImage} alt={selectedArtist.name}
+                          className="w-10 h-10 rounded-full object-cover object-top" />
+                        <div>
+                          <p className="font-bold text-sm">{selectedArtist.name}</p>
+                          <p className="text-xs text-stone-400">"{selectedArtist.nickname}"</p>
+                        </div>
+                      </div>
+                      <button onClick={() => handleStepClick('artist')}
+                        className="text-xs mt-3 hover:underline" style={{ color: COLORS.crimson }}>
+                        Cambia artista
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Opening hours */}
+                  <div className="rounded-2xl p-4" style={{ backgroundColor: COLORS.sage }}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Clock size={16} style={{ color: COLORS.crimson }} />
+                      <h3 className="font-bold text-sm">Orari</h3>
+                    </div>
+                    <div className="space-y-1.5 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-stone-500">Mar - Sab</span>
+                        <span className="font-medium">10-13 / 14-19</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-stone-500">Dom - Lun</span>
+                        <span className="text-stone-400">Chiuso</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Location */}
+                  <div className="rounded-2xl p-4" style={{ backgroundColor: COLORS.sage }}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <MapPin size={16} style={{ color: COLORS.crimson }} />
+                      <h3 className="font-bold text-sm">Dove Siamo</h3>
+                    </div>
+                    <p className="text-xs text-stone-500">
+                      Via Example 123<br />Città, Regione
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3: Time Selection */}
+          {currentStep === 'time' && (
+            <div className="max-w-2xl mx-auto">
+              <div className="rounded-2xl p-6" style={{ backgroundColor: COLORS.sage }}>
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-lg font-bold" style={{ color: COLORS.charcoal }}>Scegli l'orario</h2>
+                  <button onClick={() => { setSelectedDate(null); transitionTo('date'); }}
+                    className="text-sm flex items-center gap-1 hover:underline" style={{ color: COLORS.crimson }}>
+                    <ChevronLeft size={16} /> Cambia data
                   </button>
                 </div>
 
-                {selectedDate && (
-                  <p className="text-sm text-stone-600 mb-6">
-                    {formatDate(selectedDate)} • {selectedArtist?.fullName}
+                {selectedDate && selectedArtist && (
+                  <p className="text-sm text-stone-500 mb-6">
+                    {formatDate(selectedDate)} • {selectedArtist.name} "{selectedArtist.nickname}"
                   </p>
                 )}
 
-                {/* Morning Slots */}
+                {/* Morning */}
                 <div className="mb-6">
-                  <p className="text-sm text-stone-500 mb-3">Mattina (10:00 - 13:00)</p>
+                  <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">Mattina</p>
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                    {TIME_SLOTS.filter((slot) => {
-                      const hour = parseInt(slot.time.split(':')[0]);
-                      return hour < 14;
-                    }).map((slot) => (
+                    {TIME_SLOTS.filter(s => parseInt(s.time.split(':')[0]) < 14).map((slot) => (
                       <button
                         key={slot.time}
                         onClick={() => handleTimeSelect(slot.time)}
-                        className={`py-3 px-2 rounded-lg text-sm font-medium transition-all ${
+                        className={`py-2.5 px-2 rounded-lg text-sm font-medium transition-all ${
                           selectedTime === slot.time
-                            ? 'text-white'
-                            : 'bg-white hover:bg-stone-100'
+                            ? 'text-white shadow-md scale-105'
+                            : 'bg-white hover:bg-stone-100 hover:shadow-sm'
                         }`}
-                        style={{
-                          backgroundColor: selectedTime === slot.time ? COLORS.crimson : undefined,
-                        }}
+                        style={{ backgroundColor: selectedTime === slot.time ? COLORS.crimson : undefined }}
                       >
                         {slot.time}
                       </button>
@@ -519,25 +522,20 @@ const CalendarPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Afternoon Slots */}
+                {/* Afternoon */}
                 <div className="mb-6">
-                  <p className="text-sm text-stone-500 mb-3">Pomeriggio (14:00 - 19:00)</p>
+                  <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">Pomeriggio</p>
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                    {TIME_SLOTS.filter((slot) => {
-                      const hour = parseInt(slot.time.split(':')[0]);
-                      return hour >= 14;
-                    }).map((slot) => (
+                    {TIME_SLOTS.filter(s => parseInt(s.time.split(':')[0]) >= 14).map((slot) => (
                       <button
                         key={slot.time}
                         onClick={() => handleTimeSelect(slot.time)}
-                        className={`py-3 px-2 rounded-lg text-sm font-medium transition-all ${
+                        className={`py-2.5 px-2 rounded-lg text-sm font-medium transition-all ${
                           selectedTime === slot.time
-                            ? 'text-white'
-                            : 'bg-white hover:bg-stone-100'
+                            ? 'text-white shadow-md scale-105'
+                            : 'bg-white hover:bg-stone-100 hover:shadow-sm'
                         }`}
-                        style={{
-                          backgroundColor: selectedTime === slot.time ? COLORS.crimson : undefined,
-                        }}
+                        style={{ backgroundColor: selectedTime === slot.time ? COLORS.crimson : undefined }}
                       >
                         {slot.time}
                       </button>
@@ -545,87 +543,181 @@ const CalendarPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Confirm Button */}
+                {/* Confirm */}
                 <button
-                  onClick={handleConfirmBooking}
-                  disabled={!canBook}
-                  className={`w-full py-4 rounded-xl font-bold text-white transition-all ${
-                    canBook ? 'hover:brightness-110' : 'opacity-50 cursor-not-allowed'
+                  onClick={handleConfirmTime}
+                  disabled={!selectedTime}
+                  className={`w-full py-3.5 rounded-xl font-bold text-white transition-all flex items-center justify-center gap-2 ${
+                    selectedTime ? 'hover:brightness-110 shadow-lg' : 'opacity-40 cursor-not-allowed'
                   }`}
                   style={{ backgroundColor: COLORS.crimson }}
                 >
-                  Conferma Prenotazione
+                  Continua <ArrowRight size={18} />
                 </button>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Confirmation Content */}
-            {wrapperState === 'confirmation' && selectedArtist && selectedDate && selectedTime && (
-              <div
-                className={`transition-opacity duration-300 ${
-                  contentVisible ? 'opacity-100' : 'opacity-0'
-                }`}
-              >
-                <div className="text-center mb-6">
-                  <div
-                    className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                    style={{ backgroundColor: COLORS.crimson }}
-                  >
-                    <Check size={32} className="text-white" />
+          {/* STEP 4: Contact Details */}
+          {currentStep === 'details' && (
+            <div className="max-w-2xl mx-auto">
+              <div className="rounded-2xl p-6 md:p-8" style={{ backgroundColor: COLORS.sage }}>
+                <h2 className="text-lg font-bold mb-1" style={{ color: COLORS.charcoal }}>Raccontaci di te</h2>
+                <p className="text-sm text-stone-500 mb-6">Completa i dati per confermare la prenotazione</p>
+
+                {/* Recap bar */}
+                {selectedArtist && selectedDate && selectedTime && (
+                  <div className="flex flex-wrap items-center gap-2 mb-6 p-3 rounded-xl bg-white/60 text-xs">
+                    <img src={selectedArtist.profileImage} alt="" className="w-6 h-6 rounded-full object-cover object-top" />
+                    <span className="font-medium">{selectedArtist.name}</span>
+                    <span className="text-stone-300">•</span>
+                    <span>{formatDate(selectedDate!)}</span>
+                    <span className="text-stone-300">•</span>
+                    <span>{selectedTime}</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-2">Prenotazione completata!</h3>
-                  <p className="text-stone-400">Ecco i dettagli del tuo appuntamento</p>
+                )}
+
+                <div className="space-y-4">
+                  {/* Name */}
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-medium mb-1.5" style={{ color: COLORS.charcoal }}>
+                      <User size={14} /> Nome e cognome *
+                    </label>
+                    <input
+                      type="text"
+                      value={formName}
+                      onChange={(e) => setFormName(e.target.value)}
+                      placeholder="Mario Rossi"
+                      className="w-full p-3 rounded-xl border-2 bg-white transition-colors focus:outline-none"
+                      style={{ borderColor: formName ? COLORS.crimson : '#E5E0DB' }}
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-medium mb-1.5" style={{ color: COLORS.charcoal }}>
+                      <Mail size={14} /> Email *
+                    </label>
+                    <input
+                      type="email"
+                      value={formEmail}
+                      onChange={(e) => setFormEmail(e.target.value)}
+                      placeholder="mario@example.com"
+                      className="w-full p-3 rounded-xl border-2 bg-white transition-colors focus:outline-none"
+                      style={{ borderColor: formEmail ? COLORS.crimson : '#E5E0DB' }}
+                    />
+                  </div>
+
+                  {/* Phone */}
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-medium mb-1.5" style={{ color: COLORS.charcoal }}>
+                      <Phone size={14} /> Telefono
+                    </label>
+                    <input
+                      type="tel"
+                      value={formPhone}
+                      onChange={(e) => setFormPhone(e.target.value)}
+                      placeholder="+39 333 1234567"
+                      className="w-full p-3 rounded-xl border-2 bg-white transition-colors focus:outline-none"
+                      style={{ borderColor: formPhone ? COLORS.crimson : '#E5E0DB' }}
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-medium mb-1.5" style={{ color: COLORS.charcoal }}>
+                      <MessageSquare size={14} /> Descrivi la tua idea
+                    </label>
+                    <textarea
+                      value={formDescription}
+                      onChange={(e) => setFormDescription(e.target.value)}
+                      placeholder="Descrivi il tatuaggio che desideri: stile, dimensione, posizione sul corpo, riferimenti..."
+                      rows={4}
+                      className="w-full p-3 rounded-xl border-2 bg-white transition-colors focus:outline-none resize-none"
+                      style={{ borderColor: formDescription ? COLORS.crimson : '#E5E0DB' }}
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-4 mb-6">
-                  {/* Artist */}
-                  <div className="flex items-center gap-4 p-4 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
-                    <div
-                      className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold text-white"
-                      style={{ backgroundColor: COLORS.leather }}
-                    >
-                      {selectedArtist.nickname[0]}
-                    </div>
+                {/* Actions */}
+                <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                  <button
+                    onClick={() => { setSelectedTime(null); transitionTo('time'); }}
+                    className="px-6 py-3 rounded-xl font-medium border-2 transition-all hover:bg-stone-100"
+                    style={{ borderColor: '#E5E0DB' }}
+                  >
+                    <ChevronLeft size={16} className="inline mr-1" /> Indietro
+                  </button>
+                  <button
+                    onClick={handleSubmitBooking}
+                    disabled={!canSubmit}
+                    className={`flex-1 py-3.5 rounded-xl font-bold text-white transition-all flex items-center justify-center gap-2 ${
+                      canSubmit ? 'hover:brightness-110 shadow-lg' : 'opacity-40 cursor-not-allowed'
+                    }`}
+                    style={{ backgroundColor: COLORS.crimson }}
+                  >
+                    Conferma Prenotazione <Check size={18} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 5: Confirmation */}
+          {currentStep === 'confirmation' && selectedArtist && selectedDate && selectedTime && (
+            <div className="max-w-lg mx-auto">
+              <div className="rounded-2xl p-8 md:p-10 text-center" style={{ backgroundColor: COLORS.charcoal }}>
+                {/* Success icon */}
+                <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+                  style={{ backgroundColor: COLORS.crimson }}>
+                  <Check size={40} className="text-white" />
+                </div>
+
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Prenotazione completata!</h2>
+                <p className="text-stone-400 mb-8">Ecco il riepilogo del tuo appuntamento</p>
+
+                {/* Recap cards */}
+                <div className="space-y-3 mb-8 text-left">
+                  <div className="flex items-center gap-4 p-4 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+                    <img src={selectedArtist.profileImage} alt="" className="w-12 h-12 rounded-full object-cover object-top" />
                     <div>
-                      <p className="text-xs text-stone-400">Artista</p>
+                      <p className="text-xs text-stone-500">Artista</p>
                       <p className="font-bold text-white">{selectedArtist.fullName}</p>
                     </div>
                   </div>
 
-                  {/* Date & Time */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
-                      <div className="flex items-center gap-2 mb-2">
-                        <Calendar size={16} className="text-stone-400" />
-                        <p className="text-xs text-stone-400">Data</p>
-                      </div>
-                      <p className="font-bold text-white">{formatShortDate(selectedDate)}</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-4 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+                      <Calendar size={16} className="text-stone-500 mb-1.5" />
+                      <p className="text-xs text-stone-500">Data</p>
+                      <p className="font-bold text-white">{formatDate(selectedDate)}</p>
                     </div>
-                    <div className="p-4 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
-                      <div className="flex items-center gap-2 mb-2">
-                        <Clock size={16} className="text-stone-400" />
-                        <p className="text-xs text-stone-400">Orario</p>
-                      </div>
+                    <div className="p-4 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+                      <Clock size={16} className="text-stone-500 mb-1.5" />
+                      <p className="text-xs text-stone-500">Orario</p>
                       <p className="font-bold text-white">{selectedTime}</p>
                     </div>
                   </div>
+
+                  {formName && (
+                    <div className="p-4 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+                      <p className="text-xs text-stone-500">Prenotato da</p>
+                      <p className="font-bold text-white">{formName}</p>
+                      <p className="text-sm text-stone-400">{formEmail}</p>
+                    </div>
+                  )}
                 </div>
 
-                <div
-                  className="rounded-xl p-4 mb-6"
-                  style={{ backgroundColor: 'rgba(254, 243, 199, 0.2)', border: '1px solid rgba(245, 158, 11, 0.3)' }}
-                >
+                <div className="rounded-xl p-4 mb-6"
+                  style={{ backgroundColor: 'rgba(254, 243, 199, 0.15)', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
                   <p className="text-sm text-amber-200">
                     <strong>Nota:</strong> Questa è una consultazione iniziale di 30 minuti.
+                    Riceverai una conferma via email.
                   </p>
                 </div>
-
-                <p className="text-center text-sm text-stone-400">
-                  Riceverai una conferma via email con tutti i dettagli
-                </p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
