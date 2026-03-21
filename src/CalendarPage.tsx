@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Calendar, Clock, User, Check, MapPin, Mail, Phone, MessageSquare, ArrowRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Clock, User, Check, MapPin, Mail, Phone, MessageSquare, ArrowRight, Upload, X, Image as ImageIcon, Send } from 'lucide-react';
 
 // Import artist images
 import tattooer1 from './elements/tattooer1.png';
@@ -108,6 +108,26 @@ const CalendarPage: React.FC = () => {
   const [formEmail, setFormEmail] = useState('');
   const [formPhone, setFormPhone] = useState('');
   const [formDescription, setFormDescription] = useState('');
+  const [referenceImages, setReferenceImages] = useState<File[]>([]);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
+
+  // Handle image upload
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newFiles = Array.from(files).slice(0, 3 - referenceImages.length);
+      const newUrls = newFiles.map(file => URL.createObjectURL(file));
+      setReferenceImages(prev => [...prev, ...newFiles]);
+      setImagePreviewUrls(prev => [...prev, ...newUrls]);
+    }
+  };
+
+  // Remove uploaded image
+  const removeImage = (index: number) => {
+    URL.revokeObjectURL(imagePreviewUrls[index]);
+    setReferenceImages(prev => prev.filter((_, i) => i !== index));
+    setImagePreviewUrls(prev => prev.filter((_, i) => i !== index));
+  };
 
   const currentStepIndex = STEP_ORDER.indexOf(currentStep);
 
@@ -637,6 +657,46 @@ const CalendarPage: React.FC = () => {
                       style={{ borderColor: formDescription ? COLORS.crimson : '#E5E0DB' }}
                     />
                   </div>
+
+                  {/* Reference Images Upload */}
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-medium mb-1.5" style={{ color: COLORS.charcoal }}>
+                      <ImageIcon size={14} /> Immagini di riferimento (opzionale)
+                    </label>
+                    <p className="text-xs text-stone-500 mb-3">Carica fino a 3 immagini di ispirazione per aiutare l'artista a capire il tuo stile</p>
+
+                    <div className="flex flex-wrap gap-3">
+                      {/* Preview uploaded images */}
+                      {imagePreviewUrls.map((url, index) => (
+                        <div key={index} className="relative w-20 h-20 rounded-xl overflow-hidden group">
+                          <img src={url} alt={`Riferimento ${index + 1}`} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ))}
+
+                      {/* Upload button */}
+                      {referenceImages.length < 3 && (
+                        <label className="w-20 h-20 rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer hover:border-stone-400 transition-colors"
+                          style={{ borderColor: '#E5E0DB' }}>
+                          <Upload size={20} className="text-stone-400 mb-1" />
+                          <span className="text-xs text-stone-400">Aggiungi</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={handleImageUpload}
+                            className="hidden"
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Actions */}
@@ -708,11 +768,38 @@ const CalendarPage: React.FC = () => {
                   )}
                 </div>
 
-                <div className="rounded-xl p-4 mb-6"
+                {/* Email confirmation */}
+                <div className="rounded-xl p-5 mb-6"
+                  style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(34, 197, 94, 0.2)' }}>
+                      <Send size={16} className="text-green-400" />
+                    </div>
+                    <p className="font-bold text-green-400">Email di conferma inviata!</p>
+                  </div>
+                  <p className="text-sm text-green-300/80 ml-11">
+                    Abbiamo inviato i dettagli della prenotazione a <strong>{formEmail}</strong>
+                  </p>
+                </div>
+
+                {/* Images uploaded notice */}
+                {referenceImages.length > 0 && (
+                  <div className="rounded-xl p-4 mb-6"
+                    style={{ backgroundColor: 'rgba(138, 28, 28, 0.15)', border: '1px solid rgba(138, 28, 28, 0.3)' }}>
+                    <div className="flex items-center gap-2">
+                      <ImageIcon size={16} style={{ color: COLORS.crimson }} />
+                      <p className="text-sm" style={{ color: '#E8B4B4' }}>
+                        {referenceImages.length} {referenceImages.length === 1 ? 'immagine allegata' : 'immagini allegate'} alla richiesta
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="rounded-xl p-4"
                   style={{ backgroundColor: 'rgba(254, 243, 199, 0.15)', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
                   <p className="text-sm text-amber-200">
-                    <strong>Nota:</strong> Questa è una consultazione iniziale di 30 minuti.
-                    Riceverai una conferma via email.
+                    <strong>Cosa succede ora?</strong><br />
+                    L'artista riceverà la tua richiesta e ti contatterà entro 24h per confermare l'appuntamento e discutere i dettagli del progetto.
                   </p>
                 </div>
               </div>

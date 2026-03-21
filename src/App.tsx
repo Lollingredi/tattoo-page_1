@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Instagram, MapPin, Calendar, ArrowRight, Menu, X, ChevronLeft, ChevronRight, ZoomIn, Quote, Star, ChevronDown, Phone, Mail, Clock, MessageCircle, Scissors, Palette, Sparkles, RefreshCw, Heart, HelpCircle } from 'lucide-react';
+import { Instagram, MapPin, Calendar, ArrowRight, Menu, X, ChevronLeft, ChevronRight, ZoomIn, Quote, Star, ChevronDown, Phone, Mail, Clock, MessageCircle, Scissors, Palette, Sparkles, RefreshCw, Heart, HelpCircle, Filter, Sun, Moon, Newspaper, CalendarDays, Zap, User, Image as ImageIcon } from 'lucide-react';
 import CalendarPage from './CalendarPage';
 import ArtistsPage from './ArtistsPage';
 
@@ -27,6 +27,18 @@ interface PortfolioItem {
   id: number;
   alt: string;
   src: string;
+  artist: string;
+  style: string;
+  bodyPart: string;
+}
+
+interface BlogPost {
+  id: number;
+  title: string;
+  excerpt: string;
+  date: string;
+  category: 'news' | 'flash' | 'event';
+  image?: string;
 }
 
 // --- Data & Config ---
@@ -39,10 +51,31 @@ const COLORS: ColorPalette = {
   crimson: '#8A1C1C',   // Rosso scuro (Accenti)
 };
 
+// Dark mode colors
+const DARK_COLORS = {
+  sage: '#1F1C18',
+  sand: '#2A2520',
+  leather: '#3D352D',
+  charcoal: '#FDFBF7',
+  crimson: '#B82828',
+};
+
 const PORTFOLIO_ITEMS: PortfolioItem[] = [
-  { id: 1, alt: 'Tattoo Work 1', src: tat1 },
-  { id: 2, alt: 'Tattoo Work 2', src: tat2 },
-  { id: 3, alt: 'Tattoo Work 3', src: tat3 },
+  { id: 1, alt: 'Drago Giapponese', src: tat1, artist: 'Leo', style: 'traditional', bodyPart: 'braccio' },
+  { id: 2, alt: 'Mandala Geometrico', src: tat2, artist: 'Elena', style: 'geometric', bodyPart: 'schiena' },
+  { id: 3, alt: 'Ritratto Realistico', src: tat3, artist: 'Matteo', style: 'realistico', bodyPart: 'gamba' },
+];
+
+const GALLERY_FILTERS = {
+  artists: ['Tutti', 'Leo', 'Elena', 'Matteo'],
+  styles: ['Tutti', 'traditional', 'geometric', 'realistico', 'blackwork', 'watercolor'],
+  bodyParts: ['Tutti', 'braccio', 'gamba', 'schiena', 'petto', 'mano'],
+};
+
+const BLOG_POSTS: BlogPost[] = [
+  { id: 1, title: 'Flash Day Primavera 2026', excerpt: 'Sabato 28 Marzo: tatuaggi esclusivi a prezzo speciale! Scopri i design disponibili e prenota il tuo slot.', date: '2026-03-15', category: 'flash' },
+  { id: 2, title: 'Nuovo Artista: Benvenuta Sofia!', excerpt: 'Siamo felici di annunciare che Sofia, specializzata in fine line e botanico, si unisce al nostro team.', date: '2026-03-10', category: 'news' },
+  { id: 3, title: 'Partecipazione Milano Tattoo Convention', excerpt: 'Saremo presenti alla convention dal 5 al 7 Aprile. Vieni a trovarci allo stand B12!', date: '2026-03-05', category: 'event' },
 ];
 
 const STUDIO_IMAGES = [studioImg1, studioImg2, studioImg3];
@@ -166,6 +199,38 @@ const TattooStudio: React.FC = () => {
 
   // FAQ accordion state
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+
+  // Dark mode state
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('darkMode');
+      return saved ? JSON.parse(saved) : false;
+    }
+    return false;
+  });
+
+  // Gallery filter states
+  const [galleryArtistFilter, setGalleryArtistFilter] = useState<string>('Tutti');
+  const [galleryStyleFilter, setGalleryStyleFilter] = useState<string>('Tutti');
+  const [galleryBodyFilter, setGalleryBodyFilter] = useState<string>('Tutti');
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+
+  // Theme colors based on mode
+  const theme = isDarkMode ? DARK_COLORS : COLORS;
+
+  // Persist dark mode
+  useEffect(() => {
+    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+    document.documentElement.classList.toggle('dark', isDarkMode);
+  }, [isDarkMode]);
+
+  // Filtered portfolio items
+  const filteredPortfolio = PORTFOLIO_ITEMS.filter(item => {
+    const artistMatch = galleryArtistFilter === 'Tutti' || item.artist === galleryArtistFilter;
+    const styleMatch = galleryStyleFilter === 'Tutti' || item.style === galleryStyleFilter;
+    const bodyMatch = galleryBodyFilter === 'Tutti' || item.bodyPart === galleryBodyFilter;
+    return artistMatch && styleMatch && bodyMatch;
+  });
 
   // Refs for scroll snap
   const studioScrollRef = React.useRef<HTMLDivElement>(null);
@@ -302,29 +367,43 @@ const TattooStudio: React.FC = () => {
 
       {/* --- NAVIGATION (Global) --- */}
       <nav
-        className="fixed w-full z-50 backdrop-blur-md border-b border-stone-200/50"
-        style={{ backgroundColor: 'rgba(253, 251, 247, 0.85)' }}
+        className="fixed w-full z-50 backdrop-blur-md border-b transition-colors duration-300"
+        style={{
+          backgroundColor: isDarkMode ? 'rgba(31, 28, 24, 0.9)' : 'rgba(253, 251, 247, 0.9)',
+          borderColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+        }}
       >
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div
-            className="text-2xl font-bold tracking-tighter uppercase cursor-pointer"
+            className="text-2xl font-bold tracking-tighter uppercase cursor-pointer transition-colors"
             onClick={() => navigateToHome()}
+            style={{ color: theme.charcoal }}
           >
-            Studio<span style={{ color: COLORS.crimson }}>.</span>
+            Studio<span style={{ color: theme.crimson }}>.</span>
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex gap-8 items-center font-medium text-sm tracking-wide">
-            <a href="#studio" onClick={() => navigateToHome()} className="hover:text-red-800 transition-colors">Studio</a>
-            <a href="#works" onClick={() => navigateToHome()} className="hover:text-red-800 transition-colors">Opere</a>
-            <a href="#services" onClick={() => navigateToHome()} className="hover:text-red-800 transition-colors">Servizi</a>
-            <button onClick={() => navigateToArtists()} className="hover:text-red-800 transition-colors">Artisti</button>
-            <a href="#faq" onClick={() => navigateToHome()} className="hover:text-red-800 transition-colors">FAQ</a>
-            <a href="#contact" onClick={() => navigateToHome()} className="hover:text-red-800 transition-colors">Contatti</a>
+          <div className="hidden md:flex gap-6 items-center font-medium text-sm tracking-wide" style={{ color: theme.charcoal }}>
+            <a href="#studio" onClick={() => navigateToHome()} className="hover:opacity-70 transition-opacity">Studio</a>
+            <a href="#works" onClick={() => navigateToHome()} className="hover:opacity-70 transition-opacity">Opere</a>
+            <a href="#services" onClick={() => navigateToHome()} className="hover:opacity-70 transition-opacity">Servizi</a>
+            <a href="#blog" onClick={() => navigateToHome()} className="hover:opacity-70 transition-opacity">News</a>
+            <button onClick={() => navigateToArtists()} className="hover:opacity-70 transition-opacity">Artisti</button>
+            <a href="#faq" onClick={() => navigateToHome()} className="hover:opacity-70 transition-opacity">FAQ</a>
+            <a href="#contact" onClick={() => navigateToHome()} className="hover:opacity-70 transition-opacity">Contatti</a>
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="p-2 rounded-full transition-all hover:scale-110"
+              style={{ backgroundColor: isDarkMode ? '#3D352D' : '#E8E0D8' }}
+              aria-label="Toggle dark mode"
+            >
+              {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
             <button
               onClick={() => navigateToCalendar()}
               className="px-5 py-2 text-white rounded-full transition-transform hover:scale-105 shadow-md"
-              style={{ backgroundColor: COLORS.crimson }}
+              style={{ backgroundColor: theme.crimson }}
             >
               Prenota Ora
             </button>
@@ -332,9 +411,10 @@ const TattooStudio: React.FC = () => {
 
           {/* Mobile Toggle */}
           <button
-            className="md:hidden p-2 hover:bg-stone-100 rounded-md transition-colors"
+            className="md:hidden p-2 rounded-md transition-colors"
             onClick={toggleMenu}
             aria-label="Toggle menu"
+            style={{ color: theme.charcoal }}
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -342,20 +422,34 @@ const TattooStudio: React.FC = () => {
 
         {/* Mobile Menu - Slide down animation */}
         <div
-          className={`md:hidden absolute w-full border-b border-stone-200/50 flex flex-col gap-4 shadow-xl overflow-hidden transition-all duration-300 ease-out ${isMenuOpen ? 'max-h-96 py-6 px-6 opacity-100' : 'max-h-0 py-0 px-6 opacity-0'
-            }`}
-          style={{ backgroundColor: COLORS.sage }}
+          className={`md:hidden absolute w-full flex flex-col gap-4 shadow-xl overflow-hidden transition-all duration-300 ease-out ${isMenuOpen ? 'max-h-[500px] py-6 px-6 opacity-100' : 'max-h-0 py-0 px-6 opacity-0'}`}
+          style={{
+            backgroundColor: isDarkMode ? '#1F1C18' : theme.sage,
+            color: theme.charcoal,
+            borderBottom: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
+          }}
         >
           <a href="#studio" onClick={() => { toggleMenu(); navigateToHome(); }} className="text-lg font-medium">Studio</a>
           <a href="#works" onClick={() => { toggleMenu(); navigateToHome(); }} className="text-lg font-medium">Opere</a>
           <a href="#services" onClick={() => { toggleMenu(); navigateToHome(); }} className="text-lg font-medium">Servizi</a>
+          <a href="#blog" onClick={() => { toggleMenu(); navigateToHome(); }} className="text-lg font-medium">News</a>
           <button onClick={() => { toggleMenu(); navigateToArtists(); }} className="text-lg font-medium text-left">Artisti</button>
           <a href="#faq" onClick={() => { toggleMenu(); navigateToHome(); }} className="text-lg font-medium">FAQ</a>
           <a href="#contact" onClick={() => { toggleMenu(); navigateToHome(); }} className="text-lg font-medium">Contatti</a>
+          <div className="flex items-center justify-between mt-2 pt-4 border-t border-stone-200">
+            <span className="text-sm opacity-70">Tema {isDarkMode ? 'Scuro' : 'Chiaro'}</span>
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="p-2.5 rounded-full transition-all"
+              style={{ backgroundColor: isDarkMode ? '#3D352D' : '#E8E0D8' }}
+            >
+              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+          </div>
           <button
             onClick={() => { toggleMenu(); navigateToCalendar(); }}
             className="w-full py-3 text-white rounded-lg font-bold mt-2"
-            style={{ backgroundColor: COLORS.crimson }}
+            style={{ backgroundColor: theme.crimson }}
           >
             Prenota Ora
           </button>
@@ -543,76 +637,158 @@ const TattooStudio: React.FC = () => {
           <section
             id="works"
             className="py-24 px-6"
-            style={{ backgroundColor: '#FFFDF9' }} // Sfondo sezione bianco caldo
+            style={{ backgroundColor: isDarkMode ? '#1A1714' : '#FFFDF9' }}
           >
-            {/* WRAPPER PIÙ SCURO PER CONTRASTO */}
             <div
               className="max-w-6xl mx-auto p-8 md:p-12 rounded-3xl shadow-lg"
-              style={{ backgroundColor: '#E8E0D8', color: COLORS.charcoal }}
+              style={{ backgroundColor: isDarkMode ? '#2A2520' : '#E8E0D8', color: theme.charcoal }}
             >
-              <div className="flex justify-between items-end mb-12">
+              {/* Header con filtri */}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
                 <div>
                   <h2 className="text-4xl font-bold mb-2">Le nostre opere</h2>
-                  <div className="h-1 w-24" style={{ backgroundColor: COLORS.crimson }}></div>
+                  <div className="h-1 w-24" style={{ backgroundColor: theme.crimson }}></div>
                 </div>
-                <a href="#" className="hidden md:flex items-center gap-2 font-medium hover:text-stone-600 transition-colors">
-                  Vedi tutto su Instagram <Instagram size={18} />
-                </a>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${showFilters ? 'text-white' : ''}`}
+                    style={{ backgroundColor: showFilters ? theme.crimson : (isDarkMode ? '#3D352D' : '#D5CAC0') }}
+                  >
+                    <Filter size={18} /> Filtri
+                  </button>
+                  <a href="#" className="hidden md:flex items-center gap-2 font-medium hover:opacity-70 transition-opacity">
+                    Instagram <Instagram size={18} />
+                  </a>
+                </div>
               </div>
 
+              {/* Pannello Filtri */}
+              <div className={`overflow-hidden transition-all duration-300 ${showFilters ? 'max-h-48 mb-8' : 'max-h-0'}`}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-xl" style={{ backgroundColor: isDarkMode ? '#1F1C18' : '#FDFBF7' }}>
+                  {/* Filtro Artista */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+                      <User size={14} /> Artista
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {GALLERY_FILTERS.artists.map(artist => (
+                        <button
+                          key={artist}
+                          onClick={() => setGalleryArtistFilter(artist)}
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${galleryArtistFilter === artist ? 'text-white' : ''}`}
+                          style={{ backgroundColor: galleryArtistFilter === artist ? theme.crimson : (isDarkMode ? '#3D352D' : '#E8E0D8') }}
+                        >
+                          {artist}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Filtro Stile */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+                      <Palette size={14} /> Stile
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {GALLERY_FILTERS.styles.map(style => (
+                        <button
+                          key={style}
+                          onClick={() => setGalleryStyleFilter(style)}
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all capitalize ${galleryStyleFilter === style ? 'text-white' : ''}`}
+                          style={{ backgroundColor: galleryStyleFilter === style ? theme.crimson : (isDarkMode ? '#3D352D' : '#E8E0D8') }}
+                        >
+                          {style}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Filtro Zona */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+                      <ImageIcon size={14} /> Zona Corpo
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {GALLERY_FILTERS.bodyParts.map(part => (
+                        <button
+                          key={part}
+                          onClick={() => setGalleryBodyFilter(part)}
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all capitalize ${galleryBodyFilter === part ? 'text-white' : ''}`}
+                          style={{ backgroundColor: galleryBodyFilter === part ? theme.crimson : (isDarkMode ? '#3D352D' : '#E8E0D8') }}
+                        >
+                          {part}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Risultati filtri */}
+              {(galleryArtistFilter !== 'Tutti' || galleryStyleFilter !== 'Tutti' || galleryBodyFilter !== 'Tutti') && (
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-sm opacity-70">
+                    {filteredPortfolio.length} {filteredPortfolio.length === 1 ? 'risultato' : 'risultati'}
+                  </p>
+                  <button
+                    onClick={() => { setGalleryArtistFilter('Tutti'); setGalleryStyleFilter('Tutti'); setGalleryBodyFilter('Tutti'); }}
+                    className="text-sm font-medium hover:underline"
+                    style={{ color: theme.crimson }}
+                  >
+                    Resetta filtri
+                  </button>
+                </div>
+              )}
+
               {/* Galleria Desktop */}
-              <div className="hidden md:grid md:grid-cols-3 gap-1">
-                {PORTFOLIO_ITEMS.map((item, index) => (
+              <div className="hidden md:grid md:grid-cols-3 gap-4">
+                {filteredPortfolio.length > 0 ? filteredPortfolio.map((item) => (
                   <div
                     key={item.id}
-                    className="aspect-square bg-stone-800 relative group overflow-hidden cursor-pointer"
-                    onClick={() => openLightbox(index)}
+                    className="aspect-square bg-stone-800 relative group overflow-hidden cursor-pointer rounded-xl"
+                    onClick={() => openLightbox(PORTFOLIO_ITEMS.findIndex(p => p.id === item.id))}
                   >
                     <img
                       src={item.src}
                       alt={item.alt}
                       className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                      <span className="text-white font-bold tracking-widest uppercase border border-white px-4 py-2 backdrop-blur-sm">
-                        View
-                      </span>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+                      <p className="text-white font-bold">{item.alt}</p>
+                      <p className="text-white/70 text-sm">{item.artist} • {item.style} • {item.bodyPart}</p>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div className="col-span-3 py-16 text-center opacity-50">
+                    <ImageIcon size={48} className="mx-auto mb-4" />
+                    <p>Nessun risultato per i filtri selezionati</p>
+                  </div>
+                )}
               </div>
 
-              {/* Galleria Mobile - Scroll snap con tap-to-zoom */}
+              {/* Galleria Mobile */}
               <div className="md:hidden relative">
                 <div
                   ref={galleryScrollRef}
-                  onScroll={() => {
-                    handleGalleryScroll();
-                    setMobileGalleryTapped(false); // Reset tap state on scroll
-                  }}
+                  onScroll={() => { handleGalleryScroll(); setMobileGalleryTapped(false); }}
                   className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide rounded-xl"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
-                  {PORTFOLIO_ITEMS.map((item, index) => (
+                  {filteredPortfolio.map((item, index) => (
                     <div
                       key={item.id}
                       className="flex-shrink-0 w-full aspect-square snap-center relative cursor-pointer"
                       onClick={handleMobileGalleryTap}
                     >
-                      <div className="relative w-full h-full bg-stone-800">
-                        <img
-                          src={item.src}
-                          alt={item.alt}
-                          className="w-full h-full object-cover"
-                        />
-
-                        {/* Overlay tap-to-zoom */}
+                      <div className="relative w-full h-full bg-stone-800 rounded-xl overflow-hidden">
+                        <img src={item.src} alt={item.alt} className="w-full h-full object-cover" />
+                        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
+                          <p className="text-white font-bold">{item.alt}</p>
+                          <p className="text-white/70 text-sm">{item.artist} • {item.style}</p>
+                        </div>
                         {mobileGalleryTapped && index === mobileGalleryIndex && (
-                          <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center transition-opacity duration-300">
+                          <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center">
                             <ZoomIn size={48} className="text-white mb-3" />
-                            <p className="text-white text-sm font-medium text-center px-4">
-                              Tocca per vedere la galleria completa
-                            </p>
+                            <p className="text-white text-sm font-medium">Tocca per ingrandire</p>
                           </div>
                         )}
                       </div>
@@ -649,12 +825,12 @@ const TattooStudio: React.FC = () => {
           </section>
 
           {/* --- SERVICES SECTION --- */}
-          <section id="services" className="py-24 px-6" style={{ backgroundColor: COLORS.sage }}>
+          <section id="services" className="py-24 px-6 transition-colors duration-300" style={{ backgroundColor: isDarkMode ? '#1A1714' : theme.sage }}>
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-16">
-                <h2 className="text-4xl font-bold mb-3" style={{ color: COLORS.charcoal }}>Servizi & Prezzi</h2>
-                <div className="h-1 w-24 mx-auto mb-4" style={{ backgroundColor: COLORS.crimson }}></div>
-                <p className="text-stone-600 max-w-2xl mx-auto">
+                <h2 className="text-4xl font-bold mb-3" style={{ color: theme.charcoal }}>Servizi & Prezzi</h2>
+                <div className="h-1 w-24 mx-auto mb-4" style={{ backgroundColor: theme.crimson }}></div>
+                <p style={{ color: isDarkMode ? '#9CA3AF' : '#6B7280' }} className="max-w-2xl mx-auto">
                   Ogni tatuaggio è unico. I prezzi indicati sono orientativi e possono variare in base alla complessità del design.
                 </p>
               </div>
@@ -664,18 +840,18 @@ const TattooStudio: React.FC = () => {
                   <div
                     key={index}
                     className="p-6 rounded-2xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
-                    style={{ backgroundColor: '#FFFFFF' }}
+                    style={{ backgroundColor: isDarkMode ? '#2A2520' : '#FFFFFF' }}
                   >
                     <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors group-hover:scale-110 duration-300"
-                      style={{ backgroundColor: `${COLORS.crimson}15`, color: COLORS.crimson }}
+                      style={{ backgroundColor: `${theme.crimson}15`, color: theme.crimson }}
                     >
                       {service.icon}
                     </div>
-                    <h3 className="text-xl font-bold mb-2" style={{ color: COLORS.charcoal }}>{service.title}</h3>
-                    <p className="text-stone-500 text-sm mb-4 leading-relaxed">{service.description}</p>
-                    <div className="pt-4 border-t border-stone-100">
-                      <span className="text-lg font-bold" style={{ color: COLORS.crimson }}>{service.price}</span>
+                    <h3 className="text-xl font-bold mb-2" style={{ color: theme.charcoal }}>{service.title}</h3>
+                    <p className="text-sm mb-4 leading-relaxed" style={{ color: isDarkMode ? '#9CA3AF' : '#6B7280' }}>{service.description}</p>
+                    <div className="pt-4" style={{ borderTop: `1px solid ${isDarkMode ? '#3D352D' : '#F5F5F4'}` }}>
+                      <span className="text-lg font-bold" style={{ color: theme.crimson }}>{service.price}</span>
                     </div>
                   </div>
                 ))}
@@ -685,7 +861,7 @@ const TattooStudio: React.FC = () => {
                 <button
                   onClick={() => navigateToCalendar()}
                   className="px-8 py-4 text-white font-bold rounded-lg hover:brightness-110 transition-all shadow-lg inline-flex items-center gap-2"
-                  style={{ backgroundColor: COLORS.crimson }}
+                  style={{ backgroundColor: theme.crimson }}
                 >
                   Richiedi un Preventivo <ArrowRight size={20} />
                 </button>
@@ -694,11 +870,11 @@ const TattooStudio: React.FC = () => {
           </section>
 
           {/* --- TESTIMONIALS SECTION --- */}
-          <section id="testimonials" className="py-24 px-6" style={{ backgroundColor: '#E8E0D8' }}>
+          <section id="testimonials" className="py-24 px-6 transition-colors duration-300" style={{ backgroundColor: isDarkMode ? '#2A2520' : '#E8E0D8' }}>
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-16">
-                <h2 className="text-4xl font-bold mb-3" style={{ color: COLORS.charcoal }}>Cosa Dicono di Noi</h2>
-                <div className="h-1 w-24 mx-auto" style={{ backgroundColor: COLORS.crimson }}></div>
+                <h2 className="text-4xl font-bold mb-3" style={{ color: theme.charcoal }}>Cosa Dicono di Noi</h2>
+                <div className="h-1 w-24 mx-auto" style={{ backgroundColor: theme.crimson }}></div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -706,31 +882,100 @@ const TattooStudio: React.FC = () => {
                   <div
                     key={index}
                     className="p-8 rounded-2xl shadow-lg relative"
-                    style={{ backgroundColor: COLORS.sage }}
+                    style={{ backgroundColor: isDarkMode ? '#1F1C18' : theme.sage }}
                   >
                     <Quote
                       size={40}
                       className="absolute top-4 right-4 opacity-10"
-                      style={{ color: COLORS.crimson }}
+                      style={{ color: theme.crimson }}
                     />
                     <div className="flex gap-1 mb-4">
                       {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} size={18} fill={COLORS.crimson} color={COLORS.crimson} />
+                        <Star key={i} size={18} fill={theme.crimson} color={theme.crimson} />
                       ))}
                     </div>
-                    <p className="text-stone-700 leading-relaxed mb-6 italic">"{testimonial.quote}"</p>
-                    <div className="flex items-center gap-3 pt-4 border-t border-stone-200">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
-                        style={{ backgroundColor: COLORS.charcoal }}>
+                    <p className="leading-relaxed mb-6 italic" style={{ color: isDarkMode ? '#D1D5DB' : '#44403C' }}>"{testimonial.quote}"</p>
+                    <div className="flex items-center gap-3 pt-4" style={{ borderTop: `1px solid ${isDarkMode ? '#3D352D' : '#E7E5E4'}` }}>
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm"
+                        style={{ backgroundColor: isDarkMode ? theme.crimson : theme.charcoal, color: isDarkMode ? 'white' : 'white' }}>
                         {testimonial.author.charAt(0)}
                       </div>
                       <div>
-                        <p className="font-bold" style={{ color: COLORS.charcoal }}>{testimonial.author}</p>
-                        <p className="text-xs text-stone-500">Cliente di {testimonial.artist}</p>
+                        <p className="font-bold" style={{ color: theme.charcoal }}>{testimonial.author}</p>
+                        <p className="text-xs" style={{ color: isDarkMode ? '#9CA3AF' : '#6B7280' }}>Cliente di {testimonial.artist}</p>
                       </div>
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          </section>
+
+          {/* --- BLOG/NEWS SECTION --- */}
+          <section id="blog" className="py-24 px-6" style={{ backgroundColor: isDarkMode ? '#1A1714' : '#FFFDF9' }}>
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-16">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-4"
+                  style={{ backgroundColor: `${theme.crimson}15`, color: theme.crimson }}>
+                  <Newspaper size={14} /> News & Eventi
+                </div>
+                <h2 className="text-4xl font-bold mb-3" style={{ color: theme.charcoal }}>Novità dallo Studio</h2>
+                <p style={{ color: isDarkMode ? '#9CA3AF' : '#6B7280' }}>Flash day, eventi, nuovi artisti e molto altro</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {BLOG_POSTS.map(post => (
+                  <article
+                    key={post.id}
+                    className="rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow group cursor-pointer"
+                    style={{ backgroundColor: isDarkMode ? '#2A2520' : theme.sage }}
+                  >
+                    {/* Category Badge + Gradient Header */}
+                    <div className="h-32 relative flex items-center justify-center"
+                      style={{
+                        background: post.category === 'flash'
+                          ? 'linear-gradient(135deg, #8A1C1C 0%, #B82828 100%)'
+                          : post.category === 'event'
+                            ? 'linear-gradient(135deg, #1F1C18 0%, #3D352D 100%)'
+                            : 'linear-gradient(135deg, #BBA18B 0%, #D5CAC0 100%)'
+                      }}>
+                      {post.category === 'flash' && <Zap size={40} className="text-white/30" />}
+                      {post.category === 'event' && <CalendarDays size={40} className="text-white/30" />}
+                      {post.category === 'news' && <Newspaper size={40} className="text-stone-800/30" />}
+                      <span className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
+                        style={{
+                          backgroundColor: 'rgba(255,255,255,0.2)',
+                          color: post.category === 'news' ? '#1F1C18' : 'white'
+                        }}>
+                        {post.category === 'flash' ? '⚡ Flash Day' : post.category === 'event' ? '📅 Evento' : '📰 News'}
+                      </span>
+                    </div>
+                    <div className="p-6">
+                      <time className="text-xs font-medium" style={{ color: theme.crimson }}>
+                        {new Date(post.date).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      </time>
+                      <h3 className="text-lg font-bold mt-2 mb-3 group-hover:underline" style={{ color: theme.charcoal }}>
+                        {post.title}
+                      </h3>
+                      <p className="text-sm leading-relaxed" style={{ color: isDarkMode ? '#9CA3AF' : '#6B7280' }}>
+                        {post.excerpt}
+                      </p>
+                      <button className="mt-4 text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all"
+                        style={{ color: theme.crimson }}>
+                        Leggi di più <ArrowRight size={14} />
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <div className="text-center mt-12">
+                <button
+                  className="px-8 py-3 rounded-lg font-medium border-2 transition-all hover:scale-105"
+                  style={{ borderColor: theme.crimson, color: theme.crimson }}
+                >
+                  Vedi tutte le news
+                </button>
               </div>
             </div>
           </section>
@@ -776,18 +1021,18 @@ const TattooStudio: React.FC = () => {
           </section>
 
           {/* --- CONTACT SECTION --- */}
-          <section id="contact" className="py-24 px-6" style={{ backgroundColor: '#E8E0D8' }}>
+          <section id="contact" className="py-24 px-6 transition-colors duration-300" style={{ backgroundColor: isDarkMode ? '#2A2520' : '#E8E0D8' }}>
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-16">
-                <h2 className="text-4xl font-bold mb-3" style={{ color: COLORS.charcoal }}>Contattaci</h2>
-                <div className="h-1 w-24 mx-auto mb-4" style={{ backgroundColor: COLORS.crimson }}></div>
-                <p className="text-stone-600">Vieni a trovarci o scrivici per qualsiasi informazione</p>
+                <h2 className="text-4xl font-bold mb-3" style={{ color: theme.charcoal }}>Contattaci</h2>
+                <div className="h-1 w-24 mx-auto mb-4" style={{ backgroundColor: theme.crimson }}></div>
+                <p style={{ color: isDarkMode ? '#9CA3AF' : '#6B7280' }}>Vieni a trovarci o scrivici per qualsiasi informazione</p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Contact Info */}
-                <div className="rounded-3xl p-8 md:p-10 shadow-xl" style={{ backgroundColor: COLORS.sage }}>
-                  <h3 className="text-2xl font-bold mb-8" style={{ color: COLORS.charcoal }}>Tomoe Tattoo Studio</h3>
+                <div className="rounded-3xl p-8 md:p-10 shadow-xl" style={{ backgroundColor: isDarkMode ? '#1F1C18' : theme.sage }}>
+                  <h3 className="text-2xl font-bold mb-8" style={{ color: theme.charcoal }}>Tomoe Tattoo Studio</h3>
 
                   <div className="space-y-6">
                     {/* Address */}
@@ -798,12 +1043,12 @@ const TattooStudio: React.FC = () => {
                       className="flex items-start gap-4 group hover:translate-x-1 transition-transform"
                     >
                       <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: `${COLORS.crimson}15` }}>
-                        <MapPin size={22} style={{ color: COLORS.crimson }} />
+                        style={{ backgroundColor: `${theme.crimson}15` }}>
+                        <MapPin size={22} style={{ color: theme.crimson }} />
                       </div>
                       <div>
-                        <p className="font-bold" style={{ color: COLORS.charcoal }}>{CONTACT_INFO.address}</p>
-                        <p className="text-stone-500">{CONTACT_INFO.city}</p>
+                        <p className="font-bold" style={{ color: theme.charcoal }}>{CONTACT_INFO.address}</p>
+                        <p style={{ color: isDarkMode ? '#9CA3AF' : '#6B7280' }}>{CONTACT_INFO.city}</p>
                       </div>
                     </a>
 
@@ -813,12 +1058,12 @@ const TattooStudio: React.FC = () => {
                       className="flex items-start gap-4 group hover:translate-x-1 transition-transform"
                     >
                       <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: `${COLORS.crimson}15` }}>
-                        <Phone size={22} style={{ color: COLORS.crimson }} />
+                        style={{ backgroundColor: `${theme.crimson}15` }}>
+                        <Phone size={22} style={{ color: theme.crimson }} />
                       </div>
                       <div>
-                        <p className="font-bold" style={{ color: COLORS.charcoal }}>Telefono</p>
-                        <p className="text-stone-500">{CONTACT_INFO.phone}</p>
+                        <p className="font-bold" style={{ color: theme.charcoal }}>Telefono</p>
+                        <p style={{ color: isDarkMode ? '#9CA3AF' : '#6B7280' }}>{CONTACT_INFO.phone}</p>
                       </div>
                     </a>
 
@@ -828,31 +1073,31 @@ const TattooStudio: React.FC = () => {
                       className="flex items-start gap-4 group hover:translate-x-1 transition-transform"
                     >
                       <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: `${COLORS.crimson}15` }}>
-                        <Mail size={22} style={{ color: COLORS.crimson }} />
+                        style={{ backgroundColor: `${theme.crimson}15` }}>
+                        <Mail size={22} style={{ color: theme.crimson }} />
                       </div>
                       <div>
-                        <p className="font-bold" style={{ color: COLORS.charcoal }}>Email</p>
-                        <p className="text-stone-500">{CONTACT_INFO.email}</p>
+                        <p className="font-bold" style={{ color: theme.charcoal }}>Email</p>
+                        <p style={{ color: isDarkMode ? '#9CA3AF' : '#6B7280' }}>{CONTACT_INFO.email}</p>
                       </div>
                     </a>
 
                     {/* Hours */}
                     <div className="flex items-start gap-4">
                       <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: `${COLORS.crimson}15` }}>
-                        <Clock size={22} style={{ color: COLORS.crimson }} />
+                        style={{ backgroundColor: `${theme.crimson}15` }}>
+                        <Clock size={22} style={{ color: theme.crimson }} />
                       </div>
                       <div>
-                        <p className="font-bold" style={{ color: COLORS.charcoal }}>Orari</p>
-                        <p className="text-stone-500">{CONTACT_INFO.hours.weekdays}</p>
-                        <p className="text-stone-400 text-sm">{CONTACT_INFO.hours.closed}</p>
+                        <p className="font-bold" style={{ color: theme.charcoal }}>Orari</p>
+                        <p style={{ color: isDarkMode ? '#9CA3AF' : '#6B7280' }}>{CONTACT_INFO.hours.weekdays}</p>
+                        <p className="text-sm" style={{ color: isDarkMode ? '#6B7280' : '#9CA3AF' }}>{CONTACT_INFO.hours.closed}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Social + WhatsApp */}
-                  <div className="mt-8 pt-8 border-t border-stone-200">
+                  <div className="mt-8 pt-8" style={{ borderTop: `1px solid ${isDarkMode ? '#3D352D' : '#E7E5E4'}` }}>
                     <div className="flex flex-wrap gap-3">
                       <a
                         href={`https://wa.me/${CONTACT_INFO.whatsapp}`}
@@ -879,7 +1124,7 @@ const TattooStudio: React.FC = () => {
                   <button
                     onClick={() => navigateToCalendar()}
                     className="mt-6 w-full px-8 py-4 text-white font-bold rounded-xl hover:brightness-110 transition-all shadow-lg flex items-center justify-center gap-2"
-                    style={{ backgroundColor: COLORS.crimson }}
+                    style={{ backgroundColor: theme.crimson }}
                   >
                     <Calendar size={20} /> Prenota Appuntamento
                   </button>
