@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Instagram, MapPin, Calendar, ArrowRight, Menu, X, ChevronLeft, ChevronRight, ZoomIn, Quote, Star, ChevronDown, Phone, Mail, Clock, MessageCircle, Scissors, Palette, Sparkles, RefreshCw, Heart, HelpCircle } from 'lucide-react';
+import { Instagram, MapPin, Calendar, ArrowRight, Menu, X, ChevronLeft, ChevronRight, ZoomIn, Phone, Mail, Clock, MessageCircle } from 'lucide-react';
 import CalendarPage from './CalendarPage';
 import ArtistsPage from './ArtistsPage';
 
@@ -47,51 +47,6 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
 
 const STUDIO_IMAGES = [studioImg1, studioImg2, studioImg3];
 
-// --- Services Data ---
-interface Service {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  price: string;
-}
-
-const SERVICES: Service[] = [
-  { icon: <MessageCircle size={24} />, title: 'Consultazione', description: 'Incontro gratuito per discutere il tuo progetto e ricevere un preventivo personalizzato.', price: 'Gratuita' },
-  { icon: <Sparkles size={24} />, title: 'Tattoo Small', description: 'Tatuaggi fino a 5cm. Perfetti per simboli, scritte e piccoli disegni.', price: 'Da €80' },
-  { icon: <Palette size={24} />, title: 'Tattoo Medium', description: 'Tatuaggi da 5 a 15cm. Ideali per disegni dettagliati e composizioni.', price: 'Da €150' },
-  { icon: <Heart size={24} />, title: 'Tattoo Large', description: 'Oltre 15cm, maniche, schiene. Progetti complessi e di grande impatto.', price: 'Su preventivo' },
-  { icon: <Scissors size={24} />, title: 'Cover-up', description: 'Copertura di tatuaggi esistenti con un nuovo design personalizzato.', price: 'Su preventivo' },
-  { icon: <RefreshCw size={24} />, title: 'Ritocco', description: 'Ritocco gratuito entro 3 mesi dalla realizzazione del tatuaggio.', price: 'Gratuito' },
-];
-
-// --- Testimonials Data ---
-interface Testimonial {
-  quote: string;
-  author: string;
-  rating: number;
-  artist: string;
-}
-
-const TESTIMONIALS: Testimonial[] = [
-  { quote: "Esperienza fantastica! Leo ha trasformato la mia idea in un capolavoro. Professionalità e attenzione ai dettagli incredibili.", author: "Marco R.", rating: 5, artist: "Leo" },
-  { quote: "Elena è incredibilmente precisa. Il mio mandala è perfetto, esattamente come lo immaginavo. Studio accogliente e pulitissimo.", author: "Sara L.", rating: 5, artist: "Elena" },
-  { quote: "Matteo ha una creatività unica. I colori del mio tatuaggio sono vibranti e il design è originale. Tornerò sicuramente!", author: "Giulia B.", rating: 5, artist: "Matteo" },
-];
-
-// --- FAQ Data ---
-interface FAQItem {
-  question: string;
-  answer: string;
-}
-
-const FAQ_ITEMS: FAQItem[] = [
-  { question: "Come mi preparo al tatuaggio?", answer: "Riposa bene la notte prima, mangia un pasto leggero, evita alcol e aspirina nelle 24 ore precedenti. Indossa abiti comodi che permettano l'accesso alla zona da tatuare. Idrata bene la pelle nei giorni precedenti." },
-  { question: "Quanto dura una sessione?", answer: "Dipende dalla dimensione e complessità del tatuaggio. Un piccolo tattoo può richiedere 30-60 minuti, mentre progetti più grandi possono necessitare sessioni di 3-4 ore o appuntamenti multipli." },
-  { question: "È doloroso?", answer: "La sensazione varia da persona a persona e dalla zona del corpo. Generalmente è un fastidio sopportabile, simile a un graffio prolungato. Zone con più ossa o nervi sono più sensibili." },
-  { question: "Come curo il tatuaggio dopo?", answer: "Ti forniremo istruzioni dettagliate. In generale: tieni la zona pulita, applica la crema consigliata, evita sole diretto, piscine e saune per 2-3 settimane. Non grattare le crosticine!" },
-  { question: "Posso modificare o cancellare l'appuntamento?", answer: "Sì, ti chiediamo di avvisarci almeno 48 ore prima. Per modifiche last-minute contattaci telefonicamente. Cancellazioni ripetute senza preavviso potrebbero richiedere un deposito per prenotazioni future." },
-  { question: "Qual è l'età minima?", answer: "Devi avere almeno 18 anni con documento d'identità valido. Per i minorenni (16-17 anni) è necessaria la presenza e firma di un genitore/tutore con documento." },
-];
 
 // --- Contact Info ---
 const CONTACT_INFO = {
@@ -163,9 +118,6 @@ const TattooStudio: React.FC = () => {
 
   // Mobile tap-to-zoom state
   const [mobileGalleryTapped, setMobileGalleryTapped] = useState<boolean>(false);
-
-  // FAQ accordion state
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
   // Refs for scroll snap
   const studioScrollRef = React.useRef<HTMLDivElement>(null);
@@ -317,9 +269,7 @@ const TattooStudio: React.FC = () => {
           <div className="hidden md:flex gap-8 items-center font-medium text-sm tracking-wide">
             <a href="#studio" onClick={() => navigateToHome()} className="hover:text-red-800 transition-colors">Studio</a>
             <a href="#works" onClick={() => navigateToHome()} className="hover:text-red-800 transition-colors">Opere</a>
-            <a href="#services" onClick={() => navigateToHome()} className="hover:text-red-800 transition-colors">Servizi</a>
             <button onClick={() => navigateToArtists()} className="hover:text-red-800 transition-colors">Artisti</button>
-            <a href="#faq" onClick={() => navigateToHome()} className="hover:text-red-800 transition-colors">FAQ</a>
             <a href="#contact" onClick={() => navigateToHome()} className="hover:text-red-800 transition-colors">Contatti</a>
             <button
               onClick={() => navigateToCalendar()}
@@ -348,9 +298,7 @@ const TattooStudio: React.FC = () => {
         >
           <a href="#studio" onClick={() => { toggleMenu(); navigateToHome(); }} className="text-lg font-medium">Studio</a>
           <a href="#works" onClick={() => { toggleMenu(); navigateToHome(); }} className="text-lg font-medium">Opere</a>
-          <a href="#services" onClick={() => { toggleMenu(); navigateToHome(); }} className="text-lg font-medium">Servizi</a>
           <button onClick={() => { toggleMenu(); navigateToArtists(); }} className="text-lg font-medium text-left">Artisti</button>
-          <a href="#faq" onClick={() => { toggleMenu(); navigateToHome(); }} className="text-lg font-medium">FAQ</a>
           <a href="#contact" onClick={() => { toggleMenu(); navigateToHome(); }} className="text-lg font-medium">Contatti</a>
           <button
             onClick={() => { toggleMenu(); navigateToCalendar(); }}
@@ -648,133 +596,6 @@ const TattooStudio: React.FC = () => {
             </div>
           </section>
 
-          {/* --- SERVICES SECTION --- */}
-          <section id="services" className="py-24 px-6" style={{ backgroundColor: COLORS.sage }}>
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-16">
-                <h2 className="text-4xl font-bold mb-3" style={{ color: COLORS.charcoal }}>Servizi & Prezzi</h2>
-                <div className="h-1 w-24 mx-auto mb-4" style={{ backgroundColor: COLORS.crimson }}></div>
-                <p className="text-stone-600 max-w-2xl mx-auto">
-                  Ogni tatuaggio è unico. I prezzi indicati sono orientativi e possono variare in base alla complessità del design.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {SERVICES.map((service, index) => (
-                  <div
-                    key={index}
-                    className="p-6 rounded-2xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
-                    style={{ backgroundColor: '#FFFFFF' }}
-                  >
-                    <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors group-hover:scale-110 duration-300"
-                      style={{ backgroundColor: `${COLORS.crimson}15`, color: COLORS.crimson }}
-                    >
-                      {service.icon}
-                    </div>
-                    <h3 className="text-xl font-bold mb-2" style={{ color: COLORS.charcoal }}>{service.title}</h3>
-                    <p className="text-stone-500 text-sm mb-4 leading-relaxed">{service.description}</p>
-                    <div className="pt-4 border-t border-stone-100">
-                      <span className="text-lg font-bold" style={{ color: COLORS.crimson }}>{service.price}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="text-center mt-12">
-                <button
-                  onClick={() => navigateToCalendar()}
-                  className="px-8 py-4 text-white font-bold rounded-lg hover:brightness-110 transition-all shadow-lg inline-flex items-center gap-2"
-                  style={{ backgroundColor: COLORS.crimson }}
-                >
-                  Richiedi un Preventivo <ArrowRight size={20} />
-                </button>
-              </div>
-            </div>
-          </section>
-
-          {/* --- TESTIMONIALS SECTION --- */}
-          <section id="testimonials" className="py-24 px-6" style={{ backgroundColor: '#E8E0D8' }}>
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-16">
-                <h2 className="text-4xl font-bold mb-3" style={{ color: COLORS.charcoal }}>Cosa Dicono di Noi</h2>
-                <div className="h-1 w-24 mx-auto" style={{ backgroundColor: COLORS.crimson }}></div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {TESTIMONIALS.map((testimonial, index) => (
-                  <div
-                    key={index}
-                    className="p-8 rounded-2xl shadow-lg relative"
-                    style={{ backgroundColor: COLORS.sage }}
-                  >
-                    <Quote
-                      size={40}
-                      className="absolute top-4 right-4 opacity-10"
-                      style={{ color: COLORS.crimson }}
-                    />
-                    <div className="flex gap-1 mb-4">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} size={18} fill={COLORS.crimson} color={COLORS.crimson} />
-                      ))}
-                    </div>
-                    <p className="text-stone-700 leading-relaxed mb-6 italic">"{testimonial.quote}"</p>
-                    <div className="flex items-center gap-3 pt-4 border-t border-stone-200">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
-                        style={{ backgroundColor: COLORS.charcoal }}>
-                        {testimonial.author.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="font-bold" style={{ color: COLORS.charcoal }}>{testimonial.author}</p>
-                        <p className="text-xs text-stone-500">Cliente di {testimonial.artist}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* --- FAQ SECTION --- */}
-          <section id="faq" className="py-24 px-6" style={{ backgroundColor: COLORS.charcoal }}>
-            <div className="max-w-3xl mx-auto">
-              <div className="text-center mb-16">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-4"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: COLORS.sage }}>
-                  <HelpCircle size={14} /> Domande Frequenti
-                </div>
-                <h2 className="text-4xl font-bold text-white mb-3">Hai Domande?</h2>
-                <p className="text-stone-400">Trova le risposte alle domande più comuni</p>
-              </div>
-
-              <div className="space-y-4">
-                {FAQ_ITEMS.map((faq, index) => (
-                  <div
-                    key={index}
-                    className="rounded-xl overflow-hidden"
-                    style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
-                  >
-                    <button
-                      onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
-                      className="w-full px-6 py-5 flex items-center justify-between text-left transition-colors hover:bg-white/5"
-                    >
-                      <span className="font-medium text-white pr-4">{faq.question}</span>
-                      <ChevronDown
-                        size={20}
-                        className={`text-stone-400 transition-transform duration-300 shrink-0 ${openFaqIndex === index ? 'rotate-180' : ''}`}
-                      />
-                    </button>
-                    <div
-                      className={`overflow-hidden transition-all duration-300 ${openFaqIndex === index ? 'max-h-96' : 'max-h-0'}`}
-                    >
-                      <p className="px-6 pb-5 text-stone-400 leading-relaxed">{faq.answer}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
           {/* --- CONTACT SECTION --- */}
           <section id="contact" className="py-24 px-6" style={{ backgroundColor: '#E8E0D8' }}>
             <div className="max-w-6xl mx-auto">
@@ -925,8 +746,6 @@ const TattooStudio: React.FC = () => {
             <div className="flex flex-wrap items-center justify-center md:justify-end gap-4 md:gap-6 text-stone-400 text-sm">
               <a href="#studio" className="hover:text-white transition-colors">Studio</a>
               <a href="#works" className="hover:text-white transition-colors">Opere</a>
-              <a href="#services" className="hover:text-white transition-colors">Servizi</a>
-              <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
               <a href="#contact" className="hover:text-white transition-colors">Contatti</a>
               {/* Separatore pallino - solo desktop */}
               <span className="hidden md:block w-1 h-1 rounded-full bg-stone-500"></span>
